@@ -2,6 +2,7 @@ use std::io;
 use chrono::{prelude::Utc, Datelike};
 
 mod repl;
+mod syntax;
 
 const VERSION: &str = "0.0.1";
 

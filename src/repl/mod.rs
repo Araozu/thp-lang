@@ -1,5 +1,11 @@
 use std::io::{self, Write};
 
+use super::syntax;
+
+fn compile(input: &String) {
+    let tokens = syntax::get_tokens(input);
+}
+
 pub fn run() -> io::Result<()> {
     let stdin = io::stdin();
     let mut buffer = String::new();
@@ -8,19 +14,21 @@ pub fn run() -> io::Result<()> {
     loop {
         print!("> ");
         let _ = io::stdout().flush();
+        buffer.clear();
         let read = stdin.read_line(&mut buffer);
 
         match read {
             Ok(0) => {
                 println!("\nBye");
-                return Ok(());
+                break Ok(())
             },
             Ok(_) => {
                 println!("{}", buffer);
+                compile(&buffer);
             },
             Err(error) => {
                 eprintln!("Error reading stdin.");
-                return Err(error);
+                break Err(error)
             }
         };
     }
