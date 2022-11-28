@@ -34,7 +34,7 @@ fn next_token(chars: &Chars, current_pos: usize) -> (Option<Token>, usize) {
 
     // Test number
     if utils::is_digit(next_char) {
-        let (token, next_pos) = scanner::number(chars, current_pos);
+        let (token, next_pos) = scanner::number(chars, current_pos).unwrap();
         (Some(token), next_pos)
     } else {
         (None, current_pos)

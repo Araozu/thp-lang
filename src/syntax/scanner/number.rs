@@ -1,6 +1,10 @@
 use crate::syntax::{token::{Token, self}, utils};
 
-pub fn scan(chars: &Vec<char>, start_pos: usize) -> (Token, usize) {
+/// Function to scan a number
+/// 
+/// This function assumes that the character at `start_pos` is a number [0-9],
+/// if not it will panic
+pub fn scan(chars: &Vec<char>, start_pos: usize) -> Result<(Token, usize), String> {
     let next_char = chars.get(start_pos);
 
     // Try to scan a HEX value
@@ -17,10 +21,12 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> (Token, usize) {
     }
 
 
-    scan_decimal(chars, start_pos, String::from(""))
+    Ok(scan_decimal(chars, start_pos, String::from("")))
 }
 
-/// Scans an integer.
+/// Recursively scans an integer
+/// 
+/// Since the first call will always have a char [0-9], always returns.
 fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usize) {
     let next_char = chars.get(start_pos);
 
@@ -40,12 +46,12 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> (Token,
     (token::new_number(current, start_pos as i32), start_pos)
 }
 
-/// Scans a hex number. If successful, always returns '0x...', never '0X...'
+/// Recursively scans a hex number
 /// 
-/// `current == ""`
-/// 
-/// `start_pos` indicates the start of the hex value
-fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usize) {
+/// This function expects the following:
+/// - The char at `start_pos` is a value between [0-9a-fA-F]. If not, will return an error.
+/// - On the first call, `current == "0x"`. If not will return an incorrect value, or panic.
+fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
     let next_char = chars.get(start_pos);
 
     if let Some(c) = next_char {
@@ -56,8 +62,13 @@ fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usi
         }
     }
 
-    // Return current value
-    (token::new_number(current, start_pos as i32), start_pos)
+    // If the current value is "0x" that means that there wasn't any hex number thereafter
+    if current.len() == 2 {
+        Err(String::from("Tried to scan an incomplete hex value"))
+    }
+    else {
+        Ok((token::new_number(current, start_pos as i32), start_pos))
+    }
 }
 
 
@@ -77,16 +88,16 @@ mod tests {
         let input = str_to_vec("123");
         let start_pos = 0;
 
-        let (token, next) = scan(&input, start_pos);
+        let (token, next) = scan(&input, start_pos).unwrap();
         assert_eq!(3, next);
         assert_eq!(TokenType::Number, token.token_type);
         assert_eq!("123", token.value);
 
 
-        let input = str_to_vec("0123");
+        let input = str_to_vec("0123 ");
         let start_pos = 0;
 
-        let (token, next) = scan(&input, start_pos);
+        let (token, next) = scan(&input, start_pos).unwrap();
         assert_eq!(4, next);
         assert_eq!(TokenType::Number, token.token_type);
         assert_eq!("0123", token.value);
@@ -95,7 +106,7 @@ mod tests {
         let input = str_to_vec("  123456 789");
         let start_pos = 2;
 
-        let (token, next) = scan(&input, start_pos);
+        let (token, next) = scan(&input, start_pos).unwrap();
         assert_eq!(8, next);
         assert_eq!(TokenType::Number, token.token_type);
         assert_eq!("123456", token.value);
@@ -103,19 +114,19 @@ mod tests {
 
     #[test]
     fn test_hex() {
-        let input = str_to_vec("0x20");
+        let input = str_to_vec("0x20 ");
         let start_pos = 0;
 
-        let (token, next) = scan(&input, start_pos);
+        let (token, next) = scan(&input, start_pos).unwrap();
         assert_eq!(4, next);
         assert_eq!(TokenType::Number, token.token_type);
         assert_eq!("0x20", token.value);
 
 
-        let input = str_to_vec("    0Xff23DA");
+        let input = str_to_vec("    0Xff23DA ");
         let start_pos = 4;
 
-        let (token, next) = scan(&input, start_pos);
+        let (token, next) = scan(&input, start_pos).unwrap();
         assert_eq!(12, next);
         assert_eq!(TokenType::Number, token.token_type);
         assert_eq!("0xff23DA", token.value);
@@ -124,12 +135,29 @@ mod tests {
     // Should not scan an incomplete hex value
     #[test]
     fn test_hex_2() {
-        let input = str_to_vec("0x20");
+        let input = str_to_vec("0x ");
         let start_pos = 0;
 
-        let (token, next) = scan(&input, start_pos);
-        assert_eq!(4, next);
+        match scan(&input, start_pos) {
+            Ok(_) => panic!(),
+            Err(reason) => assert_eq!("Tried to scan an incomplete hex value", reason)
+        }
+
+
+        let input = str_to_vec("0 x20 ");
+        let start_pos = 0;
+        let (token, _) = scan(&input, start_pos).unwrap();
         assert_eq!(TokenType::Number, token.token_type);
-        assert_eq!("0x20", token.value);
+        assert_eq!("0", token.value);
+    }
+
+    // Should not scan a hex value if it doesn't start with 0x
+    #[test]
+    fn test_hex_3() {
+        let input = str_to_vec("1x20");
+        let start_pos = 0;
+        let (token, _) = scan(&input, start_pos).unwrap();
+        assert_eq!(TokenType::Number, token.token_type);
+        assert_eq!("1", token.value);
     }
 }
