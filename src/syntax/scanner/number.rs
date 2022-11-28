@@ -21,21 +21,26 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> Result<(Token, usize), Strin
     }
 
 
-    Ok(scan_decimal(chars, start_pos, String::from("")))
+    scan_decimal(chars, start_pos, String::from(""))
 }
 
-/// Recursively scans an integer
+
+/// Recursively scans an integer, and if a dot `.` is found, scans a double.
 /// 
-/// Since the first call will always have a char [0-9], always returns.
-fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usize) {
+/// It may fail due to scanning a double.
+fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
     let next_char = chars.get(start_pos);
 
     // If a char is found
     if let Some(c) = next_char {
         let c = *c;
 
+        // If a dot is found scan a double
+        if c == '.' {
+            return scan_double(chars, start_pos + 1, utils::str_append(current, c))
+        }
         // Scan a decimal number
-        if utils::is_digit(c) {
+        else if utils::is_digit(c) {
             let new_value = format!("{}{}", current, c);
             return scan_decimal(chars, start_pos + 1, new_value)
         }
@@ -43,14 +48,15 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> (Token,
     }
 
     // Return the current value
-    (token::new_number(current, start_pos as i32), start_pos)
+    Ok((token::new_number(current, start_pos as i32), start_pos))
 }
+
 
 /// Recursively scans a hex number
 /// 
-/// This function expects the following:
+/// This function expects the following on the first call:
 /// - The char at `start_pos` is a value between [0-9a-fA-F]. If not, will return an error.
-/// - On the first call, `current == "0x"`. If not will return an incorrect value, or panic.
+/// - `current == "0x"`. If not will return an incorrect value, or panic.
 fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
     let next_char = chars.get(start_pos);
 
@@ -70,6 +76,42 @@ fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Tok
         Ok((token::new_number(current, start_pos as i32), start_pos))
     }
 }
+
+
+/// Scans a floating point number
+/// 
+/// This function expects the following on the first call:
+/// - The char at `start_pos` is a value between [0-9]. If not will return an error.
+/// - `start_pos` is the position after the dot. E.g., if the input is `3.22` then `start_pos == 2`.
+fn scan_double(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
+    let next_char = chars.get(start_pos);
+
+    // Check that the first characters exists and is a number
+    if let Some(c) = next_char {
+        if utils::is_digit(*c) { Ok(scan_double_impl(chars, start_pos, current)) }
+        else {Err(String::from("The character after the dot when scanning a double is not a number."))}
+    }
+    else {
+        Err(String::from("EOF when scanning a double number."))
+    }
+}
+
+// Implementation of scan_double
+fn scan_double_impl(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usize) {
+    let next_char = chars.get(start_pos);
+
+    if let Some(c) = next_char {
+        let c = *c;
+
+        if utils::is_digit(c) {
+            return scan_double_impl(chars, start_pos + 1, utils::str_append(current, c))
+        }
+    }
+
+    // Return current value
+    (token::new_number(current, start_pos as i32), start_pos)
+}
+
 
 
 
@@ -159,5 +201,46 @@ mod tests {
         let (token, _) = scan(&input, start_pos).unwrap();
         assert_eq!(TokenType::Number, token.token_type);
         assert_eq!("1", token.value);
+    }
+
+    // Should scan a double
+    #[test]
+    fn test_double_1() {
+        let input = str_to_vec("3.22");
+        let start_pos = 0;
+        let (token, next) = scan(&input, start_pos).unwrap();
+        assert_eq!(4, next);
+        assert_eq!(TokenType::Number, token.token_type);
+        assert_eq!("3.22", token.value);
+
+
+        let input = str_to_vec("123456.7890 ");
+        let start_pos = 0;
+        let (token, next) = scan(&input, start_pos).unwrap();
+        assert_eq!(11, next);
+        assert_eq!(TokenType::Number, token.token_type);
+        assert_eq!("123456.7890", token.value);
+    }
+
+
+    // Should not scan an incomplete double
+    #[test]
+    fn test_double_2() {
+        let input = str_to_vec("322.  ");
+        let start_pos = 0;
+
+        match scan(&input, start_pos) {
+            Ok(_) => panic!(),
+            Err(reason) => assert_eq!("The character after the dot when scanning a double is not a number.", reason)
+        }
+
+
+        let input = str_to_vec("322.");
+        let start_pos = 0;
+
+        match scan(&input, start_pos) {
+            Ok(_) => panic!(),
+            Err(reason) => assert_eq!("EOF when scanning a double number.", reason)
+        }
     }
 }
