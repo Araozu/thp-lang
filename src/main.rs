@@ -3,6 +3,8 @@ use chrono::{prelude::Utc, Datelike};
 
 mod repl;
 mod syntax;
+mod lexic;
+mod token;
 
 const VERSION: &str = "0.0.1";
 

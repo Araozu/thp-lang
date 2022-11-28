@@ -44,3 +44,11 @@ pub fn new_number(value: String, position: i32) -> Token {
         position
     }
 }
+
+pub fn new_operator(value: String, position: i32) -> Token {
+    Token {
+        token_type: TokenType::Operator,
+        value,
+        position
+    }
+}

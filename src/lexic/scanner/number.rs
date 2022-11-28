@@ -1,4 +1,4 @@
-use crate::syntax::{token::{Token, self}, utils};
+use crate::lexic::{token::{Token, self}, utils};
 
 /// Function to scan a number
 /// 
@@ -117,7 +117,7 @@ fn scan_double_impl(chars: &Vec<char>, start_pos: usize, current: String) -> (To
 
 #[cfg(test)]
 mod tests {
-    use crate::syntax::token::TokenType;
+    use crate::lexic::token::TokenType;
 
     use super::*;
 
