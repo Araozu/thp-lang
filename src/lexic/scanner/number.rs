@@ -154,6 +154,18 @@ mod tests {
         assert_eq!("123456", token.value);
     }
 
+    // Should not scan whitespace after the number
+    #[test]
+    fn test_int_2() {
+        let input = str_to_vec("123 ");
+        let start_pos = 0;
+
+        let (token, next) = scan(&input, start_pos).unwrap();
+        assert_eq!(3, next);
+        assert_eq!(TokenType::Number, token.token_type);
+        assert_eq!("123", token.value);
+    }
+
     #[test]
     fn test_hex() {
         let input = str_to_vec("0x20 ");

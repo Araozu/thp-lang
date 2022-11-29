@@ -1,5 +1,3 @@
-use core::panic;
-
 use crate::lexic::{token::{Token, self}, utils};
 
 

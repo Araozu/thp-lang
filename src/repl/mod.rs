@@ -1,10 +1,9 @@
 use std::io::{self, Write};
 
 use super::lexic;
-use super::syntax;
 
 fn compile(input: &String) {
-    let tokens = lexic::get_tokens(input);
+    let _tokens = lexic::get_tokens(input);
 }
 
 pub fn run() -> io::Result<()> {
