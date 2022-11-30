@@ -1,10 +1,12 @@
 use crate::lexic::{token::{Token, self}, utils};
 
+type ScanResult = Result<(Token, usize), String>;
+
 /// Function to scan a number
 /// 
 /// This function assumes that the character at `start_pos` is a number [0-9],
 /// if not it will panic
-pub fn scan(chars: &Vec<char>, start_pos: usize) -> Result<(Token, usize), String> {
+pub fn scan(chars: &Vec<char>, start_pos: usize) -> ScanResult {
     let next_char_1 = chars.get(start_pos);
     let next_char_2 = chars.get(start_pos + 1);
 
@@ -21,7 +23,7 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> Result<(Token, usize), Strin
 
 /// Recursively scans an integer. If a dot `.` is found, scans a double,
 /// if a `e` is found, scans a number in scientific notation
-fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
+fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> ScanResult {
     match chars.get(start_pos) {
         Some(c) if *c == '.' => {
             scan_double(chars, start_pos + 1, utils::str_append(current, *c))
@@ -44,7 +46,7 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> Result<
 /// This function expects the following on the first call:
 /// - The char at `start_pos` is a value between [0-9a-fA-F]. If not, will return an error.
 /// - `current == "0x"`. If not will return an incorrect value, or panic.
-fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
+fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> ScanResult {
     match chars.get(start_pos) {
         Some(c) if utils::is_hex_digit(*c) => {
             Ok(scan_hex_digits(chars, start_pos + 1, utils::str_append(current, *c)))
@@ -53,21 +55,38 @@ fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Tok
     }
 }
 
-/// Scans a floating point number
+
+/// Scans a floating point number, with or without an exponent
 /// 
 /// This function expects the following:
 /// - `start_pos` is the position after the dot. E.g., if the input is `3.22` then `start_pos == 2`.
 /// 
 /// Returns a syntax error if the char at `start_pos` is not a value between [0-9]
-fn scan_double(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
+fn scan_double(chars: &Vec<char>, start_pos: usize, current: String) -> ScanResult {
     match chars.get(start_pos) {
         Some(c) if utils::is_digit(*c) => {
-            Ok(scan_digits(chars, start_pos, current))
+            scan_double_impl(chars, start_pos, current)
         },
         Some(_) => {
             Err(String::from("The character after the dot when scanning a double is not a number."))
         },
         _ => Err(String::from("EOF when scanning a double number."))
+    }
+}
+
+
+// Implementation of scan_double
+fn scan_double_impl(chars: &Vec<char>, start_pos: usize, current: String) -> ScanResult {
+    match chars.get(start_pos) {
+        Some(c) if utils::is_digit(*c) => {
+            scan_double_impl(chars, start_pos + 1, utils::str_append(current, *c))
+        },
+        Some(c) if *c == 'e' => {
+            scan_scientific(chars, start_pos + 1, utils::str_append(current, *c))
+        }
+        _ => {
+            Ok((token::new_number(current, start_pos as i32), start_pos))
+        }
     }
 }
 
@@ -80,7 +99,7 @@ fn scan_double(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(
 /// Returns a syntax error if:
 /// - The char at `start_pos` is not `+` or `-`
 /// - The char at `start_pos + 1` is not between [0-9]
-fn scan_scientific(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
+fn scan_scientific(chars: &Vec<char>, start_pos: usize, current: String) -> ScanResult {
     let next_char_1 = chars.get(start_pos);
     let next_char_2 = chars.get(start_pos + 1);
 
@@ -103,6 +122,7 @@ fn scan_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, 
         _ => (token::new_number(current, start_pos as i32), start_pos)
     }
 }
+
 
 /// Scans chars between [0-9a-fA-F], returns when none is found
 fn scan_hex_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usize) {
@@ -289,5 +309,23 @@ mod tests {
         assert_eq!(19, next);
         assert_eq!(TokenType::Number, token.token_type);
         assert_eq!("123498790e+12349870", token.value);
+    }
+
+    // Should scan a double with decimal part and exponent
+    #[test]
+    fn test_exp_2(){
+        let input = str_to_vec("1.24e+1");
+        let start_pos = 0;
+        let (token, next) = scan(&input, start_pos).unwrap();
+        assert_eq!("1.24e+1", token.value);
+        assert_eq!(7, next);
+        assert_eq!(TokenType::Number, token.token_type);
+
+        let input = str_to_vec("0.00000000000001e+1");
+        let start_pos = 0;
+        let (token, next) = scan(&input, start_pos).unwrap();
+        assert_eq!("0.00000000000001e+1", token.value);
+        assert_eq!(19, next);
+        assert_eq!(TokenType::Number, token.token_type);
     }
 }
