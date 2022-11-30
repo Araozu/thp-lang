@@ -18,3 +18,7 @@ pub fn is_operator(c: char) -> bool {
              || c == '&' || c == '?' || c == '<' || c == '>' 
              || c == '^' || c == '.' || c == ':'
 }
+
+pub fn is_grouping_sign(c: char) -> bool {
+    c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']'
+}

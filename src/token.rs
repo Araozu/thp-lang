@@ -5,7 +5,6 @@ pub enum TokenType {
     Comment,
     Number,
     String,
-    Unit,
     Operator,
     LeftParen,
     RightParen,
@@ -51,4 +50,8 @@ pub fn new_operator(value: String, position: i32) -> Token {
         value,
         position
     }
+}
+
+pub fn new_grouping_sign(value: String, position: i32, token_type: TokenType) -> Token {
+    Token {token_type, value, position}
 }

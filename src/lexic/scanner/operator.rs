@@ -1,25 +1,26 @@
-use crate::lexic::{token::{Token, self}, utils};
+use crate::lexic::{token::{Token, self}, utils, LexResult};
 
 
 /// Function to scan an operator
 /// 
 /// This function assumes the character at `start_pos` is an operator
-pub fn scan(chars: &Vec<char>, start_pos: usize) -> (Token, usize) {
+pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
     scan_impl(chars, start_pos, String::from(""))
 }
 
-pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usize) {
-    let next_char = chars.get(start_pos);
-
-    if let Some(c) = next_char {
-        if utils::is_operator(*c) {
-            return scan_impl(chars, start_pos + 1, utils::str_append(current, *c))
+pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
+    match chars.get(start_pos) {
+        Some(c) if utils::is_operator(*c) => {
+            scan_impl(chars, start_pos + 1, utils::str_append(current, *c))
+        },
+        _ => {
+            LexResult::Some(token::new_operator(current, start_pos as i32), start_pos)
         }
     }
-
-    // Return current value
-    (token::new_operator(current, start_pos as i32), start_pos)
 }
+
+
+
 
 #[cfg(test)]
 mod tests {
@@ -59,11 +60,14 @@ mod tests {
         for op in operators {
             let input = str_to_vec(op);
             let start_pos = 0;
-            let (token, next) = scan(&input, start_pos);
-
-            assert_eq!(1, next);
-            assert_eq!(TokenType::Operator, token.token_type);
-            assert_eq!(op, token.value);
+            match scan(&input, start_pos) {
+                LexResult::Some(token, next) => {
+                    assert_eq!(1, next);
+                    assert_eq!(TokenType::Operator, token.token_type);
+                    assert_eq!(op, token.value);
+                },
+                _ => panic!()
+            }
         }
     }
 
@@ -91,11 +95,14 @@ mod tests {
         for op in operators {
             let input = str_to_vec(op);
             let start_pos = 0;
-            let (token, next) = scan(&input, start_pos);
-
-            assert_eq!(2, next);
-            assert_eq!(TokenType::Operator, token.token_type);
-            assert_eq!(op, token.value);
+            match scan(&input, start_pos) {
+                LexResult::Some(token, next) => {
+                    assert_eq!(2, next);
+                    assert_eq!(TokenType::Operator, token.token_type);
+                    assert_eq!(op, token.value);
+                },
+                _ => panic!()
+            }
         }
     }
 }

@@ -4,6 +4,15 @@ use super::token::{self, Token};
 
 type Chars = Vec<char>;
 
+pub enum LexResult {
+    // A token was scanned
+    Some(Token, usize),
+    // No token was found, but there was no error (EOF)
+    None(usize),
+    Err(String),
+}
+
+
 /// Scans and returns all the tokens in the input String
 pub fn get_tokens(input: &String) -> Result<Vec<Token>, String> {
     let chars: Vec<char> = input.chars().into_iter().collect();
@@ -12,14 +21,14 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, String> {
 
     while has_input(&chars, current_pos) {
         match next_token(&chars, current_pos) {
-            Ok((Some(token), next_pos)) => {
+            LexResult::Some(token, next_pos) => {
                 results.push(token);
                 current_pos = next_pos;
             },
-            Ok((None, next_pos)) => {
+            LexResult::None(next_pos) => {
                 current_pos = next_pos;
             },
-            Err(reason) => return Err(reason),
+            LexResult::Err(reason) => return Err(reason),
         }
     }
 
@@ -27,12 +36,12 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, String> {
     Ok(results)
 }
 
-fn next_token(chars: &Chars, current_pos: usize) -> Result<(Option<Token>, usize),String> {
+fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
     let next_char = peek(chars, current_pos);
 
-    // If EOF is reached return nothing
+    // If EOF is reached return nothing but the current position
     if next_char == '\0' {
-        return Ok((None, current_pos))
+        return LexResult::None(current_pos)
     }
 
     // Handle whitespace recursively
@@ -41,20 +50,19 @@ fn next_token(chars: &Chars, current_pos: usize) -> Result<(Option<Token>, usize
     }
 
     // Test number
-    if utils::is_digit(next_char) {
-        match scanner::number(chars, current_pos) {
-            Ok((token, next_pos)) => Ok((Some(token), next_pos)),
-            Err(reason) => Err(reason),
-        }
-    }
-    // Test operator
-    else if utils::is_operator(next_char) {
-        let (token, next_pos) = scanner::operator(chars, current_pos);
-        Ok((Some(token), next_pos))
-    }
-    else {
-        Err(format!("Unrecognized character: {}", next_char))
-    }
+    None
+        .or_else(|| {
+            scanner::number(next_char, chars, current_pos)
+        })
+        .or_else(|| {
+            scanner::operator(next_char, chars, current_pos)
+        })
+        .or_else(|| {
+            scanner::grouping_sign(next_char, chars, current_pos)
+        })
+        .unwrap_or_else(|| {
+            LexResult::Err(format!("Unrecognized character: {}", next_char))
+        })
 }
 
 fn peek(input: &Chars, pos: usize) -> char {
@@ -103,11 +111,11 @@ mod tests {
         assert_eq!(4, chars.len());
         assert!(has_input(&chars, 0));
 
-        match next_token(&chars, 0).unwrap() {
-            (Some(t), _) => {
+        match next_token(&chars, 0) {
+            LexResult::Some(t, _) => {
                 assert_eq!("126", t.value)
             },
-            (None, _) => {
+            _ => {
                 panic!()
             }
         }
@@ -116,7 +124,7 @@ mod tests {
     /// Should scan numbers
     #[test]
     fn number_test() {
-        let input = String::from("126 278.98 0.282398");
+        let input = String::from("126 278.98 0.282398 1789e+1 239.3298e-103");
         let tokens = get_tokens(&input).unwrap();
 
         let t1 = tokens.get(0).unwrap();
@@ -130,10 +138,39 @@ mod tests {
         let t3 = tokens.get(2).unwrap();
         assert_eq!(TokenType::Number, t3.token_type);
         assert_eq!("0.282398", t3.value);
-        /*
-        assert_eq!("1798e+1", tokens.get(3).unwrap().value);
+        
+        assert_eq!("1789e+1", tokens.get(3).unwrap().value);
         assert_eq!("239.3298e-103", tokens.get(4).unwrap().value);
         assert_eq!(TokenType::EOF, tokens.get(5).unwrap().token_type);
-        */
+    }
+
+    #[test]
+    fn grouping_sign_test() {
+        let input = String::from("( ) { } [ ]");
+        let tokens = get_tokens(&input).unwrap();
+
+        let t = tokens.get(0).unwrap();
+        assert_eq!(TokenType::LeftParen, t.token_type);
+        assert_eq!("(", t.value);
+
+        let t = tokens.get(1).unwrap();
+        assert_eq!(TokenType::RightParen, t.token_type);
+        assert_eq!(")", t.value);
+
+        let t = tokens.get(2).unwrap();
+        assert_eq!(TokenType::LeftBrace, t.token_type);
+        assert_eq!("{", t.value);
+
+        let t = tokens.get(3).unwrap();
+        assert_eq!(TokenType::RightBrace, t.token_type);
+        assert_eq!("}", t.value);
+
+        let t = tokens.get(4).unwrap();
+        assert_eq!(TokenType::LeftBracket, t.token_type);
+        assert_eq!("[", t.value);
+
+        let t = tokens.get(5).unwrap();
+        assert_eq!(TokenType::RightBracket, t.token_type);
+        assert_eq!("]", t.value);
     }
 }
