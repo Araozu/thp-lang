@@ -131,8 +131,6 @@ mod tests {
         assert_eq!(TokenType::Number, t3.token_type);
         assert_eq!("0.282398", t3.value);
         /*
-        assert_eq!("278.98", tokens.get(1).unwrap().value);
-        assert_eq!("0.282398", tokens.get(2).unwrap().value);
         assert_eq!("1798e+1", tokens.get(3).unwrap().value);
         assert_eq!("239.3298e-103", tokens.get(4).unwrap().value);
         assert_eq!(TokenType::EOF, tokens.get(5).unwrap().token_type);
