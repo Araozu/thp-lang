@@ -5,52 +5,37 @@ use crate::lexic::{token::{Token, self}, utils};
 /// This function assumes that the character at `start_pos` is a number [0-9],
 /// if not it will panic
 pub fn scan(chars: &Vec<char>, start_pos: usize) -> Result<(Token, usize), String> {
-    let next_char = chars.get(start_pos);
+    let next_char_1 = chars.get(start_pos);
+    let next_char_2 = chars.get(start_pos + 1);
 
-    // Try to scan a HEX value
-    if let Some(c) = next_char {
-        if *c == '0' {
-            // May be an 'x' or 'X'
-            let next_next_char = chars.get(start_pos + 1);
-            if let Some(c2) = next_next_char {
-                if *c2 == 'x' || *c2 == 'X' {
-                    return scan_hex(chars, start_pos + 2, String::from("0x"));
-                }
-            }
-        }
+    match (next_char_1, next_char_2) {
+        // Test if the input contains a hex number
+        (Some(c1), Some(c2)) if *c1 == '0' && (*c2 == 'x' || *c2 == 'X') => {
+            scan_hex(chars, start_pos + 2, String::from("0x"))
+        },
+        // Scan decimal/double/scientific otherwise
+        _ => scan_decimal(chars, start_pos, String::from(""))
     }
-
-
-    scan_decimal(chars, start_pos, String::from(""))
 }
 
 
 /// Recursively scans an integer. If a dot `.` is found, scans a double,
 /// if a `e` is found, scans a number in scientific notation
 fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
-    let next_char = chars.get(start_pos);
-
-    
-    // If a char is found
-    if let Some(c) = next_char {
-        let c = *c;
-
-        // If a dot is found scan a double
-        if c == '.' {
-            return scan_double(chars, start_pos + 1, utils::str_append(current, c))
-        }
-        // If a `e` is found scan a double with exponent
-        else if c == 'e' {
-            return scan_scientific(chars, start_pos + 1, utils::str_append(current, c))
-        }
-        // Scan a decimal number
-        else if utils::is_digit(c) {
-            return scan_decimal(chars, start_pos + 1, utils::str_append(current, c))
+    match chars.get(start_pos) {
+        Some(c) if *c == '.' => {
+            scan_double(chars, start_pos + 1, utils::str_append(current, *c))
+        },
+        Some(c) if *c == 'e' => {
+            scan_scientific(chars, start_pos + 1, utils::str_append(current, *c))
+        },
+        Some(c) if utils::is_digit(*c) => {
+            scan_decimal(chars, start_pos + 1, utils::str_append(current, *c))
+        },
+        _ => {
+            Ok((token::new_number(current, start_pos as i32), start_pos))
         }
     }
-
-    // Return the current value
-    Ok((token::new_number(current, start_pos as i32), start_pos))
 }
 
 
@@ -60,25 +45,13 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> Result<
 /// - The char at `start_pos` is a value between [0-9a-fA-F]. If not, will return an error.
 /// - `current == "0x"`. If not will return an incorrect value, or panic.
 fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
-    let next_char = chars.get(start_pos);
-
-    if let Some(c) = next_char {
-        let c = *c;
-
-        if utils::is_hex_digit(c) {
-            return scan_hex(chars, start_pos + 1, utils::str_append(current, c))
-        }
-    }
-
-    // If the current value is "0x" that means that there wasn't any hex number thereafter
-    if current.len() == 2 {
-        Err(String::from("Tried to scan an incomplete hex value"))
-    }
-    else {
-        Ok((token::new_number(current, start_pos as i32), start_pos))
+    match chars.get(start_pos) {
+        Some(c) if utils::is_hex_digit(*c) => {
+            Ok(scan_hex_digits(chars, start_pos + 1, utils::str_append(current, *c)))
+        },
+        _ => Err(String::from("Tried to scan an incomplete hex value"))
     }
 }
-
 
 /// Scans a floating point number
 /// 
@@ -87,15 +60,14 @@ fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Tok
 /// 
 /// Returns a syntax error if the char at `start_pos` is not a value between [0-9]
 fn scan_double(chars: &Vec<char>, start_pos: usize, current: String) -> Result<(Token, usize), String> {
-    let next_char = chars.get(start_pos);
-
-    // Check that the first characters exists and is a number
-    if let Some(c) = next_char {
-        if utils::is_digit(*c) { Ok(scan_digits(chars, start_pos, current)) }
-        else {Err(String::from("The character after the dot when scanning a double is not a number."))}
-    }
-    else {
-        Err(String::from("EOF when scanning a double number."))
+    match chars.get(start_pos) {
+        Some(c) if utils::is_digit(*c) => {
+            Ok(scan_digits(chars, start_pos, current))
+        },
+        Some(_) => {
+            Err(String::from("The character after the dot when scanning a double is not a number."))
+        },
+        _ => Err(String::from("EOF when scanning a double number."))
     }
 }
 
@@ -124,18 +96,22 @@ fn scan_scientific(chars: &Vec<char>, start_pos: usize, current: String) -> Resu
 
 /// Scans chars between [0-9], returns when none is found
 fn scan_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usize) {
-    let next_char = chars.get(start_pos);
-
-    if let Some(c) = next_char {
-        let c = *c;
-
-        if utils::is_digit(c) {
-            return scan_digits(chars, start_pos + 1, utils::str_append(current, c))
-        }
+    match chars.get(start_pos) {
+        Some(c) if utils::is_digit(*c) => {
+            scan_digits(chars, start_pos + 1, utils::str_append(current, *c))
+        },
+        _ => (token::new_number(current, start_pos as i32), start_pos)
     }
+}
 
-    // Return current value
-    (token::new_number(current, start_pos as i32), start_pos)
+/// Scans chars between [0-9a-fA-F], returns when none is found
+fn scan_hex_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usize) {
+    match chars.get(start_pos) {
+        Some(c) if utils::is_hex_digit(*c) => {
+            scan_hex_digits(chars, start_pos + 1, utils::str_append(current, *c))
+        },
+        _ => (token::new_number(current, start_pos as i32), start_pos)
+    }
 }
 
 
