@@ -3,6 +3,7 @@ use super::{token::{TokenType, self}, utils, LexResult};
 mod number;
 mod operator;
 mod identifier;
+mod string;
 
 /// Attempts to scan a number. Returns None to be able to chain other scanner
 pub fn number(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
@@ -41,3 +42,9 @@ pub fn grouping_sign(c: char, _: &Vec<char>, start_pos: usize) -> Option<LexResu
 pub fn identifier(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
     utils::is_lowercase(c).then(|| identifier::scan(c, chars, start_pos))
 }
+
+
+pub fn string(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
+    (c == '"').then(|| string::scan(chars, start_pos + 1))
+}
+

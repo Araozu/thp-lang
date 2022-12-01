@@ -51,18 +51,11 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
 
     // Scanners
     None
-        .or_else(|| {
-            scanner::number(next_char, chars, current_pos)
-        })
-        .or_else(|| {
-            scanner::operator(next_char, chars, current_pos)
-        })
-        .or_else(|| {
-            scanner::grouping_sign(next_char, chars, current_pos)
-        })
-        .or_else(|| {
-            scanner::identifier(next_char, chars, current_pos)
-        })
+        .or_else(|| scanner::number(next_char, chars, current_pos))
+        .or_else(|| scanner::identifier(next_char, chars, current_pos))
+        .or_else(|| scanner::string(next_char, chars, current_pos))
+        .or_else(|| scanner::operator(next_char, chars, current_pos))
+        .or_else(|| scanner::grouping_sign(next_char, chars, current_pos))
         .unwrap_or_else(|| {
             LexResult::Err(format!("Unrecognized character: {}", next_char))
         })
