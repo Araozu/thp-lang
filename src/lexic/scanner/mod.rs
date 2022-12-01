@@ -2,33 +2,17 @@ use super::{token::{TokenType, self}, utils, LexResult};
 
 mod number;
 mod operator;
+mod identifier;
 
 /// Attempts to scan a number. Returns None to be able to chain other scanner
 pub fn number(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
-    if utils::is_digit(c) {
-        match number::scan(chars, start_pos) {
-            Ok((token, next_pos)) => {
-                Some(LexResult::Some(token, next_pos))
-            },
-            Err(reason) => {
-                Some(LexResult::Err(reason))
-            },
-        }
-    }
-    else {
-        None
-    }
+    utils::is_digit(c).then(|| number::scan(chars, start_pos))
 }
 
 
 /// Attempts to scan an operator. Returns None to be able to chain other scanner
 pub fn operator(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
-    if utils::is_operator(c) {
-        Some(operator::scan(chars, start_pos))
-    }
-    else {
-        None
-    }
+    utils::is_operator(c).then(|| operator::scan(chars, start_pos))
 }
 
 
@@ -50,4 +34,10 @@ pub fn grouping_sign(c: char, _: &Vec<char>, start_pos: usize) -> Option<LexResu
         token_type,
     );
     Some(LexResult::Some(token, start_pos + 1))
+}
+
+
+/// Attempts to scan an identifier. Returns None to be able to chain other scanner
+pub fn identifier(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
+    utils::is_lowercase(c).then(|| identifier::scan(c, chars, start_pos))
 }

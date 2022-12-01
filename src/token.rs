@@ -55,3 +55,11 @@ pub fn new_operator(value: String, position: i32) -> Token {
 pub fn new_grouping_sign(value: String, position: i32, token_type: TokenType) -> Token {
     Token {token_type, value, position}
 }
+
+pub fn new_identifier(value: String, position: i32) -> Token {
+    Token {
+        token_type: TokenType::Identifier,
+        value,
+        position,
+    }
+}
