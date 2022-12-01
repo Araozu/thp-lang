@@ -1,4 +1,14 @@
-use crate::lexic::{token, utils, LexResult};
+use crate::{lexic::{token, utils, LexResult}, token::TokenType};
+
+/// Checks if a String is a keyword, and returns its TokenType
+fn str_is_keyword(s: &String) -> Option<TokenType> {
+    match s.as_str() {
+        "var" => Some(TokenType::VAR),
+        "val" => Some(TokenType::VAL),
+        _ => None,
+    }
+}
+
 
 pub fn scan(start_char: char, chars: &Vec<char>, start_pos: usize) -> LexResult {
     scan_impl(chars, start_pos + 1, format!("{}", start_char))
@@ -10,7 +20,12 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
             scan_impl(chars, start_pos + 1, utils::str_append(current, *c))
         },
         _ => {
-            LexResult::Some(token::new_identifier(current, start_pos as i32), start_pos)
+            if let Some(token_type) = str_is_keyword(&current) {
+                LexResult::Some(token::new(current, start_pos as i32, token_type), start_pos)
+            }
+            else {
+                LexResult::Some(token::new_identifier(current, start_pos as i32), start_pos)
+            }
         }
     }
 }
@@ -118,5 +133,26 @@ mod tests {
                 _ => panic!()
             }
         }
+    }
+
+    // Should scan keywords
+    #[test]
+    fn test_4() {
+        let input = str_to_vec("var");
+        let start_pos = 0;
+        if let LexResult::Some(token, next) = scan(*input.get(0).unwrap(), &input, start_pos) {            
+            assert_eq!(3, next);
+            assert_eq!(TokenType::VAR, token.token_type);
+            assert_eq!("var", token.value);
+        } else {panic!()}
+
+
+        let input = str_to_vec("val");
+        let start_pos = 0;
+        if let LexResult::Some(token, next) = scan(*input.get(0).unwrap(), &input, start_pos) {            
+            assert_eq!(3, next);
+            assert_eq!(TokenType::VAL, token.token_type);
+            assert_eq!("val", token.value);
+        } else {panic!()}
     }
 }

@@ -1,4 +1,4 @@
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum TokenType {
     NewLine,
     Identifier,
@@ -52,7 +52,7 @@ pub fn new_operator(value: String, position: i32) -> Token {
     }
 }
 
-pub fn new_grouping_sign(value: String, position: i32, token_type: TokenType) -> Token {
+pub fn new(value: String, position: i32, token_type: TokenType) -> Token {
     Token {token_type, value, position}
 }
 
