@@ -1,6 +1,8 @@
 mod utils;
 mod scanner;
+mod lex_error;
 use super::token::{self, Token};
+use lex_error::LexError;
 
 type Chars = Vec<char>;
 
@@ -9,12 +11,12 @@ pub enum LexResult {
     Some(Token, usize),
     // No token was found, but there was no error (EOF)
     None(usize),
-    Err(String),
+    Err(LexError),
 }
 
 
 /// Scans and returns all the tokens in the input String
-pub fn get_tokens(input: &String) -> Result<Vec<Token>, String> {
+pub fn get_tokens(input: &String) -> Result<Vec<Token>, LexError> {
     let chars: Vec<char> = input.chars().into_iter().collect();
     let mut results = Vec::new();
     let mut current_pos: usize = 0;
@@ -44,6 +46,11 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
         return LexResult::None(current_pos)
     }
 
+    // Ignore new lines for now...
+    if next_char == '\n' {
+        return next_token(chars, current_pos + 1)
+    }
+
     // Handle whitespace recursively
     if next_char == ' ' {
         return next_token(chars, current_pos + 1)
@@ -57,7 +64,11 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
         .or_else(|| scanner::operator(next_char, chars, current_pos))
         .or_else(|| scanner::grouping_sign(next_char, chars, current_pos))
         .unwrap_or_else(|| {
-            LexResult::Err(format!("Unrecognized character: {}", next_char))
+            let error = LexError {
+                position: current_pos,
+                reason: format!("Unrecognized character: {}", next_char),
+            };
+            LexResult::Err(error)
         })
 }
 

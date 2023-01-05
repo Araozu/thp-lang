@@ -1,4 +1,4 @@
-use crate::lexic::{token::{Token, self}, utils, LexResult};
+use crate::lexic::{token, utils, LexResult};
 
 
 /// Function to scan an operator

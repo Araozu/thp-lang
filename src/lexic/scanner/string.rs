@@ -1,6 +1,6 @@
 use crate::lexic::{
-    token::{self, Token},
-    utils, LexResult,
+    token,
+    utils, LexResult, lex_error::LexError,
 };
 
 /// Function to scan a string
@@ -17,7 +17,10 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
             LexResult::Some(token::new_string(current, start_pos as i32), start_pos + 1)
         }
         Some(c) if *c == '\n' => {
-            LexResult::Err(String::from("Unexpected new line inside a string."))
+            LexResult::Err(LexError {
+                position: start_pos,
+                reason: String::from("Unexpected new line inside a string.")
+            })
         }
         Some(c) if *c == '\\' => {
             if let Some(escape) = test_escape_char(chars, start_pos + 1) {
@@ -44,7 +47,10 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
             )
         }
         None => {
-            LexResult::Err(String::from("Incomplete string found"))
+            LexResult::Err(LexError {
+                position: start_pos,
+                reason: String::from("Incomplete string found")
+            })
         }
     }
 }
@@ -108,7 +114,7 @@ mod tests {
         let input = str_to_vec("\"Hello,\nworld!\"");
         let start_pos = 1;
         if let LexResult::Err(reason) = scan(&input, start_pos) {
-            assert_eq!("Unexpected new line inside a string.", reason)
+            assert_eq!("Unexpected new line inside a string.", reason.reason)
         }
         else {panic!()}
     }

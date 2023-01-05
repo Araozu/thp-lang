@@ -40,7 +40,8 @@ pub fn grouping_sign(c: char, _: &Vec<char>, start_pos: usize) -> Option<LexResu
 
 /// Attempts to scan an identifier. Returns None to be able to chain other scanner
 pub fn identifier(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
-    utils::is_lowercase(c).then(|| identifier::scan(c, chars, start_pos))
+    (utils::is_lowercase(c) || c == '_')
+        .then(|| identifier::scan(c, chars, start_pos))
 }
 
 

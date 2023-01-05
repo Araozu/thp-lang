@@ -1,6 +1,6 @@
 use crate::lexic::{
     token::{self, Token},
-    utils, LexResult,
+    utils, LexResult, lex_error::LexError,
 };
 
 /// Function to scan a number
@@ -47,7 +47,10 @@ fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
             let (t, next) = scan_hex_digits(chars, start_pos + 1, utils::str_append(current, *c));
             LexResult::Some(t, next)
         }
-        _ => LexResult::Err(String::from("Tried to scan an incomplete hex value")),
+        _ => LexResult::Err(LexError {
+            position: start_pos,
+            reason: String::from("Tried to scan an incomplete hex value"),
+        }),
     }
 }
 
@@ -60,10 +63,16 @@ fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
 fn scan_double(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
     match chars.get(start_pos) {
         Some(c) if utils::is_digit(*c) => scan_double_impl(chars, start_pos, current),
-        Some(_) => LexResult::Err(String::from(
-            "The character after the dot when scanning a double is not a number.",
-        )),
-        _ => LexResult::Err(String::from("EOF when scanning a double number.")),
+        Some(_) => LexResult::Err(LexError {
+            position: start_pos,
+            reason : String::from(
+                "The character after the dot when scanning a double is not a number.",
+            )
+        }),
+        _ => LexResult::Err(LexError {
+            position: start_pos,
+            reason: String::from("EOF when scanning a double number."),
+        }),
     }
 }
 
@@ -98,9 +107,12 @@ fn scan_scientific(chars: &Vec<char>, start_pos: usize, current: String) -> LexR
             let (t, next) = scan_digits(chars, start_pos + 2, new_value);
             LexResult::Some(t, next)
         }
-        _ => LexResult::Err(String::from(
-            "The characters after 'e' are not + or -, or are not followed by a number",
-        )),
+        _ => LexResult::Err(LexError {
+            position: start_pos,
+            reason: String::from(
+                "The characters after 'e' are not + or -, or are not followed by a number",
+            )
+        }),
     }
 }
 
@@ -217,7 +229,7 @@ mod tests {
         let start_pos = 0;
 
         match scan(&input, start_pos) {
-            LexResult::Err(reason) => assert_eq!("Tried to scan an incomplete hex value", reason),
+            LexResult::Err(reason) => assert_eq!("Tried to scan an incomplete hex value", reason.reason),
             _ => panic!(),
         }
 
@@ -277,7 +289,7 @@ mod tests {
         match scan(&input, start_pos) {
             LexResult::Err(reason) => assert_eq!(
                 "The character after the dot when scanning a double is not a number.",
-                reason
+                reason.reason
             ),
             _ => panic!(),
         }
@@ -286,7 +298,7 @@ mod tests {
         let start_pos = 0;
 
         match scan(&input, start_pos) {
-            LexResult::Err(reason) => assert_eq!("EOF when scanning a double number.", reason),
+            LexResult::Err(reason) => assert_eq!("EOF when scanning a double number.", reason.reason),
             _ => panic!(),
         }
     }

@@ -4,6 +4,19 @@ use super::lexic;
 
 fn compile(input: &String) {
     let _tokens = lexic::get_tokens(input);
+
+    match _tokens {
+        Ok(tokens) => {
+            for token in tokens {
+                print!("[{}] ", token.value);
+            }
+            println!("");
+        },
+        Err(error) => {
+            eprintln!("Error scanning.\n{} at pos {}", error.reason, error.position)
+        }
+    }
+
 }
 
 pub fn run() -> io::Result<()> {
@@ -23,7 +36,6 @@ pub fn run() -> io::Result<()> {
                 break Ok(())
             },
             Ok(_) => {
-                println!("{}", buffer);
                 compile(&buffer);
             },
             Err(error) => {
