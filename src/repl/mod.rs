@@ -1,6 +1,7 @@
 use std::io::{self, Write};
 
 use super::lexic;
+use super::syntax;
 
 fn compile(input: &String) {
     let _tokens = lexic::get_tokens(input);
@@ -8,9 +9,11 @@ fn compile(input: &String) {
     match _tokens {
         Ok(tokens) => {
             for token in tokens {
-                print!("[{}] ", token.value);
+                print!("[{:?} {}] ", token.token_type, token.value);
             }
             println!("");
+
+            let _ast = syntax::construct_ast(Vec::new());
         },
         Err(error) => {
             eprintln!("Error scanning.\n{} at pos {}", error.reason, error.position)
