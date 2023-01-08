@@ -1,17 +1,17 @@
 
-pub struct ModuleAST {
-    bindings: Vec<Binding>,
+pub struct ModuleAST<'a> {
+    bindings: Vec<Binding<'a>>,
 }
 
-pub enum Binding {
-    Val(ValBinding),
+pub enum Binding<'a> {
+    Val(ValBinding<'a>),
 }
 
-pub struct ValBinding {
-    identifier: String,
-    expression: Expression,
+pub struct ValBinding<'a> {
+    pub identifier: &'a String,
+    pub expression: Expression<'a>,
 }
 
-pub enum Expression {
-    Number(String),
+pub enum Expression<'a> {
+    Number(&'a String),
 }

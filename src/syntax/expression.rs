@@ -1,10 +1,18 @@
-use crate::token::Token;
-
+use crate::token::{Token, TokenType};
 use super::types::Expression;
 
 
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> Option<Expression> {
-    None
+    tokens
+        .get(pos)
+        .and_then(|token| {
+            match token.token_type {
+                TokenType::Number => {
+                    Some(Expression::Number(&token.value))
+                }
+                _ => None
+            }
+        })
 }
 
 
