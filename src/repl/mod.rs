@@ -13,7 +13,7 @@ fn compile(input: &String) {
             }
             println!("");
 
-            let _ast = syntax::construct_ast(Vec::new());
+            let _ast = syntax::construct_ast(&Vec::new());
         },
         Err(error) => {
             eprintln!("Error scanning.\n{} at pos {}", error.reason, error.position)

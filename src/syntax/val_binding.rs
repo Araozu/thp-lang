@@ -7,7 +7,7 @@ use super::expression;
 // - NotFound: the first token (var | val) was not found, so the parser should try other options
 // - Error: token (var | val) was found, but then other expected tokens were not found
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<Binding> {
-    let val_token = try_token_type(tokens, pos, TokenType::VAL)?;
+    let _ = try_token_type(tokens, pos, TokenType::VAL)?;
 
     let identifier = try_token_type(tokens, pos + 1, TokenType::Identifier);
     if identifier.is_none() { return None }
@@ -15,7 +15,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<Binding> {
 
     let equal_operator = try_operator(tokens, pos + 2, String::from("="));
     if equal_operator.is_none() { return None }
-    let equal_operator = equal_operator.unwrap();
+    let _ = equal_operator.unwrap();
 
     let expression = expression::try_parse(tokens, pos + 3);
     if expression.is_none() { return None }

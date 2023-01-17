@@ -1,6 +1,6 @@
 
 pub struct ModuleAST<'a> {
-    bindings: Vec<Binding<'a>>,
+    pub bindings: Vec<Binding<'a>>,
 }
 
 pub enum Binding<'a> {

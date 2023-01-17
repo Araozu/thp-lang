@@ -5,6 +5,7 @@ mod repl;
 mod syntax;
 mod lexic;
 mod token;
+mod semantic;
 
 const VERSION: &str = "0.0.1";
 
