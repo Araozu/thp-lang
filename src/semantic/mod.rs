@@ -1,7 +1,7 @@
 use super::symbol_table::{SymbolTable, _NUMBER};
 use super::ast_types::{ModuleAST, Binding};
 
-/// Checks the ast. In the future should return a list of errors.
+/// Checks the AST. In the future should return a list of errors.
 pub fn check_ast<'a>(ast: &'a mut ModuleAST, symbol_table: &'a mut SymbolTable) {
     for binding in &ast.bindings {
         match binding {

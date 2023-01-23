@@ -5,6 +5,7 @@ use crate::symbol_table::SymbolTable;
 use super::lexic;
 use super::syntax;
 use super::semantic;
+use super::codegen;
 
 fn compile(input: &String) {
     let _tokens = lexic::get_tokens(input);
@@ -14,6 +15,8 @@ fn compile(input: &String) {
             let mut ast = syntax::construct_ast(&tokens).unwrap();
             let mut table = SymbolTable::new();
             semantic::check_ast(&mut ast, &mut table);
+            let js_code = codegen::codegen(&ast);
+            println!("{}", js_code)
         },
         Err(error) => {
             eprintln!("Error scanning.\n{} at pos {}", error.reason, error.position)

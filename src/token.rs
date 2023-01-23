@@ -1,6 +1,5 @@
 #[derive(PartialEq, Debug, Clone)]
 pub enum TokenType {
-    NewLine,
     Identifier,
     Comment,
     Number,
@@ -12,8 +11,6 @@ pub enum TokenType {
     RightBracket,
     LeftBrace,
     RightBrace,
-    Indent,
-    Dedent,
     VAR,
     VAL,
     EOF,

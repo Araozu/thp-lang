@@ -8,13 +8,14 @@ mod token;
 mod semantic;
 mod ast_types;
 mod symbol_table;
+mod codegen;
 
 const VERSION: &str = "0.0.1";
 
 fn get_copyright() -> String {
     let year = Utc::now().year();
 
-    format!("Misti {}\nCopyright (c) {} Fernando Enrique Araoz Morales", VERSION, year)
+    format!("Misti {}\nCopyright (c) {} Fernando Enrique Araoz Morales\n", VERSION, year)
 }
 
 /// # Misti
