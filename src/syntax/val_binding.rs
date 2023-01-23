@@ -1,5 +1,5 @@
 use crate::token::{Token, TokenType};
-use super::types::{Binding, ValBinding};
+use super::ast_types::{Binding, ValBinding};
 use super::expression;
 
 // Should return a 3 state value:

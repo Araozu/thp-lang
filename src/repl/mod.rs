@@ -1,19 +1,19 @@
 use std::io::{self, Write};
 
+use crate::symbol_table::SymbolTable;
+
 use super::lexic;
 use super::syntax;
+use super::semantic;
 
 fn compile(input: &String) {
     let _tokens = lexic::get_tokens(input);
 
     match _tokens {
         Ok(tokens) => {
-            for token in tokens {
-                print!("[{:?} {}] ", token.token_type, token.value);
-            }
-            println!("");
-
-            let _ast = syntax::construct_ast(&Vec::new());
+            let mut ast = syntax::construct_ast(&tokens).unwrap();
+            let mut table = SymbolTable::new();
+            let new_ast = semantic::check_ast(&mut ast, &mut table);
         },
         Err(error) => {
             eprintln!("Error scanning.\n{} at pos {}", error.reason, error.position)

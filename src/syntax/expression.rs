@@ -1,5 +1,5 @@
 use crate::token::{Token, TokenType};
-use super::types::Expression;
+use super::ast_types::Expression;
 
 
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> Option<Expression> {

@@ -6,6 +6,8 @@ mod syntax;
 mod lexic;
 mod token;
 mod semantic;
+mod ast_types;
+mod symbol_table;
 
 const VERSION: &str = "0.0.1";
 

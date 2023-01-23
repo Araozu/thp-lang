@@ -2,9 +2,9 @@ use super::token::Token;
 
 mod expression;
 mod val_binding;
-mod types;
+use super::ast_types;
 
-use types::ModuleAST;
+use ast_types::ModuleAST;
 
 /// Constructs the Misti AST from a vector of tokens
 pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST<'a>, String> {
