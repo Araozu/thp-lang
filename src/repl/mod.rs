@@ -13,7 +13,7 @@ fn compile(input: &String) {
         Ok(tokens) => {
             let mut ast = syntax::construct_ast(&tokens).unwrap();
             let mut table = SymbolTable::new();
-            let new_ast = semantic::check_ast(&mut ast, &mut table);
+            semantic::check_ast(&mut ast, &mut table);
         },
         Err(error) => {
             eprintln!("Error scanning.\n{} at pos {}", error.reason, error.position)

@@ -11,7 +11,7 @@ pub struct SymbolTable {
 
 impl SymbolTable {
     pub fn new() -> SymbolTable {
-        let mut symbol_table = HashMap::<String, String>::new();
+        let symbol_table = HashMap::<String, String>::new();
 
         SymbolTable {
             table: symbol_table,
@@ -24,6 +24,20 @@ impl SymbolTable {
 
     pub fn test(&self, identifier: &str) -> bool {
         return self.table.contains_key::<String>(&String::from(identifier));
+    }
+
+    pub fn check_type(&self, identifier: &str, datatype: &str) -> bool {
+        self.table
+            .get_key_value(&String::from(identifier))
+            .and_then(|(_, value)| {
+                if value == &String::from(datatype) {
+                    Some(true)
+                }
+                else {
+                    Some(false)
+                }
+            })
+            .unwrap_or(false)
     }
 }
 
@@ -42,5 +56,13 @@ mod tests {
         let mut table = SymbolTable::new();
         table.add("identifier", _NUMBER);
         assert_eq!(true, table.test("identifier"))
+    }
+
+    #[test]
+    fn should_check_type() {
+        let mut table = SymbolTable::new();
+        table.add("firstNumber", _NUMBER);
+        
+        assert!(table.check_type("firstNumber", _NUMBER));
     }
 }
