@@ -1,14 +1,24 @@
 use std::io;
 use chrono::{prelude::Utc, Datelike};
 
+// Module to handle the repl and its compilation
 mod repl;
-mod syntax;
-mod lexic;
+// Defines the types of tokens and provides functions to create them
 mod token;
+// Module to handle lexical analysis
+mod syntax;
+// Module to handle syntactic analysis
+mod lexic;
+// Module to handle semantic analysis
 mod semantic;
+// Defines the AST
 mod ast_types;
+// Defines the Symbol table and operations within
 mod symbol_table;
+// Transforms an AST to JS
 mod codegen;
+
+mod error_handling;
 
 const VERSION: &str = "0.0.1";
 

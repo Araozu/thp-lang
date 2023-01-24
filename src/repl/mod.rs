@@ -1,5 +1,6 @@
 use std::io::{self, Write};
 
+use crate::error_handling::PrintableError;
 use crate::symbol_table::SymbolTable;
 use crate::token::Token;
 
@@ -10,14 +11,15 @@ use super::codegen;
 
 /// Executes Lexical analysis, handles errors and calls build_ast for the next phase
 fn compile(input: &String) {
-    let _tokens = lexic::get_tokens(input);
+    let tokens = lexic::get_tokens(input);
 
-    match _tokens {
+    match tokens {
         Ok(tokens) => {
             build_ast(tokens);
         },
         Err(error) => {
-            eprintln!("Error scanning.\n{} at pos {}", error.reason, error.position)
+            let chars: Vec<char> = input.chars().into_iter().collect();
+            eprintln!("{}", error.get_error_str(&chars))
         }
     }
 

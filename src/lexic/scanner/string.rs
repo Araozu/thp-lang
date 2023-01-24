@@ -1,7 +1,8 @@
 use crate::lexic::{
     token,
-    utils, LexResult, lex_error::LexError,
+    utils, LexResult,
 };
+use crate::error_handling::LexError;
 
 /// Function to scan a string
 ///

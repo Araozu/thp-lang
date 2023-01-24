@@ -1,8 +1,8 @@
 mod utils;
 mod scanner;
-mod lex_error;
+
 use super::token::{self, Token};
-use lex_error::LexError;
+use crate::error_handling::{MistiError, LexError};
 
 type Chars = Vec<char>;
 
@@ -34,7 +34,7 @@ pub enum LexResult {
 
 
 /// Scans and returns all the tokens in the input String
-pub fn get_tokens(input: &String) -> Result<Vec<Token>, LexError> {
+pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
     let chars: Vec<char> = input.chars().into_iter().collect();
     let mut results = Vec::new();
     let mut current_pos: usize = 0;
@@ -48,7 +48,9 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, LexError> {
             LexResult::None(next_pos) => {
                 current_pos = next_pos;
             },
-            LexResult::Err(reason) => return Err(reason),
+            LexResult::Err(error_info) => {
+                return Err(MistiError::Lex(error_info));
+            }
         }
     }
 
