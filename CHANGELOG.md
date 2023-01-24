@@ -11,7 +11,6 @@
 - [ ] Stdlib
 - [ ] Document code
 
-
 ## v0.0.4
 
 - Explicit datatype of variables
@@ -27,6 +26,11 @@
 
 - Compilation of `val` and `var` bindings with a number, string or boolean as value.
 - Register symbols and datatypes in the Symbol table.
+- Add better error messages for lexical errors. Show:
+    - Offending line
+    - Pointer to offending character
+    - Error message
+
 
 ## v0.0.1
 
