@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, fmt::format};
+use std::{collections::VecDeque};
 use super::{PrintableError, LexError};
 
 impl PrintableError for LexError {
@@ -8,7 +8,7 @@ impl PrintableError for LexError {
         let (erroneous_code, back_count) = get_line(chars, self.position);
 
         let mut whitespace = Vec::<char>::new();
-        for i in 0..back_count {
+        for _ in 0..back_count {
             whitespace.push(' ');
         }
         let whitespace = whitespace.iter().collect::<String>();
