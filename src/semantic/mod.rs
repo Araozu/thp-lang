@@ -9,6 +9,10 @@ pub fn check_ast<'a>(ast: &'a mut ModuleAST, symbol_table: &'a mut SymbolTable) 
                 // TODO: create a function to get the datatype, instead of a hardcoded value
                 symbol_table.add(val_binding.identifier, _NUMBER);
             }
+            Binding::Var(var_binding) => {
+                // TODO: create a function to get the datatype, instead of a hardcoded value
+                symbol_table.add(var_binding.identifier, _NUMBER);
+            }
         }
     }
 }

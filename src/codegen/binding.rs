@@ -9,6 +9,11 @@ impl Transpilable for Binding<'_> {
 
                 format!("const {} = {};", val_binding.identifier, expression_str)
             }
+            Binding::Var(var_binding) => {
+                let expression_str = var_binding.expression.transpile();
+
+                format!("let {} = {};", var_binding.identifier, expression_str)
+            }
         }
     }
 }
@@ -18,7 +23,7 @@ impl Transpilable for Binding<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast_types::{Expression, ValBinding};
+    use crate::ast_types::{Expression, Binding, ValBinding};
 
     #[test]
     fn binding_should_transpile() {

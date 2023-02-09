@@ -1,5 +1,5 @@
 use crate::token::{Token, TokenType};
-use super::ast_types::{Binding, ValBinding};
+use super::ast_types::{ValBinding, VarBinding, Binding};
 use super::expression;
 
 // Should return a 3 state value:
@@ -7,7 +7,19 @@ use super::expression;
 // - NotFound: the first token (var | val) was not found, so the parser should try other options
 // - Error: token (var | val) was found, but then other expected tokens were not found
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<Binding> {
-    let _ = try_token_type(tokens, pos, TokenType::VAL)?;
+    let is_val = {
+        let res1 = try_token_type(tokens, pos, TokenType::VAL);
+        match res1 {
+            Some(_) => true,
+            None => {
+                let res2 = try_token_type(tokens, pos, TokenType::VAR);
+                match res2 {
+                    Some(_) => false,
+                    None => return None
+                }
+            }
+        }
+    };
 
     let identifier = try_token_type(tokens, pos + 1, TokenType::Identifier);
     if identifier.is_none() { return None }
@@ -21,12 +33,18 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<Binding> {
     if expression.is_none() { return None }
     let expression = expression.unwrap();
 
-    let bind = ValBinding {
-        identifier: &identifier.value,
-        expression,
-    };
-
-    Some(Binding::Val(bind))
+    if is_val {
+        Some(Binding::Val(ValBinding {
+            identifier: &identifier.value,
+            expression,
+        }))
+    }
+    else {
+        Some(Binding::Var(VarBinding {
+            identifier: &identifier.value,
+            expression,
+        }))
+    }
 }
 
 fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Option<&Token> {
@@ -60,6 +78,9 @@ mod tests {
 
         match binding {
             Binding::Val(binding) => {
+                assert_eq!("identifier", binding.identifier);
+            }
+            Binding::Var(binding) => {
                 assert_eq!("identifier", binding.identifier);
             }
         }
