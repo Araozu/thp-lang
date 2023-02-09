@@ -1,6 +1,7 @@
 use std::io::{self, Write};
 
 use crate::symbol_table::SymbolTable;
+use crate::token::Token;
 
 use super::lexic;
 use super::syntax;
@@ -12,17 +13,29 @@ fn compile(input: &String) {
 
     match _tokens {
         Ok(tokens) => {
-            let mut ast = syntax::construct_ast(&tokens).unwrap();
-            let mut table = SymbolTable::new();
-            semantic::check_ast(&mut ast, &mut table);
-            let js_code = codegen::codegen(&ast);
-            println!("{}", js_code)
+            build_ast(tokens);
         },
         Err(error) => {
             eprintln!("Error scanning.\n{} at pos {}", error.reason, error.position)
         }
     }
 
+}
+
+fn build_ast(tokens: Vec<Token>) {
+    let ast = syntax::construct_ast(&tokens);
+
+    match ast {
+        Ok(mut ast) => {
+            let mut table = SymbolTable::new();
+            semantic::check_ast(&mut ast, &mut table);
+            let js_code = codegen::codegen(&ast);
+            println!("{}", js_code)
+        }
+        Err(reason) => {
+            eprintln!("Syntax error.\n{}", reason)
+        }
+    }
 }
 
 pub fn run() -> io::Result<()> {

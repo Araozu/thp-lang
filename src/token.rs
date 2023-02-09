@@ -1,7 +1,6 @@
 #[derive(PartialEq, Debug, Clone)]
 pub enum TokenType {
     Identifier,
-    Comment,
     Number,
     String,
     Operator,
