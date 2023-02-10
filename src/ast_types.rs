@@ -20,4 +20,6 @@ pub struct VarBinding<'a> {
 
 pub enum Expression<'a> {
     Number(&'a String),
+    String(&'a String),
+    Boolean(bool),
 }
