@@ -6,11 +6,29 @@ use lex_error::LexError;
 
 type Chars = Vec<char>;
 
+/// Represents the result of scanning a single token from the input
 pub enum LexResult {
-    // A token was scanned
+    /// A token was found. The first element is the token, and the
+    /// second element is the position in the input after the token.
+    ///
+    /// E.g., given an input 
+    ///
+    /// "`identifier 55`"
+    ///
+    /// scanning from a position `0`, the result would be
+    ///
+    /// `Some(Token("identifier"), 10)`.
+    ///
+    /// where:
+    /// - `Token("identifier")` is the token
+    /// - `10` is the position where the token ends, and from where the next token
+    /// should be scanned
     Some(Token, usize),
-    // No token was found, but there was no error (EOF)
+    /// No token was found. This indicates that EOF has been reached.
+    ///
+    /// Contains the last position, which should be the input lenght - 1
     None(usize),
+    /// An error was found while scanning.
     Err(LexError),
 }
 
@@ -38,6 +56,7 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, LexError> {
     Ok(results)
 }
 
+/// Scans a single token from `chars`, starting from `current_pos`
 fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
     let next_char = peek(chars, current_pos);
 
@@ -72,11 +91,13 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
         })
 }
 
+/// Returns the char at `pos`
 fn peek(input: &Chars, pos: usize) -> char {
     let result = input.get(pos).unwrap_or(&'\0');
     *result
 }
 
+/// Whether there is still input based on `current_pos`
 fn has_input(input: &Chars, current_pos: usize) -> bool {
     current_pos < input.len()
 }

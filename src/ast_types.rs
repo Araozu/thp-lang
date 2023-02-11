@@ -22,4 +22,5 @@ pub enum Expression<'a> {
     Number(&'a String),
     String(&'a String),
     Boolean(bool),
+    Identifier(&'a String),
 }

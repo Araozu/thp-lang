@@ -5,19 +5,22 @@ mod operator;
 mod identifier;
 mod string;
 
-/// Attempts to scan a number. Returns None to be able to chain other scanner
+
+// This module contains the individual scanners, and exports them
+
+/// Attempts to scan a number. If not found returns None to be able to chain other scanner
 pub fn number(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
     utils::is_digit(c).then(|| number::scan(chars, start_pos))
 }
 
 
-/// Attempts to scan an operator. Returns None to be able to chain other scanner
+/// Attempts to scan an operator. If not found returns None to be able to chain other scanner
 pub fn operator(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
     utils::is_operator(c).then(|| operator::scan(chars, start_pos))
 }
 
 
-/// Attempts to scan a grouping sign. Returns None to be able to chain other scanner
+/// Attempts to scan a grouping sign. If not found returns None to be able to chain other scanner
 pub fn grouping_sign(c: char, _: &Vec<char>, start_pos: usize) -> Option<LexResult> {
     let token_type = match c {
         '(' => TokenType::LeftParen,
@@ -38,13 +41,14 @@ pub fn grouping_sign(c: char, _: &Vec<char>, start_pos: usize) -> Option<LexResu
 }
 
 
-/// Attempts to scan an identifier. Returns None to be able to chain other scanner
+/// Attempts to scan an identifier. If not found returns None to be able to chain other scanner
 pub fn identifier(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
     (utils::is_lowercase(c) || c == '_')
         .then(|| identifier::scan(c, chars, start_pos))
 }
 
 
+/// Attempts to scan a string. If not found returns None to be able to chain other scanner
 pub fn string(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
     (c == '"').then(|| string::scan(chars, start_pos + 1))
 }

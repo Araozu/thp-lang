@@ -2,6 +2,7 @@ use crate::ast_types::Binding;
 use super::Transpilable;
 
 impl Transpilable for Binding<'_> {
+    /// Transpiles val and var bindings into JS.
     fn transpile(&self) -> String {
         match self {
             Binding::Val(val_binding) => {

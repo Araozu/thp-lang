@@ -11,6 +11,7 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
     scan_impl(chars, start_pos, String::from(""))
 }
 
+/// Recursive function that does the scanning
 pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
     match chars.get(start_pos) {
         Some(c) if *c == '"' => {
@@ -56,6 +57,7 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
 }
 
 
+/// Checks if the char at `start_pos` is a escape character
 fn test_escape_char(chars: &Vec<char>, start_pos: usize) -> Option<char> {
     if let Some(c) = chars.get(start_pos) {
         match *c {

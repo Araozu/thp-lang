@@ -9,12 +9,15 @@ fn str_is_keyword(s: &String) -> Option<TokenType> {
     }
 }
 
-
+/// Scans an identifier. This function assumes that `start_pos` is the start of
+/// a valid identifier
 pub fn scan(start_char: char, chars: &Vec<char>, start_pos: usize) -> LexResult {
+    // The scanning is done by this recursive function
     scan_impl(chars, start_pos + 1, format!("{}", start_char))
 }
 
-pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
+/// Recursive funtion that scans the identifier
+fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
     match chars.get(start_pos) {
         Some(c) if utils::is_identifier_char(*c) => {
             scan_impl(chars, start_pos + 1, utils::str_append(current, *c))

@@ -8,6 +8,7 @@ use super::syntax;
 use super::semantic;
 use super::codegen;
 
+/// Executes Lexical analysis, handles errors and calls build_ast for the next phase
 fn compile(input: &String) {
     let _tokens = lexic::get_tokens(input);
 
@@ -22,6 +23,9 @@ fn compile(input: &String) {
 
 }
 
+/// Executes Syntax analysis, and for now, Semantic analysis and Code generation.
+///
+/// Prints the generated code in stdin
 fn build_ast(tokens: Vec<Token>) {
     let ast = syntax::construct_ast(&tokens);
 
@@ -38,6 +42,7 @@ fn build_ast(tokens: Vec<Token>) {
     }
 }
 
+/// Executes the REPL, reading from stdin, compiling and emitting JS to stdout
 pub fn run() -> io::Result<()> {
     let stdin = io::stdin();
     let mut buffer = String::new();

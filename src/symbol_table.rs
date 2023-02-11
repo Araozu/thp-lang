@@ -39,6 +39,14 @@ impl SymbolTable {
             })
             .unwrap_or(false)
     }
+    
+    pub fn get_type(&self, identifier: &str) -> Option<String> {
+        self.table
+            .get_key_value(&String::from(identifier))
+            .and_then(|(_, value)| {
+                Some(String::from(value))
+            })
+    }
 }
 
 

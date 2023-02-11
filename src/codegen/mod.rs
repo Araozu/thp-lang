@@ -4,11 +4,13 @@ mod expression;
 mod binding;
 mod module_ast;
 
+/// Trait that the AST and its nodes implement to support transformation to JavaScript
 trait Transpilable {
+    /// Transforms this struct into JavaScript
     fn transpile(&self) -> String;
 }
 
-/// Generates JavaScript from the AST
+/// Transforms an AST to its representation in JavaScript
 pub fn codegen<'a>(ast: &'a ModuleAST) -> String {
     ast.transpile()
 }

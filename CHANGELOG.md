@@ -11,6 +11,11 @@
 - [ ] Stdlib
 - [ ] Document code
 
+## v0.0.3
+
+- Get datatype of an identifier from the symbol table
+- Improve documentation of the code
+
 ## v0.0.2
 
 - Compilation of `val` and `var` bindings with a number, string or boolean as value.
