@@ -1,25 +1,20 @@
-use crate::ast_types::Expression;
-use crate::symbol_table::{_STRING, _BOOLEAN};
-
-use super::symbol_table::{SymbolTable, _NUMBER};
-use super::ast_types::{ModuleAST, Binding};
+use super::symbol_table::{SymbolTable, _NUMBER, _STRING, _BOOLEAN};
+use super::ast_types::{ModuleAST, Binding, Expression};
 
 /// Checks the AST. In the future should return a list of errors.
 pub fn check_ast<'a>(ast: &'a mut ModuleAST, symbol_table: &'a mut SymbolTable) {
     for binding in &ast.bindings {
         match binding {
-            Binding::Val(val_binding) => {
-                // TODO: create a function to get the datatype, instead of a hardcoded value
+            Binding::Val(binding) => {
                 symbol_table.add(
-                    val_binding.identifier,
-                    get_expression_type(&val_binding.expression).as_str()
+                    binding.identifier,
+                    get_expression_type(&binding.expression).as_str()
                 );
             }
-            Binding::Var(var_binding) => {
-                // TODO: create a function to get the datatype, instead of a hardcoded value
+            Binding::Var(binding) => {
                 symbol_table.add(
-                    var_binding.identifier,
-                    get_expression_type(&var_binding.expression).as_str(),
+                    binding.identifier,
+                    get_expression_type(&binding.expression).as_str(),
                 );
             }
         }

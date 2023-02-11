@@ -11,6 +11,11 @@
 - [ ] Stdlib
 - [ ] Document code
 
+## v0.0.2
+
+- Compilation of `val` and `var` bindings with a number, string or boolean as value.
+- Register symbols and datatypes in the Symbol table.
+
 ## v0.0.1
 
 - Compilation of a `val` binding with a number.
