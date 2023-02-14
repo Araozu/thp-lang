@@ -4,6 +4,7 @@ mod number;
 mod operator;
 mod identifier;
 mod string;
+mod new_line;
 
 
 // This module contains the individual scanners, and exports them
@@ -51,5 +52,10 @@ pub fn identifier(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexRes
 /// Attempts to scan a string. If not found returns None to be able to chain other scanner
 pub fn string(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
     (c == '"').then(|| string::scan(chars, start_pos + 1))
+}
+
+/// Attemts to scan a new line. If not found returns None to be able to chain other scanner
+pub fn new_line(c:char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
+    (c == '\n').then(|| new_line::scan(chars, start_pos))
 }
 

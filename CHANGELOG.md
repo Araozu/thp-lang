@@ -15,6 +15,7 @@
 
 - Get datatype of an identifier from the symbol table
 - Improve documentation of the code
+- Simple ASI: insert semicolon after a single or series of new lines
 
 ## v0.0.2
 

@@ -65,12 +65,7 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
         return LexResult::None(current_pos)
     }
 
-    // Ignore new lines for now...
-    if next_char == '\n' {
-        return next_token(chars, current_pos + 1)
-    }
-
-    // Handle whitespace recursively
+    // Handle whitespace recursively.
     if next_char == ' ' {
         return next_token(chars, current_pos + 1)
     }
@@ -82,6 +77,7 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
         .or_else(|| scanner::string(next_char, chars, current_pos))
         .or_else(|| scanner::operator(next_char, chars, current_pos))
         .or_else(|| scanner::grouping_sign(next_char, chars, current_pos))
+        .or_else(|| scanner::new_line(next_char, chars, current_pos))
         .unwrap_or_else(|| {
             let error = LexError {
                 position: current_pos,
@@ -200,5 +196,31 @@ mod tests {
         let t = tokens.get(5).unwrap();
         assert_eq!(TokenType::RightBracket, t.token_type);
         assert_eq!("]", t.value);
+    }
+    
+    #[test]
+    fn should_scan_new_line() {
+        let input = String::from("3\n22");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Semicolon, tokens[1].token_type);
+    }
+    
+    #[test]
+    fn should_scan_multiple_new_lines() {
+        let input = String::from("3\n\n\n22");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Semicolon, tokens[1].token_type);
+        assert_eq!(TokenType::Number, tokens[2].token_type);
+    }
+    
+    #[test]
+    fn should_scan_multiple_new_lines_with_whitespace_in_between() {
+        let input = String::from("3\n \n   \n22");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Semicolon, tokens[1].token_type);
+        assert_eq!(TokenType::Number, tokens[2].token_type);
     }
 }
