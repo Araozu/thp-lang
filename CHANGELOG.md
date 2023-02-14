@@ -16,6 +16,7 @@
 - Get datatype of an identifier from the symbol table
 - Improve documentation of the code
 - Simple ASI: insert semicolon after a single or series of new lines
+- The token stream now always ends with a Semicolon and EOF token, regardless of input
 
 ## v0.0.2
 

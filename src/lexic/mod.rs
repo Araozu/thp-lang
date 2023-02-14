@@ -52,6 +52,7 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, LexError> {
         }
     }
 
+    results.push(token::new_semicolon(0));
     results.push(token::new_eof(0));
     Ok(results)
 }
@@ -110,20 +111,23 @@ mod tests {
     fn test1() {
         let input = String::from("");
         let tokens = get_tokens(&input).unwrap();
-        assert_eq!(1, tokens.len());
-        let first = tokens.get(0).unwrap();
+        // 1 semicolon and 1 EOF token
+        assert_eq!(2, tokens.len());
+        let first = tokens.get(1).unwrap();
         assert_eq!(TokenType::EOF, first.token_type);
 
         let input = String::from("  ");
         let tokens = get_tokens(&input).unwrap();
-        assert_eq!(1, tokens.len());
-        let first = tokens.get(0).unwrap();
+        // 1 semicolon and 1 EOF token
+        assert_eq!(2, tokens.len());
+        let first = tokens.get(1).unwrap();
         assert_eq!(TokenType::EOF, first.token_type);
 
         let input = String::from("    ");
         let tokens = get_tokens(&input).unwrap();
-        assert_eq!(1, tokens.len());
-        let first = tokens.get(0).unwrap();
+        // 1 semicolon and 1 EOF token
+        assert_eq!(2, tokens.len());
+        let first = tokens.get(1).unwrap();
         assert_eq!(TokenType::EOF, first.token_type);
     }
 
@@ -165,7 +169,8 @@ mod tests {
         
         assert_eq!("1789e+1", tokens.get(3).unwrap().value);
         assert_eq!("239.3298e-103", tokens.get(4).unwrap().value);
-        assert_eq!(TokenType::EOF, tokens.get(5).unwrap().token_type);
+        assert_eq!(TokenType::Semicolon, tokens.get(5).unwrap().token_type);
+        assert_eq!(TokenType::EOF, tokens.get(6).unwrap().token_type);
     }
 
     #[test]

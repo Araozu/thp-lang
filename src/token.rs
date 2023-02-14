@@ -68,3 +68,11 @@ pub fn new_string(value: String, position: i32) -> Token {
         _position: position,
     }
 }
+
+pub fn new_semicolon(position: i32) -> Token {
+    Token {
+        token_type: TokenType::Semicolon,
+        value: String::from(";"),
+        _position: position,
+    }
+}
