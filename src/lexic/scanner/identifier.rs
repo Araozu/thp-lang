@@ -13,18 +13,31 @@ fn str_is_keyword(s: &String) -> Option<TokenType> {
 /// a valid identifier
 pub fn scan(start_char: char, chars: &Vec<char>, start_pos: usize) -> LexResult {
     // The scanning is done by this recursive function
-    scan_impl(chars, start_pos + 1, format!("{}", start_char))
+    scan_impl(
+        chars,
+        start_pos + 1,
+        format!("{}", start_char),
+        utils::is_uppercase(start_char),
+    )
 }
 
 /// Recursive funtion that scans the identifier
-fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
+fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String, is_datatype: bool) -> LexResult {
     match chars.get(start_pos) {
         Some(c) if utils::is_identifier_char(*c) => {
-            scan_impl(chars, start_pos + 1, utils::str_append(current, *c))
+            scan_impl(
+                chars,
+                start_pos + 1,
+                utils::str_append(current, *c),
+                is_datatype,
+            )
         },
         _ => {
             if let Some(token_type) = str_is_keyword(&current) {
                 LexResult::Some(token::new(current, start_pos as i32, token_type), start_pos)
+            }
+            else if is_datatype {
+                LexResult::Some(token::new_datatype(current, start_pos as i32), start_pos)
             }
             else {
                 LexResult::Some(token::new_identifier(current, start_pos as i32), start_pos)

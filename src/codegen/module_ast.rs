@@ -22,6 +22,7 @@ mod tests {
         let id = String::from("identifier");
         let value = String::from("322");
         let binding = Binding::Val(ValBinding {
+            datatype: None,
             identifier: &id,
             expression: Expression::Number(&value),
         });

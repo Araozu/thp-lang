@@ -2,11 +2,26 @@ use crate::token::{Token, TokenType};
 use super::ast_types::{ValBinding, VarBinding, Binding};
 use super::expression;
 
-// Should return a 3 state value:
+// TODO: Should return a 3 state value:
 // - Success: binding parsed successfully
 // - NotFound: the first token (var | val) was not found, so the parser should try other options
 // - Error: token (var | val) was found, but then other expected tokens were not found
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<Binding> {
+    let mut pos = pos;
+    
+    // Optional datatype annotation
+    let datatype_annotation = {
+        match tokens.get(pos) {
+            Some(t) if t.token_type == TokenType::Datatype => {
+                pos += 1;
+                Some(String::from(&t.value))
+            }
+            Some(_) => None,
+            None => return None
+        }
+    };
+    
+    // var/val keyword
     let is_val = {
         let res1 = try_token_type(tokens, pos, TokenType::VAL);
         match res1 {
@@ -27,7 +42,6 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<Binding> {
 
     let equal_operator = try_operator(tokens, pos + 2, String::from("="));
     if equal_operator.is_none() { return None }
-    let _ = equal_operator.unwrap();
 
     let expression = expression::try_parse(tokens, pos + 3);
     if expression.is_none() { return None }
@@ -35,12 +49,14 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<Binding> {
 
     if is_val {
         Some(Binding::Val(ValBinding {
+            datatype: datatype_annotation,
             identifier: &identifier.value,
             expression,
         }))
     }
     else {
         Some(Binding::Var(VarBinding {
+            datatype: datatype_annotation,
             identifier: &identifier.value,
             expression,
         }))
@@ -80,9 +96,7 @@ mod tests {
             Binding::Val(binding) => {
                 assert_eq!("identifier", binding.identifier);
             }
-            Binding::Var(binding) => {
-                assert_eq!("identifier", binding.identifier);
-            }
+            _ => panic!()
         }
     }
 
@@ -109,5 +123,31 @@ mod tests {
         let token = try_operator(&tokens, 0, String::from("=")).unwrap();
 
         assert_eq!("=", token.value);
+    }
+    
+    #[test]
+    fn should_parse_binding_with_datatype() {
+        let tokens = get_tokens(&String::from("Num val identifier = 20")).unwrap();
+        let binding = try_parse(&tokens, 0).unwrap();
+
+        match binding {
+            Binding::Val(binding) => {
+                assert_eq!(Some(String::from("Num")), binding.datatype);
+                assert_eq!("identifier", binding.identifier);
+            }
+            _ => panic!()
+        }
+        
+        
+        let tokens = get_tokens(&String::from("Bool var identifier = true")).unwrap();
+        let binding = try_parse(&tokens, 0).unwrap();
+
+        match binding {
+            Binding::Var(binding) => {
+                assert_eq!(Some(String::from("Bool")), binding.datatype);
+                assert_eq!("identifier", binding.identifier);
+            }
+            _ => panic!()
+        }
     }
 }

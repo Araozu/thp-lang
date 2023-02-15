@@ -75,6 +75,7 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
     None
         .or_else(|| scanner::number(next_char, chars, current_pos))
         .or_else(|| scanner::identifier(next_char, chars, current_pos))
+        .or_else(|| scanner::datatype(next_char, chars, current_pos))
         .or_else(|| scanner::string(next_char, chars, current_pos))
         .or_else(|| scanner::operator(next_char, chars, current_pos))
         .or_else(|| scanner::grouping_sign(next_char, chars, current_pos))
@@ -201,6 +202,14 @@ mod tests {
         let t = tokens.get(5).unwrap();
         assert_eq!(TokenType::RightBracket, t.token_type);
         assert_eq!("]", t.value);
+    }
+    
+    #[test]
+    fn should_scan_datatype() {
+        let input = String::from("Num");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Datatype, tokens[0].token_type);
     }
     
     #[test]

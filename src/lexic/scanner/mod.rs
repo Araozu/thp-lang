@@ -48,6 +48,13 @@ pub fn identifier(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexRes
         .then(|| identifier::scan(c, chars, start_pos))
 }
 
+/// Attempts to scan a datatype. If not found returns None to be able to chain other scanner
+pub fn datatype(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
+    // Since the only difference with an identifier is that the fist character is an
+    // uppercase letter, reuse the identifier scanner
+    utils::is_uppercase(c)
+        .then(|| identifier::scan(c, chars, start_pos))
+}
 
 /// Attempts to scan a string. If not found returns None to be able to chain other scanner
 pub fn string(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {

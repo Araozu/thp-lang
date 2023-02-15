@@ -11,6 +11,11 @@
 - [ ] Stdlib
 - [ ] Document code
 
+
+## v0.0.4
+
+- Explicit datatype of variables
+
 ## v0.0.3
 
 - Get datatype of an identifier from the symbol table

@@ -9,11 +9,13 @@ pub enum Binding<'a> {
 }
 
 pub struct ValBinding<'a> {
+    pub datatype: Option<String>,
     pub identifier: &'a String,
     pub expression: Expression<'a>,
 }
 
 pub struct VarBinding<'a> {
+    pub datatype: Option<String>,
     pub identifier: &'a String,
     pub expression: Expression<'a>,
 }

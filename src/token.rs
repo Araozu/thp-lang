@@ -1,6 +1,7 @@
 #[derive(PartialEq, Debug, Clone)]
 pub enum TokenType {
     Identifier,
+    Datatype,
     Number,
     String,
     Operator,
@@ -73,6 +74,14 @@ pub fn new_semicolon(position: i32) -> Token {
     Token {
         token_type: TokenType::Semicolon,
         value: String::from(";"),
+        _position: position,
+    }
+}
+
+pub fn new_datatype(value: String, position: i32) -> Token {
+    Token {
+        token_type: TokenType::Datatype,
+        value,
         _position: position,
     }
 }
