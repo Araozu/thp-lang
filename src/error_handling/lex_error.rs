@@ -14,11 +14,12 @@ impl PrintableError for LexError {
         let whitespace = whitespace.iter().collect::<String>();
 
         format!(
-            "\n{}\n{}^\n\n{}{}", 
+            "\n{}\n{}^\n\n{}{}\n{}", 
             erroneous_code, 
             whitespace, 
             "Invalid character at pos ",
             self.position + 1,
+            self.reason,
         )
     }
 }
