@@ -1,4 +1,7 @@
-use crate::{lexic::{token, utils, LexResult}, token::TokenType};
+use crate::{
+    lexic::{token, utils, LexResult},
+    token::TokenType,
+};
 
 /// Checks if a String is a keyword, and returns its TokenType
 fn str_is_keyword(s: &String) -> Option<TokenType> {
@@ -24,30 +27,23 @@ pub fn scan(start_char: char, chars: &Vec<char>, start_pos: usize) -> LexResult 
 /// Recursive funtion that scans the identifier
 fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String, is_datatype: bool) -> LexResult {
     match chars.get(start_pos) {
-        Some(c) if utils::is_identifier_char(*c) => {
-            scan_impl(
-                chars,
-                start_pos + 1,
-                utils::str_append(current, *c),
-                is_datatype,
-            )
-        },
+        Some(c) if utils::is_identifier_char(*c) => scan_impl(
+            chars,
+            start_pos + 1,
+            utils::str_append(current, *c),
+            is_datatype,
+        ),
         _ => {
             if let Some(token_type) = str_is_keyword(&current) {
                 LexResult::Some(token::new(current, start_pos as i32, token_type), start_pos)
-            }
-            else if is_datatype {
+            } else if is_datatype {
                 LexResult::Some(token::new_datatype(current, start_pos as i32), start_pos)
-            }
-            else {
+            } else {
                 LexResult::Some(token::new_identifier(current, start_pos as i32), start_pos)
             }
         }
     }
 }
-
-
-
 
 #[cfg(test)]
 mod tests {
@@ -69,8 +65,8 @@ mod tests {
                 assert_eq!(1, next);
                 assert_eq!(TokenType::Identifier, token.token_type);
                 assert_eq!("_", token.value);
-            },
-            _ => panic!()
+            }
+            _ => panic!(),
         }
 
         let input = str_to_vec("i");
@@ -80,8 +76,8 @@ mod tests {
                 assert_eq!(1, next);
                 assert_eq!(TokenType::Identifier, token.token_type);
                 assert_eq!("i", token.value);
-            },
-            _ => panic!()
+            }
+            _ => panic!(),
         }
     }
 
@@ -89,27 +85,8 @@ mod tests {
     #[test]
     fn test_2() {
         let operators = vec![
-            "_a",
-            "_z",
-            "_A",
-            "_Z",
-            "__",
-            "_0",
-            "_9",
-            "aa",
-            "az",
-            "aA",
-            "aZ",
-            "a_",
-            "a0",
-            "a9",
-            "za",
-            "zz",
-            "zA",
-            "zZ",
-            "z_",
-            "z0",
-            "z9",
+            "_a", "_z", "_A", "_Z", "__", "_0", "_9", "aa", "az", "aA", "aZ", "a_", "a0", "a9",
+            "za", "zz", "zA", "zZ", "z_", "z0", "z9",
         ];
 
         for op in operators {
@@ -120,12 +97,11 @@ mod tests {
                     assert_eq!(2, next);
                     assert_eq!(TokenType::Identifier, token.token_type);
                     assert_eq!(op, token.value);
-                },
-                _ => panic!()
+                }
+                _ => panic!(),
             }
         }
     }
-
 
     // Should scan long identifiers
     #[test]
@@ -145,8 +121,8 @@ mod tests {
                     assert_eq!(input.len(), next);
                     assert_eq!(TokenType::Identifier, token.token_type);
                     assert_eq!(op, token.value);
-                },
-                _ => panic!()
+                }
+                _ => panic!(),
             }
         }
     }
@@ -156,19 +132,22 @@ mod tests {
     fn test_4() {
         let input = str_to_vec("var");
         let start_pos = 0;
-        if let LexResult::Some(token, next) = scan(*input.get(0).unwrap(), &input, start_pos) {            
+        if let LexResult::Some(token, next) = scan(*input.get(0).unwrap(), &input, start_pos) {
             assert_eq!(3, next);
             assert_eq!(TokenType::VAR, token.token_type);
             assert_eq!("var", token.value);
-        } else {panic!()}
-
+        } else {
+            panic!()
+        }
 
         let input = str_to_vec("val");
         let start_pos = 0;
-        if let LexResult::Some(token, next) = scan(*input.get(0).unwrap(), &input, start_pos) {            
+        if let LexResult::Some(token, next) = scan(*input.get(0).unwrap(), &input, start_pos) {
             assert_eq!(3, next);
             assert_eq!(TokenType::VAL, token.token_type);
             assert_eq!("val", token.value);
-        } else {panic!()}
+        } else {
+            panic!()
+        }
     }
 }

@@ -1,11 +1,10 @@
-
 pub struct ModuleAST<'a> {
     pub bindings: Vec<Binding<'a>>,
 }
 
 pub enum Binding<'a> {
     Val(ValBinding<'a>),
-    Var(VarBinding<'a>)
+    Var(VarBinding<'a>),
 }
 
 pub struct ValBinding<'a> {

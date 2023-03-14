@@ -20,7 +20,6 @@ mod codegen;
 
 mod error_handling;
 
-
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
@@ -39,20 +38,22 @@ enum Commands {
         output: String,
     },
     /// Starts the REPL
-    R {}
+    R {},
 }
-
 
 const VERSION: &str = "0.0.1";
 
 fn get_copyright() -> String {
     let year = Utc::now().year();
 
-    format!("Misti {}\nCopyright (c) {} Fernando Enrique Araoz Morales\n", VERSION, year)
+    format!(
+        "Misti {}\nCopyright (c) {} Fernando Enrique Araoz Morales\n",
+        VERSION, year
+    )
 }
 
 /// # Misti
-/// 
+///
 /// Usage:
 /// - `misti` : Starts the compiler in watch mode
 /// - `misti w, --watch, -w` : Starts the compiler in watch mode
@@ -66,13 +67,11 @@ fn main() {
         Some(Commands::C { file: _, output: _ }) => {
             println!("Compile a file: Not implemented")
         }
-        Some(Commands::R {  }) => {
+        Some(Commands::R {}) => {
             let _ = repl::run();
         }
         None => {
             println!("Compile in watch mode: Not implemented")
         }
     }
-
 }
-

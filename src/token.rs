@@ -38,7 +38,7 @@ pub fn new_number(value: String, position: i32) -> Token {
     Token {
         token_type: TokenType::Number,
         value,
-        _position: position
+        _position: position,
     }
 }
 
@@ -46,12 +46,16 @@ pub fn new_operator(value: String, position: i32) -> Token {
     Token {
         token_type: TokenType::Operator,
         value,
-        _position: position
+        _position: position,
     }
 }
 
 pub fn new(value: String, position: i32, token_type: TokenType) -> Token {
-    Token {token_type, value, _position: position}
+    Token {
+        token_type,
+        value,
+        _position: position,
+    }
 }
 
 pub fn new_identifier(value: String, position: i32) -> Token {

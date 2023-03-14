@@ -1,7 +1,7 @@
 use super::ast_types::ModuleAST;
 
-mod expression;
 mod binding;
+mod expression;
 mod module_ast;
 
 /// Trait that the AST and its nodes implement to support transformation to JavaScript
@@ -15,13 +15,9 @@ pub fn codegen<'a>(ast: &'a ModuleAST) -> String {
     ast.transpile()
 }
 
-
-
-
-
 #[cfg(test)]
 mod tests {
-    use crate::{lexic, syntax, semantic, symbol_table::SymbolTable};
+    use crate::{lexic, semantic, symbol_table::SymbolTable, syntax};
 
     use super::*;
 
@@ -38,4 +34,3 @@ mod tests {
         assert_eq!("const id = 322;", out_str);
     }
 }
-

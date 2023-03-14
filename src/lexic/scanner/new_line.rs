@@ -1,8 +1,6 @@
 use crate::{
-    lexic::{
-        token, LexResult,
-    }, 
-    token::TokenType
+    lexic::{token, LexResult},
+    token::TokenType,
 };
 
 /// Function to handle new lines
@@ -15,28 +13,16 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
     let current = chars.get(start_pos);
 
     match current {
-        Some(c) if *c == '\n' => {
-            scan(chars, start_pos + 1)
-        }
-        Some(c) if *c == ' ' => {
-            match look_ahead_for_new_line(chars, start_pos + 1) {
-                Some(next_pos) => scan(chars, next_pos),
-                None => {
-                    let token = token::new(
-                        String::from(";"),
-                        start_pos as i32,
-                        TokenType::Semicolon,
-                    );
-                    LexResult::Some(token, start_pos)
-                }
+        Some(c) if *c == '\n' => scan(chars, start_pos + 1),
+        Some(c) if *c == ' ' => match look_ahead_for_new_line(chars, start_pos + 1) {
+            Some(next_pos) => scan(chars, next_pos),
+            None => {
+                let token = token::new(String::from(";"), start_pos as i32, TokenType::Semicolon);
+                LexResult::Some(token, start_pos)
             }
-        }
+        },
         Some(_) | None => {
-            let token = token::new(
-                String::from(";"),
-                start_pos as i32,
-                TokenType::Semicolon,
-            );
+            let token = token::new(String::from(";"), start_pos as i32, TokenType::Semicolon);
             LexResult::Some(token, start_pos)
         }
     }
@@ -45,18 +31,11 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
 /// Returns the position after the new line
 fn look_ahead_for_new_line(chars: &Vec<char>, pos: usize) -> Option<usize> {
     match chars.get(pos) {
-        Some(c) if *c == ' ' => {
-            look_ahead_for_new_line(chars, pos + 1)
-        }
-        Some(c) if *c == '\n' => {
-            Some(pos + 1)
-        }
-        Some(_) | None => {
-            None
-        }
+        Some(c) if *c == ' ' => look_ahead_for_new_line(chars, pos + 1),
+        Some(c) if *c == '\n' => Some(pos + 1),
+        Some(_) | None => None,
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -67,7 +46,7 @@ mod tests {
     fn str_to_vec(s: &str) -> Vec<char> {
         s.chars().collect()
     }
-    
+
     #[test]
     fn should_emit_semicolon_instead_of_new_line() {
         let input = str_to_vec("\n");
@@ -92,8 +71,7 @@ mod tests {
         } else {
             panic!()
         }
-        
-        
+
         let input = str_to_vec("\n\n\naToken");
         let start_pos = 0;
 
@@ -104,7 +82,7 @@ mod tests {
             panic!()
         }
     }
-    
+
     #[test]
     fn should_emit_a_single_semicolon_with_multiple_new_lines_and_whitespace() {
         let input = str_to_vec("\n \n  \n");
@@ -116,8 +94,7 @@ mod tests {
         } else {
             panic!()
         }
-        
-        
+
         let input = str_to_vec("\n \n  \n    aToken");
         let start_pos = 0;
 
@@ -127,8 +104,7 @@ mod tests {
         } else {
             panic!()
         }
-        
-        
+
         let input = str_to_vec("\n \n  \n    ");
         let start_pos = 0;
 

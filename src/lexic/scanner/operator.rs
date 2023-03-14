@@ -1,8 +1,7 @@
 use crate::lexic::{token, utils, LexResult};
 
-
 /// Function to scan an operator
-/// 
+///
 /// This function assumes the character at `start_pos` is an operator
 pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
     scan_impl(chars, start_pos, String::from(""))
@@ -12,15 +11,10 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
     match chars.get(start_pos) {
         Some(c) if utils::is_operator(*c) => {
             scan_impl(chars, start_pos + 1, utils::str_append(current, *c))
-        },
-        _ => {
-            LexResult::Some(token::new_operator(current, start_pos as i32), start_pos)
         }
+        _ => LexResult::Some(token::new_operator(current, start_pos as i32), start_pos),
     }
 }
-
-
-
 
 #[cfg(test)]
 mod tests {
@@ -35,26 +29,8 @@ mod tests {
     #[test]
     fn test_1() {
         let operators = vec![
-            "+",
-            "-",
-            "=",
-            "*",
-            "!",
-            "\\",
-            "/",
-            "|",
-            "@",
-            "#",
-            "$",
-            "~",
-            "%",
-            "&",
-            "?",
-            "<",
-            ">",
-            "^",
-            ".",
-            ":",
+            "+", "-", "=", "*", "!", "\\", "/", "|", "@", "#", "$", "~", "%", "&", "?", "<", ">",
+            "^", ".", ":",
         ];
 
         for op in operators {
@@ -65,8 +41,8 @@ mod tests {
                     assert_eq!(1, next);
                     assert_eq!(TokenType::Operator, token.token_type);
                     assert_eq!(op, token.value);
-                },
-                _ => panic!()
+                }
+                _ => panic!(),
             }
         }
     }
@@ -75,20 +51,7 @@ mod tests {
     #[test]
     fn test_2() {
         let operators = vec![
-            "<<",
-            ">>",
-            "<|",
-            "|>",
-            "+>",
-            "<+",
-            "+=",
-            "-=",
-            "?.",
-            "??",
-            "?:",
-            "*=",
-            "/=",
-            "==",
+            "<<", ">>", "<|", "|>", "+>", "<+", "+=", "-=", "?.", "??", "?:", "*=", "/=", "==",
             "!=",
         ];
 
@@ -100,8 +63,8 @@ mod tests {
                     assert_eq!(2, next);
                     assert_eq!(TokenType::Operator, token.token_type);
                     assert_eq!(op, token.value);
-                },
-                _ => panic!()
+                }
+                _ => panic!(),
             }
         }
     }

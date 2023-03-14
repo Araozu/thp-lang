@@ -1,10 +1,9 @@
-use std::{collections::VecDeque};
-use super::{PrintableError, LexError};
+use super::{LexError, PrintableError};
+use std::collections::VecDeque;
 
 impl PrintableError for LexError {
     // TODO: Count and show line number
     fn get_error_str(&self, chars: &Vec<char>) -> String {
-
         let (erroneous_code, back_count) = get_line(chars, self.position);
 
         let mut whitespace = Vec::<char>::new();
@@ -14,9 +13,9 @@ impl PrintableError for LexError {
         let whitespace = whitespace.iter().collect::<String>();
 
         format!(
-            "\n{}\n{}^\n\n{}{}\n{}", 
-            erroneous_code, 
-            whitespace, 
+            "\n{}\n{}^\n\n{}{}\n{}",
+            erroneous_code,
+            whitespace,
             "Invalid character at pos ",
             self.position + 1,
             self.reason,
@@ -26,11 +25,11 @@ impl PrintableError for LexError {
 
 /// Extracts a line of code from `chars` and the number of characters in the back.
 /// `pos` indicates a position, from where to extract the line.
-/// 
+///
 /// Ex. Given:
 /// - `input = "first line\nsecond line\nthird line"`
 /// - `pos = 15`
-/// 
+///
 /// this function should return `("second line", 4)`
 fn get_line(chars: &Vec<char>, pos: usize) -> (String, usize) {
     let mut result_chars = VecDeque::<char>::new();
@@ -72,12 +71,10 @@ fn get_line(chars: &Vec<char>, pos: usize) -> (String, usize) {
     (result_chars.iter().collect::<String>(), pos - before_pos)
 }
 
-
-
 #[cfg(test)]
 mod tests {
-    use crate::lexic;
     use super::*;
+    use crate::lexic;
 
     #[test]
     fn test_error_msg() {
@@ -92,15 +89,11 @@ mod tests {
 
                 // TODO: check for line number
                 let expected_str = format!(
-                    "\n{}\n{}^\n\nInvalid character at pos 9",
-                    "val name' = 20",
-                    "        "
+                    "\n{}\n{}^\n\nInvalid character at pos 9\n{}",
+                    "val name' = 20", "        ", "Unrecognized character `'` (escaped: `\\'`)"
                 );
 
-                assert_eq!(
-                    expected_str,
-                    err_str,
-                );
+                assert_eq!(expected_str, err_str,);
             }
         }
     }
@@ -114,7 +107,6 @@ mod tests {
 
         assert_eq!("second line", result);
         assert_eq!(4, back_count);
-
 
         let input = String::from("val binding = 322");
         let chars: Vec<char> = input.chars().into_iter().collect();

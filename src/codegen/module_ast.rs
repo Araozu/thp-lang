@@ -1,21 +1,24 @@
-use crate::ast_types::ModuleAST;
 use super::Transpilable;
+use crate::ast_types::ModuleAST;
 
 impl Transpilable for ModuleAST<'_> {
     /// Transpiles the whole AST into JS, using this same trait on the
     /// nodes and leaves of the AST
     fn transpile(&self) -> String {
-        let bindings_str: Vec::<String> = self.bindings.iter().map(|binding| binding.transpile()).collect();
+        let bindings_str: Vec<String> = self
+            .bindings
+            .iter()
+            .map(|binding| binding.transpile())
+            .collect();
 
         bindings_str.join("\n")
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast_types::{Expression, ValBinding, Binding};
+    use crate::ast_types::{Binding, Expression, ValBinding};
 
     #[test]
     fn module_ast_should_transpile() {
@@ -34,5 +37,5 @@ mod tests {
         let result = module.transpile();
 
         assert_eq!("const identifier = 322;", result);
-    }   
+    }
 }

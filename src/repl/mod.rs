@@ -4,10 +4,10 @@ use crate::error_handling::PrintableError;
 use crate::symbol_table::SymbolTable;
 use crate::token::Token;
 
-use super::lexic;
-use super::syntax;
-use super::semantic;
 use super::codegen;
+use super::lexic;
+use super::semantic;
+use super::syntax;
 
 /// Executes Lexical analysis, handles errors and calls build_ast for the next phase
 fn compile(input: &String) {
@@ -15,20 +15,19 @@ fn compile(input: &String) {
 
     match tokens {
         Ok(tokens) => {
-            build_ast(tokens);
-        },
+            build_ast(input, tokens);
+        }
         Err(error) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
             eprintln!("{}", error.get_error_str(&chars))
         }
     }
-
 }
 
 /// Executes Syntax analysis, and for now, Semantic analysis and Code generation.
 ///
 /// Prints the generated code in stdin
-fn build_ast(tokens: Vec<Token>) {
+fn build_ast(input: &String, tokens: Vec<Token>) {
     let ast = syntax::construct_ast(&tokens);
 
     match ast {
@@ -39,7 +38,8 @@ fn build_ast(tokens: Vec<Token>) {
             println!("{}", js_code)
         }
         Err(reason) => {
-            eprintln!("Syntax error.\n{}", reason)
+            let chars: Vec<char> = input.chars().into_iter().collect();
+            eprintln!("Syntax error.\n{}", reason.get_error_str(&chars))
         }
     }
 }
@@ -59,14 +59,14 @@ pub fn run() -> io::Result<()> {
         match read {
             Ok(0) => {
                 println!("\nBye");
-                break Ok(())
-            },
+                break Ok(());
+            }
             Ok(_) => {
                 compile(&buffer);
-            },
+            }
             Err(error) => {
                 eprintln!("Error reading stdin.");
-                break Err(error)
+                break Err(error);
             }
         };
     }

@@ -1,8 +1,8 @@
+use crate::error_handling::LexError;
 use crate::lexic::{
     token::{self, Token},
     utils, LexResult,
 };
-use crate::error_handling::LexError;
 
 /// Function to scan a number
 ///
@@ -66,9 +66,9 @@ fn scan_double(chars: &Vec<char>, start_pos: usize, current: String) -> LexResul
         Some(c) if utils::is_digit(*c) => scan_double_impl(chars, start_pos, current),
         Some(_) => LexResult::Err(LexError {
             position: start_pos,
-            reason : String::from(
+            reason: String::from(
                 "The character after the dot when scanning a double is not a number.",
-            )
+            ),
         }),
         _ => LexResult::Err(LexError {
             position: start_pos,
@@ -112,7 +112,7 @@ fn scan_scientific(chars: &Vec<char>, start_pos: usize, current: String) -> LexR
             position: start_pos,
             reason: String::from(
                 "The characters after 'e' are not + or -, or are not followed by a number",
-            )
+            ),
         }),
     }
 }
@@ -230,7 +230,9 @@ mod tests {
         let start_pos = 0;
 
         match scan(&input, start_pos) {
-            LexResult::Err(reason) => assert_eq!("Tried to scan an incomplete hex value", reason.reason),
+            LexResult::Err(reason) => {
+                assert_eq!("Tried to scan an incomplete hex value", reason.reason)
+            }
             _ => panic!(),
         }
 
@@ -299,7 +301,9 @@ mod tests {
         let start_pos = 0;
 
         match scan(&input, start_pos) {
-            LexResult::Err(reason) => assert_eq!("EOF when scanning a double number.", reason.reason),
+            LexResult::Err(reason) => {
+                assert_eq!("EOF when scanning a double number.", reason.reason)
+            }
             _ => panic!(),
         }
     }

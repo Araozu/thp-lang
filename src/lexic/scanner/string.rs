@@ -1,8 +1,5 @@
-use crate::lexic::{
-    token,
-    utils, LexResult,
-};
 use crate::error_handling::LexError;
+use crate::lexic::{token, utils, LexResult};
 
 /// Function to scan a string
 ///
@@ -18,45 +15,25 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
         Some(c) if *c == '"' => {
             LexResult::Some(token::new_string(current, start_pos as i32), start_pos + 1)
         }
-        Some(c) if *c == '\n' => {
-            LexResult::Err(LexError {
-                position: start_pos,
-                reason: String::from("Unexpected new line inside a string.")
-            })
-        }
+        Some(c) if *c == '\n' => LexResult::Err(LexError {
+            position: start_pos,
+            reason: String::from("Unexpected new line inside a string."),
+        }),
         Some(c) if *c == '\\' => {
             if let Some(escape) = test_escape_char(chars, start_pos + 1) {
-                scan_impl(
-                    chars,
-                    start_pos + 2, 
-                    utils::str_append(current, escape),
-                )
-            }
-            else {
+                scan_impl(chars, start_pos + 2, utils::str_append(current, escape))
+            } else {
                 // Ignore the backslash
-                scan_impl(
-                    chars,
-                    start_pos + 1,
-                    current,
-                )
+                scan_impl(chars, start_pos + 1, current)
             }
         }
-        Some(c) => {
-            scan_impl(
-                chars,
-                start_pos + 1,
-                utils::str_append(current, *c),
-            )
-        }
-        None => {
-            LexResult::Err(LexError {
-                position: start_pos,
-                reason: String::from("Incomplete string found")
-            })
-        }
+        Some(c) => scan_impl(chars, start_pos + 1, utils::str_append(current, *c)),
+        None => LexResult::Err(LexError {
+            position: start_pos,
+            reason: String::from("Incomplete string found"),
+        }),
     }
 }
-
 
 /// Checks if the char at `start_pos` is a escape character
 fn test_escape_char(chars: &Vec<char>, start_pos: usize) -> Option<char> {
@@ -69,14 +46,10 @@ fn test_escape_char(chars: &Vec<char>, start_pos: usize) -> Option<char> {
             't' => Some('\t'),
             _ => None,
         }
-    }
-    else {
+    } else {
         None
     }
 }
-
-
-
 
 #[cfg(test)]
 mod tests {
@@ -96,8 +69,9 @@ mod tests {
             assert_eq!(2, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("", token.value);
+        } else {
+            panic!()
         }
-        else {panic!()}
     }
 
     #[test]
@@ -108,8 +82,9 @@ mod tests {
             assert_eq!(15, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("Hello, world!", token.value);
+        } else {
+            panic!()
         }
-        else {panic!()}
     }
 
     #[test]
@@ -118,8 +93,9 @@ mod tests {
         let start_pos = 1;
         if let LexResult::Err(reason) = scan(&input, start_pos) {
             assert_eq!("Unexpected new line inside a string.", reason.reason)
+        } else {
+            panic!()
         }
-        else {panic!()}
     }
 
     #[test]
@@ -130,8 +106,9 @@ mod tests {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("Sample\ntext", token.value);
+        } else {
+            panic!()
         }
-        else {panic!()}
 
         let input = str_to_vec("\"Sample\\\"text\"");
         let start_pos = 1;
@@ -139,8 +116,9 @@ mod tests {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("Sample\"text", token.value);
+        } else {
+            panic!()
         }
-        else {panic!()}
 
         let input = str_to_vec("\"Sample\\rtext\"");
         let start_pos = 1;
@@ -148,8 +126,9 @@ mod tests {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("Sample\rtext", token.value);
+        } else {
+            panic!()
         }
-        else {panic!()}
 
         let input = str_to_vec("\"Sample\\\\text\"");
         let start_pos = 1;
@@ -157,8 +136,9 @@ mod tests {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("Sample\\text", token.value);
+        } else {
+            panic!()
         }
-        else {panic!()}
 
         let input = str_to_vec("\"Sample\\ttext\"");
         let start_pos = 1;
@@ -166,8 +146,9 @@ mod tests {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("Sample\ttext", token.value);
+        } else {
+            panic!()
         }
-        else {panic!()}
 
         let input = str_to_vec("\"Sample\\ text\"");
         let start_pos = 1;
@@ -175,7 +156,8 @@ mod tests {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("Sample text", token.value);
+        } else {
+            panic!()
         }
-        else {panic!()}
     }
 }

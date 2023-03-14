@@ -6,7 +6,7 @@ pub const _STRING: &str = "Str";
 pub const _BOOLEAN: &str = "Bool";
 
 pub struct SymbolTable {
-    table: HashMap<String, String>
+    table: HashMap<String, String>,
 }
 
 impl SymbolTable {
@@ -19,7 +19,8 @@ impl SymbolTable {
     }
 
     pub fn add(&mut self, identifier: &str, datatype: &str) {
-        self.table.insert(String::from(identifier), String::from(datatype));
+        self.table
+            .insert(String::from(identifier), String::from(datatype));
     }
 
     pub fn test(&self, identifier: &str) -> bool {
@@ -32,23 +33,19 @@ impl SymbolTable {
             .and_then(|(_, value)| {
                 if value == &String::from(datatype) {
                     Some(true)
-                }
-                else {
+                } else {
                     Some(false)
                 }
             })
             .unwrap_or(false)
     }
-    
+
     pub fn get_type(&self, identifier: &str) -> Option<String> {
         self.table
             .get_key_value(&String::from(identifier))
-            .and_then(|(_, value)| {
-                Some(String::from(value))
-            })
+            .and_then(|(_, value)| Some(String::from(value)))
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -70,7 +67,7 @@ mod tests {
     fn should_check_type() {
         let mut table = SymbolTable::new();
         table.add("firstNumber", _NUMBER);
-        
+
         assert!(table.check_type("firstNumber", _NUMBER));
     }
 }

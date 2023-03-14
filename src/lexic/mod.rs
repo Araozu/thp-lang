@@ -1,8 +1,8 @@
-mod utils;
 mod scanner;
+mod utils;
 
 use super::token::{self, Token};
-use crate::error_handling::{MistiError, LexError};
+use crate::error_handling::{LexError, MistiError};
 
 type Chars = Vec<char>;
 
@@ -11,7 +11,7 @@ pub enum LexResult {
     /// A token was found. The first element is the token, and the
     /// second element is the position in the input after the token.
     ///
-    /// E.g., given an input 
+    /// E.g., given an input
     ///
     /// "`identifier 55`"
     ///
@@ -32,7 +32,6 @@ pub enum LexResult {
     Err(LexError),
 }
 
-
 /// Scans and returns all the tokens in the input String
 pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
     let chars: Vec<char> = input.chars().into_iter().collect();
@@ -44,10 +43,10 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
             LexResult::Some(token, next_pos) => {
                 results.push(token);
                 current_pos = next_pos;
-            },
+            }
             LexResult::None(next_pos) => {
                 current_pos = next_pos;
-            },
+            }
             LexResult::Err(error_info) => {
                 return Err(MistiError::Lex(error_info));
             }
@@ -65,17 +64,16 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
 
     // If EOF is reached return nothing but the current position
     if next_char == '\0' {
-        return LexResult::None(current_pos)
+        return LexResult::None(current_pos);
     }
 
     // Handle whitespace recursively.
     if next_char == ' ' {
-        return next_token(chars, current_pos + 1)
+        return next_token(chars, current_pos + 1);
     }
 
     // Scanners
-    None
-        .or_else(|| scanner::number(next_char, chars, current_pos))
+    None.or_else(|| scanner::number(next_char, chars, current_pos))
         .or_else(|| scanner::identifier(next_char, chars, current_pos))
         .or_else(|| scanner::datatype(next_char, chars, current_pos))
         .or_else(|| scanner::string(next_char, chars, current_pos))
@@ -87,7 +85,7 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
                 position: current_pos,
                 reason: format!(
                     "Unrecognized character `{}` (escaped: `{}`)",
-                    next_char, 
+                    next_char,
                     next_char.escape_default().to_string(),
                 ),
             };
@@ -105,8 +103,6 @@ fn peek(input: &Chars, pos: usize) -> char {
 fn has_input(input: &Chars, current_pos: usize) -> bool {
     current_pos < input.len()
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -149,7 +145,7 @@ mod tests {
         match next_token(&chars, 0) {
             LexResult::Some(t, _) => {
                 assert_eq!("126", t.value)
-            },
+            }
             _ => {
                 panic!()
             }
@@ -173,7 +169,7 @@ mod tests {
         let t3 = tokens.get(2).unwrap();
         assert_eq!(TokenType::Number, t3.token_type);
         assert_eq!("0.282398", t3.value);
-        
+
         assert_eq!("1789e+1", tokens.get(3).unwrap().value);
         assert_eq!("239.3298e-103", tokens.get(4).unwrap().value);
         assert_eq!(TokenType::Semicolon, tokens.get(5).unwrap().token_type);
@@ -209,7 +205,7 @@ mod tests {
         assert_eq!(TokenType::RightBracket, t.token_type);
         assert_eq!("]", t.value);
     }
-    
+
     #[test]
     fn should_scan_datatype() {
         let input = String::from("Num");
@@ -217,7 +213,7 @@ mod tests {
 
         assert_eq!(TokenType::Datatype, tokens[0].token_type);
     }
-    
+
     #[test]
     fn should_scan_new_line() {
         let input = String::from("3\n22");
@@ -225,7 +221,7 @@ mod tests {
 
         assert_eq!(TokenType::Semicolon, tokens[1].token_type);
     }
-    
+
     #[test]
     fn should_scan_multiple_new_lines() {
         let input = String::from("3\n\n\n22");
@@ -234,7 +230,7 @@ mod tests {
         assert_eq!(TokenType::Semicolon, tokens[1].token_type);
         assert_eq!(TokenType::Number, tokens[2].token_type);
     }
-    
+
     #[test]
     fn should_scan_multiple_new_lines_with_whitespace_in_between() {
         let input = String::from("3\n \n   \n22");

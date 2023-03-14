@@ -1,5 +1,5 @@
-use crate::ast_types::Binding;
 use super::Transpilable;
+use crate::ast_types::Binding;
 
 impl Transpilable for Binding<'_> {
     /// Transpiles val and var bindings into JS.
@@ -19,12 +19,10 @@ impl Transpilable for Binding<'_> {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast_types::{Expression, Binding, ValBinding};
+    use crate::ast_types::{Binding, Expression, ValBinding};
 
     #[test]
     fn binding_should_transpile() {
@@ -37,7 +35,7 @@ mod tests {
         });
 
         let result = binding.transpile();
-        
+
         assert_eq!("const identifier = 322;", result);
     }
 }
