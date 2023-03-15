@@ -6,11 +6,7 @@ impl PrintableError for LexError {
     fn get_error_str(&self, chars: &Vec<char>) -> String {
         let (erroneous_code, back_count) = get_line(chars, self.position);
 
-        let mut whitespace = Vec::<char>::new();
-        for _ in 0..back_count {
-            whitespace.push(' ');
-        }
-        let whitespace = whitespace.iter().collect::<String>();
+        let whitespace = vec![' '; back_count].iter().collect::<String>();
 
         format!(
             "\n{}\n{}^\n\n{}{}\n{}",
@@ -41,6 +37,8 @@ fn get_line(chars: &Vec<char>, pos: usize) -> (String, usize) {
         let current_char = chars[before_pos];
 
         if current_char == '\n' {
+            // This is important because before_pos will be used to calculate
+            // the number of chars before pos
             before_pos += 1;
             break;
         }

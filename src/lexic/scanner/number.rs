@@ -33,7 +33,7 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> LexResu
         Some(c) if utils::is_digit(*c) => {
             scan_decimal(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => LexResult::Some(token::new_number(current, start_pos as i32), start_pos),
+        _ => LexResult::Some(token::new_number(current, start_pos), start_pos),
     }
 }
 
@@ -86,7 +86,7 @@ fn scan_double_impl(chars: &Vec<char>, start_pos: usize, current: String) -> Lex
         Some(c) if *c == 'e' => {
             scan_scientific(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => LexResult::Some(token::new_number(current, start_pos as i32), start_pos),
+        _ => LexResult::Some(token::new_number(current, start_pos), start_pos),
     }
 }
 
@@ -123,7 +123,7 @@ fn scan_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, 
         Some(c) if utils::is_digit(*c) => {
             scan_digits(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => (token::new_number(current, start_pos as i32), start_pos),
+        _ => (token::new_number(current, start_pos), start_pos),
     }
 }
 
@@ -133,7 +133,7 @@ fn scan_hex_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Tok
         Some(c) if utils::is_hex_digit(*c) => {
             scan_hex_digits(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => (token::new_number(current, start_pos as i32), start_pos),
+        _ => (token::new_number(current, start_pos), start_pos),
     }
 }
 

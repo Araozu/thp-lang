@@ -31,7 +31,10 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST<'a>, Syntax
             bindings: vec![module],
         }),
         SyntaxResult::None => Err(SyntaxError {
-            reason: String::from("D:"),
+            reason: String::from("PARSER couldn't parse any construction"),
+            // FIXME: This should get the position of the _token_ that current_pos points to
+            error_start: current_pos,
+            error_end: current_pos,
         }),
         SyntaxResult::Err(err) => Err(err),
     }
@@ -42,6 +45,9 @@ fn next_construct<'a>(tokens: &'a Vec<Token>, current_pos: usize) -> SyntaxResul
         .unwrap_or_else(|| {
             SyntaxResult::Err(SyntaxError {
                 reason: String::from("Unrecognized token"),
+                // FIXME: This should get the position of the _token_ that current_pos points to
+                error_start: current_pos,
+                error_end: current_pos,
             })
         })
 }

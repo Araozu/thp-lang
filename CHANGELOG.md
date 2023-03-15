@@ -10,10 +10,12 @@
 - [ ] Namespace identifiers in the symbol table
 - [ ] Stdlib
 - [ ] Document code
+- [ ] Test that the field `position` of the tokens actually points to the start of the token, and not its length
 
 ## v0.0.4
 
 - Explicit datatype of variables
+- Improve error messages when a syntax error is found (show offending line and offending token)
 
 ## v0.0.3
 

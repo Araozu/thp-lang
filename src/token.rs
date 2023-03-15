@@ -23,69 +23,69 @@ pub struct Token {
     pub value: String,
     /// The absolute position of this token, from the
     /// start of the file
-    _position: i32,
+    pub position: usize,
 }
 
-pub fn new_eof(position: i32) -> Token {
+pub fn new_eof(position: usize) -> Token {
     Token {
         token_type: TokenType::EOF,
         value: String::from(""),
-        _position: position,
+        position,
     }
 }
 
-pub fn new_number(value: String, position: i32) -> Token {
+pub fn new_number(value: String, position: usize) -> Token {
     Token {
         token_type: TokenType::Number,
         value,
-        _position: position,
+        position,
     }
 }
 
-pub fn new_operator(value: String, position: i32) -> Token {
+pub fn new_operator(value: String, position: usize) -> Token {
     Token {
         token_type: TokenType::Operator,
         value,
-        _position: position,
+        position,
     }
 }
 
-pub fn new(value: String, position: i32, token_type: TokenType) -> Token {
+pub fn new(value: String, position: usize, token_type: TokenType) -> Token {
     Token {
         token_type,
         value,
-        _position: position,
+        position,
     }
 }
 
-pub fn new_identifier(value: String, position: i32) -> Token {
+pub fn new_identifier(value: String, position: usize) -> Token {
     Token {
         token_type: TokenType::Identifier,
         value,
-        _position: position,
+        position,
     }
 }
 
-pub fn new_string(value: String, position: i32) -> Token {
+pub fn new_string(value: String, position: usize) -> Token {
     Token {
         token_type: TokenType::String,
         value,
-        _position: position,
+        position,
     }
 }
 
-pub fn new_semicolon(position: i32) -> Token {
+pub fn new_semicolon(position: usize) -> Token {
     Token {
         token_type: TokenType::Semicolon,
         value: String::from(";"),
-        _position: position,
+        position,
     }
 }
 
-pub fn new_datatype(value: String, position: i32) -> Token {
+pub fn new_datatype(value: String, position: usize) -> Token {
     Token {
         token_type: TokenType::Datatype,
         value,
-        _position: position,
+        position,
     }
 }

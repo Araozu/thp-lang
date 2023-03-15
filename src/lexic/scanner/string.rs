@@ -13,7 +13,7 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
 pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
     match chars.get(start_pos) {
         Some(c) if *c == '"' => {
-            LexResult::Some(token::new_string(current, start_pos as i32), start_pos + 1)
+            LexResult::Some(token::new_string(current, start_pos), start_pos + 1)
         }
         Some(c) if *c == '\n' => LexResult::Err(LexError {
             position: start_pos,

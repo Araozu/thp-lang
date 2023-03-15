@@ -12,7 +12,7 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
         Some(c) if utils::is_operator(*c) => {
             scan_impl(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => LexResult::Some(token::new_operator(current, start_pos as i32), start_pos),
+        _ => LexResult::Some(token::new_operator(current, start_pos), start_pos),
     }
 }
 

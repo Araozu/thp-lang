@@ -17,12 +17,12 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
         Some(c) if *c == ' ' => match look_ahead_for_new_line(chars, start_pos + 1) {
             Some(next_pos) => scan(chars, next_pos),
             None => {
-                let token = token::new(String::from(";"), start_pos as i32, TokenType::Semicolon);
+                let token = token::new(String::from(";"), start_pos, TokenType::Semicolon);
                 LexResult::Some(token, start_pos)
             }
         },
         Some(_) | None => {
-            let token = token::new(String::from(";"), start_pos as i32, TokenType::Semicolon);
+            let token = token::new(String::from(";"), start_pos, TokenType::Semicolon);
             LexResult::Some(token, start_pos)
         }
     }

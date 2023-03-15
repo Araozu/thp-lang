@@ -1,5 +1,6 @@
 use super::ast_types::{Binding, ValBinding, VarBinding};
 use super::{expression, SyntaxResult};
+use crate::error_handling::SyntaxError;
 use crate::token::{Token, TokenType};
 
 // TODO: Should return a 3 state value:
@@ -16,22 +17,27 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
                 pos += 1;
                 Some(String::from(&t.value))
             }
+            // If the first token is anything else, ignore
             Some(_) => None,
-            // TODO: return Error
-            None => return None,
+            // This should never match, as there should always be at least a
+            // TokenType::Semicolon or TokenType::EOF
+            None => panic!(
+                "Internal compiler error: Illegal token stream at src/syntax/binding.rs#try_parse"
+            ),
         }
     };
 
     // var/val keyword
-    let is_val = {
+    let (is_val, binding_token) = {
         let res1 = try_token_type(tokens, pos, TokenType::VAL);
         match res1 {
-            Some(_) => true,
+            Some(val_token) => (true, val_token),
             None => {
                 let res2 = try_token_type(tokens, pos, TokenType::VAR);
                 match res2 {
-                    Some(_) => false,
-                    // TODO: return Error
+                    Some(var_token) => (false, var_token),
+                    // Neither VAL nor VAR were matched, the parser should try
+                    // other constructs
                     None => return None,
                 }
             }
@@ -41,7 +47,12 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     let identifier = try_token_type(tokens, pos + 1, TokenType::Identifier);
     if identifier.is_none() {
         // TODO: return Error
-        return None;
+        // The parser didn't find an Identifier after VAL/VAR
+        return Some(SyntaxResult::Err(SyntaxError {
+            reason: String::from("D:"),
+            error_start: binding_token.position,
+            error_end: binding_token.position + binding_token.value.len(),
+        }));
     }
     let identifier = identifier.unwrap();
 
@@ -150,6 +161,22 @@ mod tests {
             SyntaxResult::Ok(Binding::Var(binding)) => {
                 assert_eq!(Some(String::from("Bool")), binding.datatype);
                 assert_eq!("identifier", binding.identifier);
+            }
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn should_return_correct_error() {
+        let tokens = get_tokens(&String::from("val")).unwrap();
+        assert_eq!(TokenType::VAL, tokens[0].token_type);
+        assert_eq!(0, tokens[0].position);
+        let binding = try_parse(&tokens, 0).unwrap();
+
+        match binding {
+            SyntaxResult::Err(error) => {
+                assert_eq!(0, error.error_start);
+                assert_eq!(3, error.error_end);
             }
             _ => panic!(),
         }

@@ -19,6 +19,8 @@ pub struct LexError {
 
 #[derive(Debug)]
 pub struct SyntaxError {
+    pub error_start: usize,
+    pub error_end: usize,
     pub reason: String,
 }
 

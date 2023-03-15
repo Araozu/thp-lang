@@ -39,7 +39,7 @@ fn build_ast(input: &String, tokens: Vec<Token>) {
         }
         Err(reason) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
-            eprintln!("Syntax error.\n{}", reason.get_error_str(&chars))
+            eprintln!("{}", reason.get_error_str(&chars))
         }
     }
 }
