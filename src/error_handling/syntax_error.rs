@@ -10,8 +10,9 @@ impl PrintableError for SyntaxError {
         let indicator = vec!['^'; length].iter().collect::<String>();
 
         format!(
-            "\n{}\n{}{}\n\n{}{}{}",
-            line, whitespace, indicator, "Syntax error at pos ", self.error_start, ": "
+            "\n{}\n{}{}\n\n{}{}{}\n{}",
+            line, whitespace, indicator, "Syntax error at pos ", self.error_start, ":",
+            self.reason
         )
     }
 }
@@ -121,7 +122,7 @@ mod tests {
         let (chars, error) = get_error_data(String::from("val"));
         let actual_err = error.get_error_str(&chars);
         // TODO: Write a better error message (something that explains why it failed)
-        let expected_str = format!("\n{}\n{}\n\n{}", "val", "^^^", "Syntax error at pos 0: ");
+        let expected_str = format!("\n{}\n{}\n\n{}\n{}", "val", "^^^", "Syntax error at pos 0:", "There should be an identifier after a `val` token");
 
         assert_eq!(expected_str, actual_err);
     }

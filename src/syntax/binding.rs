@@ -46,10 +46,14 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
 
     let identifier = try_token_type(tokens, pos + 1, TokenType::Identifier);
     if identifier.is_none() {
-        // TODO: return Error
+        // TODO: Differentiate between no token found and incorrect token found.
+        // TODO: 
         // The parser didn't find an Identifier after VAL/VAR
         return Some(SyntaxResult::Err(SyntaxError {
-            reason: String::from("D:"),
+            reason: format!(
+                "There should be an identifier after a `{}` token", 
+                if is_val {"val"} else {"var"}
+            ),
             error_start: binding_token.position,
             error_end: binding_token.position + binding_token.value.len(),
         }));
