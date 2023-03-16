@@ -148,6 +148,7 @@ mod tests {
             assert_eq!(3, next);
             assert_eq!(TokenType::VAR, token.token_type);
             assert_eq!("var", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -158,6 +159,7 @@ mod tests {
             assert_eq!(3, next);
             assert_eq!(TokenType::VAL, token.token_type);
             assert_eq!("val", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }

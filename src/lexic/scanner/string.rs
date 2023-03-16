@@ -13,7 +13,12 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
 pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
     match chars.get(start_pos) {
         Some(c) if *c == '"' => {
-            LexResult::Some(token::new_string(current, start_pos), start_pos + 1)
+            // start_pos is the position where the token ENDS, not where it STARTS,
+            // so this is used to retrieve the original START position of the token
+            // 1 is added to account for the opening `"`
+            let current_len = current.len() + 1;
+
+            LexResult::Some(token::new_string(current, start_pos - current_len), start_pos + 1)
         }
         Some(c) if *c == '\n' => LexResult::Err(LexError {
             position: start_pos,
@@ -21,10 +26,11 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
         }),
         Some(c) if *c == '\\' => {
             if let Some(escape) = test_escape_char(chars, start_pos + 1) {
-                scan_impl(chars, start_pos + 2, utils::str_append(current, escape))
+                // This should only detect an escaped `"`
+                scan_impl(chars, start_pos + 2, format!("{}{}", current, escape))
             } else {
                 // Ignore the backslash
-                scan_impl(chars, start_pos + 1, current)
+                scan_impl(chars, start_pos + 1, utils::str_append(current, *c))
             }
         }
         Some(c) => scan_impl(chars, start_pos + 1, utils::str_append(current, *c)),
@@ -36,14 +42,15 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
 }
 
 /// Checks if the char at `start_pos` is a escape character
-fn test_escape_char(chars: &Vec<char>, start_pos: usize) -> Option<char> {
+fn test_escape_char(chars: &Vec<char>, start_pos: usize) -> Option<String> {
     if let Some(c) = chars.get(start_pos) {
         match *c {
-            'n' => Some('\n'),
-            '"' => Some('"'),
-            'r' => Some('\r'),
-            '\\' => Some('\\'),
-            't' => Some('\t'),
+            // Escape sequences ignored: They are passed as is to JS
+            'n' => Some(String::from("\\n")),
+            '"' => Some(String::from("\\\"")),
+            'r' => Some(String::from("\\r")),
+            '\\' => Some(String::from("\\\\")),
+            't' => Some(String::from("\\t")),
             _ => None,
         }
     } else {
@@ -69,6 +76,7 @@ mod tests {
             assert_eq!(2, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -82,6 +90,7 @@ mod tests {
             assert_eq!(15, next);
             assert_eq!(TokenType::String, token.token_type);
             assert_eq!("Hello, world!", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -105,7 +114,8 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\ntext", token.value);
+            assert_eq!("Sample\\ntext", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -115,7 +125,8 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\"text", token.value);
+            assert_eq!("Sample\\\"text", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -125,7 +136,8 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\rtext", token.value);
+            assert_eq!("Sample\\rtext", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -135,7 +147,8 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\\text", token.value);
+            assert_eq!("Sample\\\\text", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -145,7 +158,8 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\ttext", token.value);
+            assert_eq!("Sample\\ttext", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -155,7 +169,8 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample text", token.value);
+            assert_eq!("Sample\\ text", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }

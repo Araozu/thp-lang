@@ -12,7 +12,13 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
         Some(c) if utils::is_operator(*c) => {
             scan_impl(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => LexResult::Some(token::new_operator(current, start_pos), start_pos),
+        _ => {
+            // start_pos is the position where the token ENDS, not where it STARTS,
+            // so this is used to retrieve the original START position of the token
+            let current_len = current.len();
+
+            LexResult::Some(token::new_operator(current, start_pos - current_len), start_pos)
+        }
     }
 }
 
@@ -41,6 +47,7 @@ mod tests {
                     assert_eq!(1, next);
                     assert_eq!(TokenType::Operator, token.token_type);
                     assert_eq!(op, token.value);
+                    assert_eq!(0, token.position);
                 }
                 _ => panic!(),
             }
@@ -63,6 +70,7 @@ mod tests {
                     assert_eq!(2, next);
                     assert_eq!(TokenType::Operator, token.token_type);
                     assert_eq!(op, token.value);
+                    assert_eq!(0, token.position);
                 }
                 _ => panic!(),
             }
