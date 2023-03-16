@@ -38,11 +38,20 @@ fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String, is_datatype: 
             // so this is used to retrieve the original START position of the token
             let current_len = current.len();
             if let Some(token_type) = str_is_keyword(&current) {
-                LexResult::Some(token::new(current, start_pos - current_len, token_type), start_pos)
+                LexResult::Some(
+                    token::new(current, start_pos - current_len, token_type),
+                    start_pos,
+                )
             } else if is_datatype {
-                LexResult::Some(token::new_datatype(current, start_pos - current_len), start_pos)
+                LexResult::Some(
+                    token::new_datatype(current, start_pos - current_len),
+                    start_pos,
+                )
             } else {
-                LexResult::Some(token::new_identifier(current, start_pos - current_len), start_pos)
+                LexResult::Some(
+                    token::new_identifier(current, start_pos - current_len),
+                    start_pos,
+                )
             }
         }
     }

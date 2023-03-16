@@ -33,7 +33,13 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> LexResu
         Some(c) if utils::is_digit(*c) => {
             scan_decimal(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => LexResult::Some(token::new_number(current, start_pos), start_pos),
+        _ => {
+            // start_pos is the position where the token ENDS, not where it STARTS,
+            // so this is used to retrieve the original START position of the token
+            let current_len = current.len();
+
+            LexResult::Some(token::new_number(current, start_pos - current_len), start_pos)
+        },
     }
 }
 
@@ -86,7 +92,13 @@ fn scan_double_impl(chars: &Vec<char>, start_pos: usize, current: String) -> Lex
         Some(c) if *c == 'e' => {
             scan_scientific(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => LexResult::Some(token::new_number(current, start_pos), start_pos),
+        _ => {
+            // start_pos is the position where the token ENDS, not where it STARTS,
+            // so this is used to retrieve the original START position of the token
+            let current_len = current.len();
+
+            LexResult::Some(token::new_number(current, start_pos - current_len), start_pos)
+        }
     }
 }
 
@@ -123,7 +135,13 @@ fn scan_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, 
         Some(c) if utils::is_digit(*c) => {
             scan_digits(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => (token::new_number(current, start_pos), start_pos),
+        _ => {
+            // start_pos is the position where the token ENDS, not where it STARTS,
+            // so this is used to retrieve the original START position of the token
+            let current_len = current.len();
+
+            (token::new_number(current, start_pos - current_len), start_pos)
+        }
     }
 }
 
@@ -133,7 +151,13 @@ fn scan_hex_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Tok
         Some(c) if utils::is_hex_digit(*c) => {
             scan_hex_digits(chars, start_pos + 1, utils::str_append(current, *c))
         }
-        _ => (token::new_number(current, start_pos), start_pos),
+        _ => {
+            // start_pos is the position where the token ENDS, not where it STARTS,
+            // so this is used to retrieve the original START position of the token
+            let current_len = current.len();
+
+            (token::new_number(current, start_pos - current_len), start_pos)
+        }
     }
 }
 
@@ -156,6 +180,7 @@ mod tests {
             assert_eq!(3, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("123", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -167,6 +192,7 @@ mod tests {
             assert_eq!(4, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("0123", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -178,6 +204,7 @@ mod tests {
             assert_eq!(8, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("123456", token.value);
+            assert_eq!(2, token.position);
         } else {
             panic!()
         }
@@ -207,6 +234,7 @@ mod tests {
             assert_eq!(4, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("0x20", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -218,6 +246,7 @@ mod tests {
             assert_eq!(12, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("0xff23DA", token.value);
+            assert_eq!(4, token.position);
         } else {
             panic!()
         }
@@ -268,6 +297,7 @@ mod tests {
             assert_eq!(4, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("3.22", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -278,6 +308,7 @@ mod tests {
             assert_eq!(11, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("123456.7890", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -317,6 +348,7 @@ mod tests {
             assert_eq!("1e+0", token.value);
             assert_eq!(4, next);
             assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -327,6 +359,7 @@ mod tests {
             assert_eq!(4, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("1e-0", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -337,6 +370,7 @@ mod tests {
             assert_eq!(4, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("0e+0", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -347,6 +381,7 @@ mod tests {
             assert_eq!(19, next);
             assert_eq!(TokenType::Number, token.token_type);
             assert_eq!("123498790e+12349870", token.value);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -361,6 +396,7 @@ mod tests {
             assert_eq!("1.24e+1", token.value);
             assert_eq!(7, next);
             assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
@@ -371,8 +407,25 @@ mod tests {
             assert_eq!("0.00000000000001e+1", token.value);
             assert_eq!(19, next);
             assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(0, token.position);
         } else {
             panic!()
         }
+    }
+
+    #[test]
+    fn position_should_be_valid() {
+        let input = str_to_vec("  123  ");
+        let start_pos = 2;
+
+        if let LexResult::Some(token, next) = scan(&input, start_pos) {
+            assert_eq!(5, next);
+            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!("123", token.value);
+            assert_eq!(2, token.position);
+        } else {
+            panic!("Expected some value")
+        };
+
     }
 }

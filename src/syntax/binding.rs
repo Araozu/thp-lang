@@ -2,6 +2,7 @@ use super::ast_types::{Binding, ValBinding, VarBinding};
 use super::{expression, SyntaxResult};
 use crate::error_handling::SyntaxError;
 use crate::token::{Token, TokenType};
+use crate::utils::Result3;
 
 // TODO: Should return a 3 state value:
 // - Success: binding parsed successfully
@@ -12,16 +13,13 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
 
     // Optional datatype annotation
     let datatype_annotation = {
-        match tokens.get(pos) {
-            Some(t) if t.token_type == TokenType::Datatype => {
+        match try_token_type(tokens, pos, TokenType::Datatype) {
+            Result3::Ok(t) => {
                 pos += 1;
                 Some(String::from(&t.value))
             }
-            // If the first token is anything else, ignore
-            Some(_) => None,
-            // This should never match, as there should always be at least a
-            // TokenType::Semicolon or TokenType::EOF
-            None => panic!(
+            Result3::Err(_) => None,
+            Result3::None => panic!(
                 "Internal compiler error: Illegal token stream at src/syntax/binding.rs#try_parse"
             ),
         }
@@ -31,40 +29,67 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     let (is_val, binding_token) = {
         let res1 = try_token_type(tokens, pos, TokenType::VAL);
         match res1 {
-            Some(val_token) => (true, val_token),
-            None => {
+            Result3::Ok(val_token) => (true, val_token),
+            _ => {
                 let res2 = try_token_type(tokens, pos, TokenType::VAR);
                 match res2 {
-                    Some(var_token) => (false, var_token),
+                    Result3::Ok(var_token) => (false, var_token),
                     // Neither VAL nor VAR were matched, the parser should try
                     // other constructs
-                    None => return None,
+                    _ => return None,
                 }
             }
         }
     };
 
-    let identifier = try_token_type(tokens, pos + 1, TokenType::Identifier);
-    if identifier.is_none() {
-        // TODO: Differentiate between no token found and incorrect token found.
-        // TODO: 
-        // The parser didn't find an Identifier after VAL/VAR
-        return Some(SyntaxResult::Err(SyntaxError {
-            reason: format!(
-                "There should be an identifier after a `{}` token", 
-                if is_val {"val"} else {"var"}
-            ),
-            error_start: binding_token.position,
-            error_end: binding_token.position + binding_token.value.len(),
-        }));
-    }
-    let identifier = identifier.unwrap();
+    let identifier = match try_token_type(tokens, pos + 1, TokenType::Identifier) {
+        Result3::Ok(t) => t,
+        Result3::Err(t) => {
+            // The parser found a token, but it's not an identifier
+            return Some(SyntaxResult::Err(SyntaxError {
+                reason: format!(
+                    "There should be an identifier after a `{}` token",
+                    if is_val { "val" } else { "var" }
+                ),
+                error_start: binding_token.position,
+                error_end: binding_token.position + binding_token.value.len(),
+            }));
+        }
+        Result3::None => {
+            // TODO: Differentiate between no token found and incorrect token found.
+            // The parser didn't find an Identifier after VAL/VAR
+            return Some(SyntaxResult::Err(SyntaxError {
+                reason: format!(
+                    "There should be an identifier after a `{}` token",
+                    if is_val { "val" } else { "var" }
+                ),
+                error_start: binding_token.position,
+                error_end: binding_token.position + binding_token.value.len(),
+            }));
+        }
+    };
 
-    let equal_operator = try_operator(tokens, pos + 2, String::from("="));
-    if equal_operator.is_none() {
-        // TODO: return Error
-        return None;
-    }
+    let _equal_operator: &Token = match try_operator(tokens, pos + 2, String::from("=")) {
+        Result3::Ok(t) => t,
+        Result3::Err(t) => {
+            // TODO: Differentiate between no token found and incorrect token found.
+            // The parser didn't find the `=` operator after the identifier
+            return Some(SyntaxResult::Err(SyntaxError {
+                reason: format!("There should be an equal sign `=` after the identifier",),
+                error_start: identifier.position,
+                error_end: identifier.position + identifier.value.len(),
+            }));
+        }
+        Result3::None => {
+            // TODO: Differentiate between no token found and incorrect token found.
+            // The parser didn't find the `=` operator after the identifier
+            return Some(SyntaxResult::Err(SyntaxError {
+                reason: format!("There should be an equal sign `=` after the identifier",),
+                error_start: identifier.position,
+                error_end: identifier.position + identifier.value.len(),
+            }));
+        }
+    };
 
     let expression = expression::try_parse(tokens, pos + 3);
     if expression.is_none() {
@@ -90,16 +115,21 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     Some(SyntaxResult::Ok(binding))
 }
 
-fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Option<&Token> {
-    tokens
-        .get(pos)
-        .and_then(|token| (token.token_type == token_type).then(|| token))
+/// Expects the token at `pos` to be of type `token_type`
+fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
+    match tokens.get(pos) {
+        Some(t) if t.token_type == token_type => Result3::Ok(t),
+        Some(t) => Result3::Err(t),
+        None => Result3::None,
+    }
 }
 
-fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Option<&Token> {
-    tokens.get(pos).and_then(|token| {
-        (token.token_type == TokenType::Operator && token.value == operator).then(|| token)
-    })
+fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
+    match tokens.get(pos) {
+        Some(t) if t.token_type == TokenType::Operator && t.value == operator => Result3::Ok(t),
+        Some(t) => Result3::Err(t),
+        None => Result3::None,
+    }
 }
 
 #[cfg(test)]
@@ -123,7 +153,7 @@ mod tests {
     #[test]
     fn should_parse_val() {
         let tokens = get_tokens(&String::from("val")).unwrap();
-        let token = try_token_type(&tokens, 0, TokenType::VAL).unwrap();
+        let token = *try_token_type(&tokens, 0, TokenType::VAL).unwrap();
 
         assert_eq!(TokenType::VAL, token.token_type);
         assert_eq!("val", token.value);
@@ -132,7 +162,7 @@ mod tests {
     #[test]
     fn should_parse_identifier() {
         let tokens = get_tokens(&String::from("identifier")).unwrap();
-        let token = try_token_type(&tokens, 0, TokenType::Identifier).unwrap();
+        let token = *try_token_type(&tokens, 0, TokenType::Identifier).unwrap();
 
         assert_eq!("identifier", token.value);
     }
@@ -140,7 +170,7 @@ mod tests {
     #[test]
     fn should_parse_operator() {
         let tokens = get_tokens(&String::from("=")).unwrap();
-        let token = try_operator(&tokens, 0, String::from("=")).unwrap();
+        let token = *try_operator(&tokens, 0, String::from("=")).unwrap();
 
         assert_eq!("=", token.value);
     }
@@ -182,7 +212,23 @@ mod tests {
                 assert_eq!(0, error.error_start);
                 assert_eq!(3, error.error_end);
             }
-            _ => panic!(),
+            _ => panic!("Error expected"),
+        }
+    }
+
+    #[test]
+    fn should_return_error_when_identifier_is_wrong() {
+        let tokens = get_tokens(&String::from("val 322")).unwrap();
+        assert_eq!(TokenType::VAL, tokens[0].token_type);
+        assert_eq!(0, tokens[0].position);
+        let binding = try_parse(&tokens, 0).unwrap();
+
+        match binding {
+            SyntaxResult::Err(error) => {
+                // assert_eq!(4, error.error_start);
+                // assert_eq!(7, error.error_end);
+            }
+            _ => panic!("Error expected")
         }
     }
 }

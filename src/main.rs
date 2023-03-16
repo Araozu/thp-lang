@@ -17,6 +17,7 @@ mod ast_types;
 mod symbol_table;
 // Transforms an AST to JS
 mod codegen;
+mod utils;
 
 mod error_handling;
 

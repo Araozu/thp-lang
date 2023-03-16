@@ -11,8 +11,7 @@ impl PrintableError for SyntaxError {
 
         format!(
             "\n{}\n{}{}\n\n{}{}{}\n{}",
-            line, whitespace, indicator, "Syntax error at pos ", self.error_start, ":",
-            self.reason
+            line, whitespace, indicator, "Syntax error at pos ", self.error_start, ":", self.reason
         )
     }
 }
@@ -122,7 +121,29 @@ mod tests {
         let (chars, error) = get_error_data(String::from("val"));
         let actual_err = error.get_error_str(&chars);
         // TODO: Write a better error message (something that explains why it failed)
-        let expected_str = format!("\n{}\n{}\n\n{}\n{}", "val", "^^^", "Syntax error at pos 0:", "There should be an identifier after a `val` token");
+        let expected_str = format!(
+            "\n{}\n{}\n\n{}\n{}",
+            "val",
+            "^^^",
+            "Syntax error at pos 0:",
+            "There should be an identifier after a `val` token"
+        );
+
+        assert_eq!(expected_str, actual_err);
+    }
+
+    #[test]
+    fn should_show_an_error_for_missing_equal_operator() {
+        let (chars, error) = get_error_data(String::from("val name"));
+        let actual_err = error.get_error_str(&chars);
+        // TODO: Write a better error message (something that explains why it failed)
+        let expected_str = format!(
+            "\n{}\n{}\n\n{}\n{}",
+            "val name",
+            "    ^^^^",
+            "Syntax error at pos 4:",
+            "There should be an equal sign `=` after the identifier"
+        );
 
         assert_eq!(expected_str, actual_err);
     }
