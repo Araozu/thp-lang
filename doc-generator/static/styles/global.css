@@ -1,0 +1,312 @@
+body ::selection {
+    background-color: var(--js-color);
+    color: var(--dark-color);
+}
+
+:root {
+    --js-color: #FFE70B;
+    --dark-color: #0f0f0f;
+    --light-color: white;
+    --error-color: #ff3b3b;
+    --error-text-color: #410002;
+    --error-bg-color: #ffdad6;
+
+    --c1: #e7b711;
+    --c2: #038dce;
+    --c3: #ffaed7;
+    --c4: #f44336;
+    --c5: #39b487;
+    --c3-transparent: #772957; /* rgba(252, 168, 209, 0.35); */
+
+    --bg-color: var(--dark-color);
+    --color: #dedede;
+    --code-bg-color: #151515;
+    --code-color: #bababa;
+    --border-color: #72787e;
+
+    /* C1 Material Colors */
+    --c1-primary: #f1c01f;
+
+    /* C2 Material Colors */
+    --c2-primary: #90ccff;
+
+    /* C3 Material Colors */
+    --c3-primary: #ffaed7;
+    --c3-on-primary: #5b113f;
+    --c3-primary-container: #782957;
+    --c3-on-primary-container: #ffd8e9;
+
+    /* C4 Material Colors */
+    --c4-primary: #ffb4a8;
+
+
+    /* C5 Material Colors */
+    --c5-primary: #66dcac;
+    --c5-on-primary: #003825;
+    --c5-primary-container: #005137;
+    --c5-on-primary-container: #83f9c7;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --c2: #038dce;
+
+        --bg-color: #fffdfc;
+        --color: #202020;
+        --code-bg-color: #fdf6e3;
+        --code-color: #073642;
+        --border-color: rgba(64, 64, 64, 0.25);
+
+        --c3-transparent: #ffd8ea;
+
+        /* C1 Material Colors */
+        --c1-primary: #765b00;
+
+        /* C2 Material Colors  */
+        --c2-primary: #006397;
+
+        /* C3 Material Colors */
+        --c3-primary: #954170;
+        --c3-on-primary: #ffffff;
+        --c3-primary-container: #ffd8e9;
+        --c3-on-primary-container: #3c0027;
+
+        /* C4 Material Colors */
+        --c4-primary: #bc1714;
+
+        /* C5 Material Colors */
+        --c5-primary: #006c4b;
+        --c5-on-primary: #ffffff;
+        --c5-primary-container: #83f9c7;
+        --c5-on-primary-container: #002114;
+
+    }
+
+    body ::selection {
+        color: var(--js-color);
+        background-color: var(--dark-color);
+    }
+}
+
+html {
+    font-size: 20px;
+}
+
+.hide-on-small {}
+
+.padded {
+    padding-left: 2rem;
+    border-left: solid 1px var(--border-color);
+}
+
+@media screen and (max-width: 800px) {
+    html {
+        font-size: 18px;
+    }
+
+    .hide-on-small {
+        display: none;
+    }
+}
+
+body {
+    font-family: Inter, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--color);
+}
+
+svg.railroad-diagram {
+    background-color: rgba(0,0,0,0) !important;
+}
+
+svg.railroad-diagram path {
+    stroke: var(--c1) !important;
+}
+
+svg.railroad-diagram rect {
+    stroke: var(--c2) !important;
+    fill: var(--c2) !important;
+}
+
+svg.railroad-diagram g.non-terminal rect {
+    stroke: var(--c4) !important;
+    fill: var(--c4) !important;
+}
+
+svg.railroad-diagram text {
+    font-family: Inter, sans-serif !important;
+    font-weight: normal !important;
+    fill: white;
+}
+
+g.terminal text {
+    font-family: Iosevka, sans-serif !important;
+}
+
+.railroad-code {
+    text-align: center;
+    padding: 1rem;
+}
+
+.railroad-code svg {
+    transform: scale(1.5);
+}
+
+.main-container {
+    margin: 0 auto;
+    max-width: 1400px;
+    width: 90%;
+}
+
+.rainbow-separator {
+    background-color: var(--js-color);
+}
+
+h2 {
+    font-weight: normal;
+    font-size: 2rem;
+}
+
+code {
+
+}
+
+pre {
+    border: solid 1px rgba(150, 150, 150, 0.5);
+}
+
+code, pre {
+    font-family: "SF Mono", Iosevka, "Source Code Pro", monospace !important;
+    font-variant-ligatures: discretionary-ligatures;
+}
+
+.marked pre {
+    font-size: 0.85rem;
+}
+
+.marked p {
+    line-height: 1.5rem;
+    text-align: justify;
+}
+
+.marked h1 {
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+}
+
+.marked h2 {
+    font-size: 1.75rem;
+    font-weight: 500;
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+.marked h2:target {
+    text-decoration: underline;
+    text-decoration-color: var(--c5);
+}
+
+.marked h3, .marked h4, .marked h5 {
+    font-size: 1.5rem;
+    font-weight: 300;
+}
+
+.marked table {
+    text-align: center;
+    border-collapse: collapse;
+}
+
+.marked table, th, td {
+    border: solid 1px rgba(150, 150, 150, 1);
+}
+
+.marked table td, th {
+    padding: 0.25rem 0.5rem;
+}
+
+.md-modifier {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin: 2rem 0;
+}
+
+.md-modifier > div {
+    padding-bottom: 1rem;
+    font-weight: 500;
+}
+
+.md-info {
+    border: solid 2px var(--js-color);
+}
+
+.md-info > div {
+    color: var(--js-color);
+}
+
+@media (prefers-color-scheme: light) {
+    .md-info {
+        background-color: var(--js-color);
+    }
+
+    .md-info > div {
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+}
+
+
+.md-warning {
+    border: solid 3px var(--c4);
+}
+
+.md-warning > div {
+    color: var(--c4);
+}
+
+@media (prefers-color-scheme: light) {
+    .md-warning {
+        background-color: var(--error-bg-color);
+        color: var(--error-text-color);
+    }
+
+    .md-warning > div {
+        color: var(--c4);
+        font-weight: 600;
+    }
+}
+
+
+.md-implemented {
+    border: solid 3px var(--c2-primary);
+}
+
+.md-implemented > div {
+    color: var(--c2-primary);
+}
+
+
+@media screen and (max-width: 800px) {
+    .marked p {
+        line-height: 1.25rem;
+    }
+
+    .marked h1 {
+        margin-top: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .marked h2 {
+        margin-top: 2rem;
+        margin-bottom: 1.25rem;
+    }
+
+    pre[class*="language-"].line-numbers {
+        font-size: 0.8rem;
+    }
+
+    .railroad-code svg {
+        display: none;
+        transform: scale(1);
+    }
+}
