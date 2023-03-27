@@ -51,8 +51,8 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
                     "There should be an identifier after a `{}` token",
                     if is_val { "val" } else { "var" }
                 ),
-                error_start: binding_token.position,
-                error_end: binding_token.position + binding_token.value.len(),
+                error_start: t.position,
+                error_end: t.position + t.value.len(),
             }));
         }
         Result3::None => {
@@ -119,6 +119,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
 fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == token_type => Result3::Ok(t),
+        Some(t) if t.token_type == TokenType::Semicolon || t.token_type == TokenType::EOF => Result3::None,
         Some(t) => Result3::Err(t),
         None => Result3::None,
     }
@@ -225,8 +226,21 @@ mod tests {
 
         match binding {
             SyntaxResult::Err(error) => {
-                // assert_eq!(4, error.error_start);
-                // assert_eq!(7, error.error_end);
+                assert_eq!(4, error.error_start);
+                assert_eq!(7, error.error_end);
+            }
+            _ => panic!("Error expected")
+        }
+
+
+        // ERROR: when computing the length of the token "hello" the quotes are not considered
+        let tokens = get_tokens(&String::from("val \"hello\"")).unwrap();
+        let binding = try_parse(&tokens, 0).unwrap();
+
+        match binding {
+            SyntaxResult::Err(error) => {
+                assert_eq!(4, error.error_start);
+                assert_eq!(11, error.error_end);
             }
             _ => panic!("Error expected")
         }

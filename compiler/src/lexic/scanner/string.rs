@@ -29,7 +29,6 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
                 // This should only detect an escaped `"`
                 scan_impl(chars, start_pos + 2, format!("{}{}", current, escape))
             } else {
-                // Ignore the backslash
                 scan_impl(chars, start_pos + 1, utils::str_append(current, *c))
             }
         }
