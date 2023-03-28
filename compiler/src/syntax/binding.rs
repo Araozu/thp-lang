@@ -76,7 +76,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     /*
      * Equal (=) operator
      */
-    let _equal_operator: &Token = match try_operator(tokens, pos + 2, String::from("=")) {
+    let equal_operator: &Token = match try_operator(tokens, pos + 2, String::from("=")) {
         Result3::Ok(t) => t,
         Result3::Err(t) => {
             // The parser found a token, but it's not the `=` operator
@@ -98,8 +98,11 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
 
     let expression = expression::try_parse(tokens, pos + 3);
     if expression.is_none() {
-        // TODO: return Error
-        return None;
+        return Some(SyntaxResult::Err(SyntaxError {
+            reason: String::from("Expected an expression after the equal `=` operator"),
+            error_start: equal_operator.position,
+            error_end: equal_operator.get_end_position(),
+        }));
     }
     let expression = expression.unwrap();
 
