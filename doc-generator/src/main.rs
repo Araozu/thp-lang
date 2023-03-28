@@ -2,9 +2,8 @@ use clap::Parser;
 use markdown::to_html;
 use std::fs::File;
 use std::io::Write;
-use std::str;
 use std::{
-    fs::{self},
+    fs,
     path::Path,
 };
 
@@ -26,21 +25,21 @@ fn main() {
     let output_folder = Path::new(&args.output);
 
     if input_folder.is_dir() && output_folder.is_dir() {
-        process_folder(&input_folder, input_folder, output_folder, true);
+        process_folder(&input_folder, input_folder, output_folder);
     } else {
         eprint!("Input folder is not a valid path to a folder")
     }
 }
 
-fn process_folder(path: &Path, input_folder: &Path, output_folder: &Path, is_top_level: bool) {
+fn process_folder(path: &Path, input_folder: &Path, output_folder: &Path) {
     for entry in path.read_dir().unwrap() {
         match entry {
             Ok(entry) if entry.path().is_dir() => {
                 let path = entry.path();
 
-                match ensure_folder_exists(&entry.path(), input_folder, output_folder, is_top_level) {
+                match ensure_folder_exists(&entry.path(), input_folder, output_folder) {
                     Ok(_) => {
-                        process_folder(&path, input_folder, output_folder, false);
+                        process_folder(&path, input_folder, output_folder);
                     }
                     Err(reason) => panic!("{}", reason),
                 }
@@ -53,7 +52,7 @@ fn process_folder(path: &Path, input_folder: &Path, output_folder: &Path, is_top
     }
 }
 
-fn ensure_folder_exists(folder: &Path, input_folder: &Path, output_folder: &Path, is_top_level: bool) -> Result<(), String> {
+fn ensure_folder_exists(folder: &Path, input_folder: &Path, output_folder: &Path) -> Result<(), String> {
     // /home/fernando/misti/docs/markdown
     let input_folder = input_folder.canonicalize().unwrap();
 
@@ -91,29 +90,32 @@ fn process_markdown(file: &Path, input_folder: &Path, output_folder: &Path) -> R
     let input_folder = input_folder.canonicalize().unwrap();
 
     // /home/fernando/misti/docs/markdown/en/docs/latest/index.md
-    let full_input_path = file.canonicalize().unwrap();
+    let input_file = file.canonicalize().unwrap();
 
     // /home/fernando/misti/docs/static
     let output_folder = output_folder.canonicalize().unwrap();
 
     // en/docs/latests/index.md
-    let relative_file_path = full_input_path.strip_prefix(input_folder).unwrap();
+    let relative_input_file = input_file.strip_prefix(input_folder).unwrap();
 
-    let mut full_output_path = output_folder.clone();
-    full_output_path.push(relative_file_path);
+    let mut output_file = output_folder.clone();
+    output_file.push(relative_input_file);
+    output_file.set_extension("html");
 
 
-    let file_content_bytes = fs::read(&full_input_path).unwrap();
+    let file_content_bytes = fs::read(&input_file).unwrap();
     let markdown_text = String::from_utf8(file_content_bytes).unwrap();
 
     let html_text = to_html(markdown_text.as_str());
 
     // Write the HTML to disk
 
-    println!("Compiling: from -> to\n{:?}\n{:?}", full_input_path, full_output_path);
+    println!("Compiling: from -> to\n{:?}\n{:?}\n", input_file, output_file);
 
-    let mut file = File::create(&full_output_path).unwrap();
-    let _ = file.write_all(html_text.as_bytes());
+    let _ = File::create(&output_file)
+        .unwrap()
+        .write_all(html_text.as_bytes())
+        .unwrap();
 
-    Err(String::from("Not implemented"))
+    Ok(())
 }
