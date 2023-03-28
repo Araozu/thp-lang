@@ -5,6 +5,7 @@ module.exports = {
     colors: {
       transparent: 'transparent',
       current: 'currentColor',
+      white: "#ffffff",
 
       "js-color": "var(--js-color)",
       "dark-color": "var(--dark-color)",
@@ -22,8 +23,14 @@ module.exports = {
       "code-bg-color": "var(--code-bg-color)",
       "code-color": "var(--code-color)",
       "border-color": "var(--border-color)",
+
       "c1-primary": "var(--c1-primary)",
+
       "c2-primary": "var(--c2-primary)",
+      "c2-on-primary": "var(--c2-on-primary)",
+      "c2-primary-container": "var(--c2-primary-container)",
+      "c2-on-primary-container": "var(--c2-on-primary-container)",
+
       "c3-primary": "var(--c3-primary)",
       "c3-on-primary": "var(--c3-on-primary)",
       "c3-primary-container": "var(--c3-primary-container)",
@@ -34,6 +41,9 @@ module.exports = {
       "c5-primary-container": "var(--c5-primary-container)",
       "c5-on-primary-container": "var(--c5-on-primary-container)",
       "bg-color": "var(--bg-color)",
+    },
+    borderWidth: {
+      '1': '1px'
     },
     extend: {},
   },

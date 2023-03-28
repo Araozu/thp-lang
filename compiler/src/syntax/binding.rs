@@ -25,7 +25,9 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
         }
     };
 
-    // var/val keyword
+    /*
+     * val/var keyword
+     */
     let (is_val, binding_token) = {
         let res1 = try_token_type(tokens, pos, TokenType::VAL);
         match res1 {
@@ -42,6 +44,9 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
         }
     };
 
+    /*
+     * identifier
+     */
     let identifier = match try_token_type(tokens, pos + 1, TokenType::Identifier) {
         Result3::Ok(t) => t,
         Result3::Err(t) => {
@@ -52,11 +57,10 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
                     if is_val { "val" } else { "var" }
                 ),
                 error_start: t.position,
-                error_end: t.position + t.value.len(),
+                error_end: t.get_end_position(),
             }));
         }
         Result3::None => {
-            // TODO: Differentiate between no token found and incorrect token found.
             // The parser didn't find an Identifier after VAL/VAR
             return Some(SyntaxResult::Err(SyntaxError {
                 reason: format!(
@@ -64,29 +68,30 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
                     if is_val { "val" } else { "var" }
                 ),
                 error_start: binding_token.position,
-                error_end: binding_token.position + binding_token.value.len(),
+                error_end: binding_token.get_end_position(),
             }));
         }
     };
 
+    /*
+     * Equal (=) operator
+     */
     let _equal_operator: &Token = match try_operator(tokens, pos + 2, String::from("=")) {
         Result3::Ok(t) => t,
         Result3::Err(t) => {
-            // TODO: Differentiate between no token found and incorrect token found.
-            // The parser didn't find the `=` operator after the identifier
+            // The parser found a token, but it's not the `=` operator
             return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!("There should be an equal sign `=` after the identifier",),
-                error_start: identifier.position,
-                error_end: identifier.position + identifier.value.len(),
+                reason: format!("There should be an equal sign `=` after the identifier"),
+                error_start: t.position,
+                error_end: t.get_end_position(),
             }));
         }
         Result3::None => {
-            // TODO: Differentiate between no token found and incorrect token found.
             // The parser didn't find the `=` operator after the identifier
             return Some(SyntaxResult::Err(SyntaxError {
                 reason: format!("There should be an equal sign `=` after the identifier",),
                 error_start: identifier.position,
-                error_end: identifier.position + identifier.value.len(),
+                error_end: identifier.get_end_position(),
             }));
         }
     };
@@ -128,6 +133,7 @@ fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Res
 fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == TokenType::Operator && t.value == operator => Result3::Ok(t),
+        Some(t) if t.token_type == TokenType::Semicolon || t.token_type == TokenType::EOF => Result3::None,
         Some(t) => Result3::Err(t),
         None => Result3::None,
     }
@@ -233,7 +239,6 @@ mod tests {
         }
 
 
-        // ERROR: when computing the length of the token "hello" the quotes are not considered
         let tokens = get_tokens(&String::from("val \"hello\"")).unwrap();
         let binding = try_parse(&tokens, 0).unwrap();
 
@@ -241,6 +246,20 @@ mod tests {
             SyntaxResult::Err(error) => {
                 assert_eq!(4, error.error_start);
                 assert_eq!(11, error.error_end);
+            }
+            _ => panic!("Error expected")
+        }
+    }
+
+    #[test]
+    fn should_return_error_when_equal_op_is_wrong() {
+        let tokens = get_tokens(&String::from("val id \"error\"")).unwrap();
+        let binding = try_parse(&tokens, 0).unwrap();
+
+        match binding {
+            SyntaxResult::Err(error) => {
+                assert_eq!(7, error.error_start);
+                assert_eq!(14, error.error_end);
             }
             _ => panic!("Error expected")
         }

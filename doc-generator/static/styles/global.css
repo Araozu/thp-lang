@@ -29,6 +29,9 @@ body ::selection {
 
     /* C2 Material Colors */
     --c2-primary: #90ccff;
+    --c2-on-primary: #003351;
+    --c2-primary-container: #004b72;
+    --c2-on-primary-container: #cce5ff;
 
     /* C3 Material Colors */
     --c3-primary: #ffaed7;
@@ -64,6 +67,9 @@ body ::selection {
 
         /* C2 Material Colors  */
         --c2-primary: #006397;
+        --c2-on-primary: #ffffff;
+        --c2-primary-container: #cce5ff;
+        --c2-on-primary-container: #001e31;
 
         /* C3 Material Colors */
         --c3-primary: #954170;
