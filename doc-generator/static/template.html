@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/tailwind/output.css" rel="stylesheet">
+
+    <link href="/styles/global.css" rel="stylesheet" />
+    <title>Misti</title>
+
+    <!-- Google fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+</head>
+<body>
+
+    {{markdown}}
+
+    <script>
+        // Inter - Google fonts - load here as to not interrupt the page
+        const linkEl = document.createElement("link");
+        linkEl.href = "https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;700&display=swap";
+        linkEl.rel = "stylesheet";
+
+        document.head.appendChild(linkEl);
+    </script>
+</body>
+</html>
