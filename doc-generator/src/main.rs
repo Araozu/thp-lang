@@ -112,9 +112,18 @@ fn process_markdown(file: &Path, input_folder: &Path, output_folder: &Path) -> R
 
     println!("Compiling: from -> to\n{:?}\n{:?}\n", input_file, output_file);
 
+    // Read template.html
+    let mut template_path = output_folder.clone();
+    template_path.push("template.html");
+
+    let template_contents = fs::read(template_path).unwrap();
+    let template_contents = String::from_utf8(template_contents).unwrap();
+
+    let final_output = template_contents.replace("{{markdown}}", &html_text);
+
     let _ = File::create(&output_file)
         .unwrap()
-        .write_all(html_text.as_bytes())
+        .write_all(final_output.as_bytes())
         .unwrap();
 
     Ok(())

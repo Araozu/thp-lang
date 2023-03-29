@@ -23,6 +23,19 @@ markdown, and have the `.md` file extension.
 Contains CSS, JS, and HTML templates. Here the MD files are written to
 after being converted.
 
+There must be a `template.html` file inside this folder. This file will be used to generate the HTML from MD files.
+
+Inside `template.html` there must be a string `{{markdown}}`:
+
+```html
+<!-- Some html -->
+    {{markdown}}
+<!-- More html -->
+```
+
+This string, `{{markdown}}`, will be replaced with the HTML generated
+from Markdown
+
 ## `dist` folder
 
 Coming soon, this folder will contain all HTML, CSS & JS minified after
