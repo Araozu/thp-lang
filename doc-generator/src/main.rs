@@ -1,14 +1,11 @@
 use clap::Parser;
 use generator::Printable;
-use markdown::to_html;
 use std::fs::File;
 use std::io::Write;
-use std::{
-    fs,
-    path::Path,
-};
+use std::{fs, path::Path};
 
 mod generator;
+mod utils;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -55,7 +52,11 @@ fn process_folder(path: &Path, input_folder: &Path, output_folder: &Path) {
     }
 }
 
-fn ensure_folder_exists(folder: &Path, input_folder: &Path, output_folder: &Path) -> Result<(), String> {
+fn ensure_folder_exists(
+    folder: &Path,
+    input_folder: &Path,
+    output_folder: &Path,
+) -> Result<(), String> {
     // /home/fernando/misti/docs/markdown
     let input_folder = input_folder.canonicalize().unwrap();
 
@@ -114,7 +115,6 @@ fn process_markdown(file: &Path, input_folder: &Path, output_folder: &Path) -> R
     // let html_text = to_html(markdown_text.as_str());
     let md_ast = markdown::to_mdast(&markdown_text, &markdown::ParseOptions::gfm()).unwrap();
     let html_text = md_ast.to_html();
-
 
     // Read template.html
     let mut template_path = output_folder.clone();

@@ -2,7 +2,6 @@ use markdown::mdast;
 
 use super::Printable;
 
-
 impl Printable for mdast::Root {
     fn to_html(&self) -> String {
         let mut result = Vec::<String>::new();
@@ -12,5 +11,15 @@ impl Printable for mdast::Root {
         }
 
         result.into_iter().collect()
+    }
+
+    fn get_text(&self) -> String {
+        let mut result = Vec::<String>::new();
+
+        for node in &self.children {
+            result.push(node.get_text())
+        }
+
+        result.join("-")
     }
 }

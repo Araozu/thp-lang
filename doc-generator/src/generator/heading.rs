@@ -1,9 +1,8 @@
-use std::fmt::format;
-
 use markdown::mdast::Heading;
 
-use super::Printable;
+use crate::utils;
 
+use super::Printable;
 
 impl Printable for Heading {
     fn to_html(&self) -> String {
@@ -15,7 +14,25 @@ impl Printable for Heading {
 
         let text: String = result.into_iter().collect();
 
-        format!("<h{}>{}</h{}>", self.depth, text, self.depth)
+        if self.depth < 4 {
+            let html_fragment_text = utils::to_html_fragment(&self.get_text());
+
+            format!(
+                "<h{} id=\"{}\"><a href=\"#{}\">{}</a></h{}>",
+                self.depth, html_fragment_text, html_fragment_text, text, self.depth
+            )
+        } else {
+            format!("<h{}>{}</h{}>", self.depth, text, self.depth)
+        }
+    }
+
+    fn get_text(&self) -> String {
+        let mut result = Vec::<String>::new();
+
+        for node in &self.children {
+            result.push(node.get_text())
+        }
+
+        result.join("-")
     }
 }
-
