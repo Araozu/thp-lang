@@ -98,8 +98,6 @@ html {
     font-size: 20px;
 }
 
-.hide-on-small {}
-
 .padded {
     padding-left: 2rem;
     border-left: solid 1px var(--border-color);
@@ -108,10 +106,6 @@ html {
 @media screen and (max-width: 800px) {
     html {
         font-size: 18px;
-    }
-
-    .hide-on-small {
-        display: none;
     }
 }
 
@@ -158,25 +152,6 @@ g.terminal text {
     transform: scale(1.5);
 }
 
-.main-container {
-    margin: 0 auto;
-    max-width: 1400px;
-    width: 90%;
-}
-
-.rainbow-separator {
-    background-color: var(--js-color);
-}
-
-h2 {
-    font-weight: normal;
-    font-size: 2rem;
-}
-
-code {
-
-}
-
 pre {
     border: solid 1px rgba(150, 150, 150, 0.5);
 }
@@ -193,17 +168,19 @@ code, pre {
 .marked p {
     line-height: 1.5rem;
     text-align: justify;
+    margin: 1rem 0;
 }
 
 .marked h1 {
-    font-weight: 600;
+    font-weight: 900;
     margin-top: 3rem;
     margin-bottom: 2rem;
+    font-size: 2.25rem;
 }
 
 .marked h2 {
-    font-size: 1.75rem;
-    font-weight: 500;
+    font-size: 2rem;
+    font-weight: bold;
     margin-top: 3rem;
     margin-bottom: 1.5rem;
 }
@@ -213,9 +190,23 @@ code, pre {
     text-decoration-color: var(--c5);
 }
 
-.marked h3, .marked h4, .marked h5 {
-    font-size: 1.5rem;
+.marked h3 {
+    font-size: 1.75rem;
+    font-weight: 500;
+    margin-top: 2.5rem;
+    margin-bottom: 1.25rem;
+    text-decoration: underline;
+
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color);
+}
+
+.marked h4 {
+    font-size: 1.25rem;
     font-weight: 300;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
 }
 
 .marked table {
@@ -300,11 +291,6 @@ code, pre {
     .marked h1 {
         margin-top: 1rem;
         margin-bottom: 0.75rem;
-    }
-
-    .marked h2 {
-        margin-top: 2rem;
-        margin-bottom: 1.25rem;
     }
 
     pre[class*="language-"].line-numbers {

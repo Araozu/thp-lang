@@ -1,4 +1,5 @@
 use clap::Parser;
+use generator::Printable;
 use markdown::to_html;
 use std::fs::File;
 use std::io::Write;
@@ -6,6 +7,8 @@ use std::{
     fs,
     path::Path,
 };
+
+mod generator;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -67,18 +70,18 @@ fn ensure_folder_exists(folder: &Path, input_folder: &Path, output_folder: &Path
     let mut full_output_folder = output_folder.clone();
     full_output_folder.push(relative_new_folder);
 
-    println!("Ensuring that folder exists:\n{:?}", full_output_folder);
+    // println!("Ensuring that folder exists:\n{:?}", full_output_folder);
 
     // If this is a "top-level" folder, remove all its contents, if it exists
     if full_output_folder.is_dir() {
-        println!("| Removing...");
+        // println!("| Removing...");
         let _ = fs::remove_dir_all(&full_output_folder);
     }
 
     // Create folder
     match fs::create_dir(&full_output_folder) {
         Ok(_) => {
-            println!("| done\n\n");
+            // println!("| done\n\n");
             Ok(())
         }
         Err(_) => Err(format!("Error creating folder {:?}", full_output_folder)),
@@ -102,15 +105,16 @@ fn process_markdown(file: &Path, input_folder: &Path, output_folder: &Path) -> R
     output_file.push(relative_input_file);
     output_file.set_extension("html");
 
-
+    //
+    //  Compilation
+    //
     let file_content_bytes = fs::read(&input_file).unwrap();
     let markdown_text = String::from_utf8(file_content_bytes).unwrap();
 
-    let html_text = to_html(markdown_text.as_str());
+    // let html_text = to_html(markdown_text.as_str());
+    let md_ast = markdown::to_mdast(&markdown_text, &markdown::ParseOptions::gfm()).unwrap();
+    let html_text = md_ast.to_html();
 
-    // Write the HTML to disk
-
-    println!("Compiling: from -> to\n{:?}\n{:?}\n", input_file, output_file);
 
     // Read template.html
     let mut template_path = output_folder.clone();
@@ -121,6 +125,7 @@ fn process_markdown(file: &Path, input_folder: &Path, output_folder: &Path) -> R
 
     let final_output = template_contents.replace("{{markdown}}", &html_text);
 
+    // Write to disk
     let _ = File::create(&output_file)
         .unwrap()
         .write_all(final_output.as_bytes())
