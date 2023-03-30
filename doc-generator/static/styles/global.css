@@ -185,10 +185,6 @@ code, pre {
     margin-bottom: 1.5rem;
 }
 
-.marked h2:target {
-    text-decoration: underline;
-    text-decoration-color: var(--c5);
-}
 
 .marked h3 {
     font-size: 1.75rem;
@@ -197,9 +193,11 @@ code, pre {
     margin-bottom: 1.25rem;
     text-decoration: underline;
 
+    /*
     position: sticky;
     top: 0;
     background-color: var(--bg-color);
+    */
 }
 
 .marked h4 {
@@ -301,4 +299,15 @@ code, pre {
         display: none;
         transform: scale(1);
     }
+}
+
+/* Used by headers generated at src/generator/heading.rs */
+.heading-linked :hover::after{
+    color: var(--c1);
+    content: "#";
+    display: inline-block;
+    font-size: 0.7em;
+    line-height: 1;
+    margin-left: 4px;
+    text-decoration: none;
 }
