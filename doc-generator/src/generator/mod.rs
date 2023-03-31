@@ -1,9 +1,12 @@
 use markdown::mdast::Node;
 
+mod code;
 mod heading;
-mod root;
-mod text;
+mod inline_code;
 mod paragraph;
+mod root;
+mod strong;
+mod text;
 
 pub trait Printable {
     fn to_html(&self) -> String;
@@ -18,7 +21,11 @@ impl Printable for Node {
             Node::Text(text) => text.to_html(),
             Node::Paragraph(p) => p.to_html(),
             Node::ThematicBreak(_) => String::from("<hr />"),
-            _ => format!("Not implemented<br>{:?}", self),
+            Node::InlineCode(i) => i.to_html(),
+            Node::Code(c) => c.to_html(),
+            Node::Html(h) => h.value.clone(),
+            Node::Strong(s) => s.to_html(),
+            _ => format!("<div style=\"background-color: red\">Not implemented<div><br>{:?}", self),
         }
     }
 
@@ -29,6 +36,10 @@ impl Printable for Node {
             Node::Text(text) => text.get_text(),
             Node::Paragraph(p) => p.get_text(),
             Node::ThematicBreak(_) => panic!("<hr> cannot return its raw text"),
+            Node::InlineCode(i) => i.get_text(),
+            Node::Code(c) => c.get_text(),
+            Node::Html(_) => panic!("Html cannot return its raw text"),
+            Node::Strong(s) => s.get_text(),
             _ => String::from(""),
         }
     }
