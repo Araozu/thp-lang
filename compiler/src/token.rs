@@ -17,6 +17,8 @@ pub enum TokenType {
     EOF,
 }
 
+
+#[derive(Debug)]
 pub struct Token {
     pub token_type: TokenType,
     // The token as a raw string

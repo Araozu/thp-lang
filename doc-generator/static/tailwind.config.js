@@ -42,9 +42,6 @@ module.exports = {
       "c5-on-primary-container": "var(--c5-on-primary-container)",
       "bg-color": "var(--bg-color)",
     },
-    borderWidth: {
-      '1': '1px'
-    },
     extend: {},
   },
   plugins: [],

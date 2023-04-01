@@ -3,6 +3,11 @@ name = "misti"
 version = "0.0.4"
 edition = "2021"
 
+
+[lib]
+name = "misti"
+path = "src/lib.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
