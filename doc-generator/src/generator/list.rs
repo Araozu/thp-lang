@@ -14,7 +14,11 @@ impl Printable for List {
 
         let str: String = result.into_iter().collect();
 
-        format!("<ol class=\"list-decimal list-inside\">{}</ol>", str)
+        if self.ordered {
+            format!("<ol class=\"list-decimal list-inside\">{}</ol>", str)
+        } else {
+            format!("<ul class=\"list-disc list-inside\">{}</ul>", str)
+        }
     }
 
     fn get_text(&self) -> String {

@@ -4,7 +4,11 @@ use super::Printable;
 
 impl Printable for InlineCode {
     fn to_html(&self) -> String {
-        format!("<code>{}</code>", self.value)
+        let s = self.value
+            .replace("<", "&lt;")
+            .replace(">", "&gt;");
+        
+        format!("<code>{}</code>", s)
     }
 
     fn get_text(&self) -> String {
