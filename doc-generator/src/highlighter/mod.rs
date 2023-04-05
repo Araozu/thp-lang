@@ -53,6 +53,17 @@ pub fn highlight(input: &String) -> String {
 
                 output.replace_range(range, html.as_str());
             }
+            TokenType::Comment => {
+                let start_pos = token.position;
+                let end_pos = token.get_end_position();
+
+                let range = (start_pos + offset)..(end_pos + offset);
+                let html = format!("<span class=\"token comment\">{}</span>", token.value);
+
+                offset += 35;
+
+                output.replace_range(range, html.as_str());
+            }
             _ => {}
         }
     }
