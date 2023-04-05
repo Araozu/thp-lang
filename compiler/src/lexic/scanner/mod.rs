@@ -4,6 +4,7 @@ use super::{
 };
 
 mod identifier;
+mod new_comment;
 mod new_line;
 mod number;
 mod operator;
@@ -57,4 +58,13 @@ pub fn string(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult>
 /// Attemts to scan a new line. If not found returns None to be able to chain other scanner
 pub fn new_line(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
     (c == '\n').then(|| new_line::scan(chars, start_pos))
+}
+
+/// Attempts to scan a single line comment.
+pub fn new_comment(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
+    let next_char = chars.get(start_pos + 1);
+    match (c, next_char) {
+        ('/', Some('/')) => Some(new_comment::scan(chars, start_pos)),
+        _ => None,
+    }
 }

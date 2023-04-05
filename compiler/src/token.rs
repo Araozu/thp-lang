@@ -12,11 +12,11 @@ pub enum TokenType {
     LeftBrace,
     RightBrace,
     Semicolon,
+    Comment,
     VAR,
     VAL,
     EOF,
 }
-
 
 #[derive(Debug)]
 pub struct Token {
@@ -31,12 +31,8 @@ pub struct Token {
 impl Token {
     pub fn get_end_position(&self) -> usize {
         match self.token_type {
-            TokenType::String => {
-                self.position + self.value.len() + 2
-            }
-            _ => {
-                self.position + self.value.len()
-            }
+            TokenType::String => self.position + self.value.len() + 2,
+            _ => self.position + self.value.len(),
         }
     }
 }
@@ -100,6 +96,14 @@ pub fn new_semicolon(position: usize) -> Token {
 pub fn new_datatype(value: String, position: usize) -> Token {
     Token {
         token_type: TokenType::Datatype,
+        value,
+        position,
+    }
+}
+
+pub fn new_comment(value: String, position: usize) -> Token {
+    Token {
+        token_type: TokenType::Comment,
         value,
         position,
     }

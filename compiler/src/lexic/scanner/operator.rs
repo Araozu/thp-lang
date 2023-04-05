@@ -17,7 +17,10 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
             // so this is used to retrieve the original START position of the token
             let current_len = current.len();
 
-            LexResult::Some(token::new_operator(current, start_pos - current_len), start_pos)
+            LexResult::Some(
+                token::new_operator(current, start_pos - current_len),
+                start_pos,
+            )
         }
     }
 }

@@ -18,7 +18,10 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
             // 1 is added to account for the opening `"`
             let current_len = current.len() + 1;
 
-            LexResult::Some(token::new_string(current, start_pos - current_len), start_pos + 1)
+            LexResult::Some(
+                token::new_string(current, start_pos - current_len),
+                start_pos + 1,
+            )
         }
         Some(c) if *c == '\n' => LexResult::Err(LexError {
             position: start_pos,

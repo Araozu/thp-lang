@@ -38,8 +38,11 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> LexResu
             // so this is used to retrieve the original START position of the token
             let current_len = current.len();
 
-            LexResult::Some(token::new_number(current, start_pos - current_len), start_pos)
-        },
+            LexResult::Some(
+                token::new_number(current, start_pos - current_len),
+                start_pos,
+            )
+        }
     }
 }
 
@@ -97,7 +100,10 @@ fn scan_double_impl(chars: &Vec<char>, start_pos: usize, current: String) -> Lex
             // so this is used to retrieve the original START position of the token
             let current_len = current.len();
 
-            LexResult::Some(token::new_number(current, start_pos - current_len), start_pos)
+            LexResult::Some(
+                token::new_number(current, start_pos - current_len),
+                start_pos,
+            )
         }
     }
 }
@@ -140,7 +146,10 @@ fn scan_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, 
             // so this is used to retrieve the original START position of the token
             let current_len = current.len();
 
-            (token::new_number(current, start_pos - current_len), start_pos)
+            (
+                token::new_number(current, start_pos - current_len),
+                start_pos,
+            )
         }
     }
 }
@@ -156,7 +165,10 @@ fn scan_hex_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Tok
             // so this is used to retrieve the original START position of the token
             let current_len = current.len();
 
-            (token::new_number(current, start_pos - current_len), start_pos)
+            (
+                token::new_number(current, start_pos - current_len),
+                start_pos,
+            )
         }
     }
 }
@@ -426,6 +438,5 @@ mod tests {
         } else {
             panic!("Expected some value")
         };
-
     }
 }

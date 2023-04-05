@@ -127,7 +127,9 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
 fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == token_type => Result3::Ok(t),
-        Some(t) if t.token_type == TokenType::Semicolon || t.token_type == TokenType::EOF => Result3::None,
+        Some(t) if t.token_type == TokenType::Semicolon || t.token_type == TokenType::EOF => {
+            Result3::None
+        }
         Some(t) => Result3::Err(t),
         None => Result3::None,
     }
@@ -136,7 +138,9 @@ fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Res
 fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == TokenType::Operator && t.value == operator => Result3::Ok(t),
-        Some(t) if t.token_type == TokenType::Semicolon || t.token_type == TokenType::EOF => Result3::None,
+        Some(t) if t.token_type == TokenType::Semicolon || t.token_type == TokenType::EOF => {
+            Result3::None
+        }
         Some(t) => Result3::Err(t),
         None => Result3::None,
     }
@@ -238,9 +242,8 @@ mod tests {
                 assert_eq!(4, error.error_start);
                 assert_eq!(7, error.error_end);
             }
-            _ => panic!("Error expected")
+            _ => panic!("Error expected"),
         }
-
 
         let tokens = get_tokens(&String::from("val \"hello\"")).unwrap();
         let binding = try_parse(&tokens, 0).unwrap();
@@ -250,7 +253,7 @@ mod tests {
                 assert_eq!(4, error.error_start);
                 assert_eq!(11, error.error_end);
             }
-            _ => panic!("Error expected")
+            _ => panic!("Error expected"),
         }
     }
 
@@ -264,7 +267,7 @@ mod tests {
                 assert_eq!(7, error.error_start);
                 assert_eq!(14, error.error_end);
             }
-            _ => panic!("Error expected")
+            _ => panic!("Error expected"),
         }
     }
 }
