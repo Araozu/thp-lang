@@ -6,6 +6,7 @@ use std::{fs, path::Path};
 
 mod generator;
 mod utils;
+mod highlighter;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
