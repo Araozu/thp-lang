@@ -1,5 +1,22 @@
 use misti::TokenType;
 
+#[macro_export]
+macro_rules! replace {
+    ($classes:literal, $token:ident, $offset:ident, $output:ident) => {
+        {
+            let start_pos = $token.position;
+            let end_pos = $token.get_end_position();
+
+            let range = (start_pos + $offset)..(end_pos + $offset);
+            let html = format!("<span class=\"token {}\">{}</span>", $classes, $token.value);
+
+            $offset += 28 + $classes.len();
+
+            $output.replace_range(range, html.as_str());
+        }
+    };
+}
+
 pub fn highlight(input: &String) -> String {
     // The tokens come in order
     let tokens = misti::tokenize(&input);
@@ -19,29 +36,8 @@ pub fn highlight(input: &String) -> String {
 
     for token in tokens.unwrap() {
         match &token.token_type {
-            TokenType::Datatype => {
-                let start_pos = token.position;
-                let end_pos = token.get_end_position();
-
-                let range = (start_pos + offset)..(end_pos + offset);
-                let html = format!("<span class=\"token class-name\">{}</span>", token.value);
-
-                // 38 is the number of extra characters added to the token
-                offset += 38;
-
-                output.replace_range(range, html.as_str());
-            }
-            TokenType::Number => {
-                let start_pos = token.position;
-                let end_pos = token.get_end_position();
-
-                let range = (start_pos + offset)..(end_pos + offset);
-                let html = format!("<span class=\"token number\">{}</span>", token.value);
-
-                offset += 34;
-
-                output.replace_range(range, html.as_str());
-            }
+            TokenType::Datatype => replace!("class-name", token, offset, output),
+            TokenType::Number => replace!("number", token, offset, output),
             TokenType::String => {
                 let start_pos = token.position;
                 let end_pos = token.get_end_position();
@@ -53,23 +49,15 @@ pub fn highlight(input: &String) -> String {
 
                 output.replace_range(range, html.as_str());
             }
-            TokenType::Comment => {
-                let start_pos = token.position;
-                let end_pos = token.get_end_position();
-
-                let range = (start_pos + offset)..(end_pos + offset);
-                let html = format!("<span class=\"token comment\">{}</span>", token.value);
-
-                offset += 35;
-
-                output.replace_range(range, html.as_str());
-            }
+            TokenType::Comment => replace!("comment", token, offset, output),
+            TokenType::VAL | TokenType::VAR => replace!("keyword", token, offset, output),
             _ => {}
         }
     }
 
     output
 }
+
 
 #[cfg(test)]
 mod tests {
