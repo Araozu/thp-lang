@@ -2,19 +2,17 @@ use misti::TokenType;
 
 #[macro_export]
 macro_rules! replace {
-    ($classes:literal, $token:ident, $offset:ident, $output:ident) => {
-        {
-            let start_pos = $token.position;
-            let end_pos = $token.get_end_position();
+    ($classes:literal, $token:ident, $offset:ident, $output:ident) => {{
+        let start_pos = $token.position;
+        let end_pos = $token.get_end_position();
 
-            let range = (start_pos + $offset)..(end_pos + $offset);
-            let html = format!("<span class=\"token {}\">{}</span>", $classes, $token.value);
+        let range = (start_pos + $offset)..(end_pos + $offset);
+        let html = format!("<span class=\"token {}\">{}</span>", $classes, $token.value);
 
-            $offset += 28 + $classes.len();
+        $offset += 28 + $classes.len();
 
-            $output.replace_range(range, html.as_str());
-        }
-    };
+        $output.replace_range(range, html.as_str());
+    }};
 }
 
 pub fn highlight(input: &String) -> String {
@@ -22,10 +20,7 @@ pub fn highlight(input: &String) -> String {
     let tokens = misti::tokenize(&input);
 
     if tokens.is_err() {
-        eprintln!(
-            "Found a lexical error processing code.\n{:?}",
-            tokens
-        );
+        eprintln!("Found a lexical error processing code.\n{:?}", tokens);
         return input.clone();
     }
 
@@ -38,6 +33,9 @@ pub fn highlight(input: &String) -> String {
         match &token.token_type {
             TokenType::Datatype => replace!("class-name", token, offset, output),
             TokenType::Number => replace!("number", token, offset, output),
+            TokenType::Identifier if token.value == "true" || token.value == "false" => {
+                replace!("keyword", token, offset, output)
+            }
             TokenType::String => {
                 let start_pos = token.position;
                 let end_pos = token.get_end_position();
@@ -57,7 +55,6 @@ pub fn highlight(input: &String) -> String {
 
     output
 }
-
 
 #[cfg(test)]
 mod tests {

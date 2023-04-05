@@ -1,7 +1,7 @@
 use markdown::mdast::InlineCode;
 
+use super::highlighter::highlight;
 use super::Printable;
-use crate::highlighter::highlight;
 
 impl Printable for InlineCode {
     fn to_html(&self) -> String {
@@ -14,7 +14,10 @@ impl Printable for InlineCode {
             .replace(">", "&gt;");
          */
 
-        format!("<code class=\"border border-border-color dark:border-transparent\">{}</code>", highlight(&self.value))
+        format!(
+            "<code class=\"border border-border-color dark:border-transparent\">{}</code>",
+            highlight(&self.value)
+        )
     }
 
     fn get_text(&self) -> String {

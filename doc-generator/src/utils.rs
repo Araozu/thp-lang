@@ -3,7 +3,7 @@ use markdown::mdast::Node;
 use crate::generator::Printable;
 
 pub fn to_html_fragment(text: &String) -> String {
-    text.clone().to_lowercase().replace(" ", "-")
+    text.clone().replace(" ", "-")
 }
 
 pub fn collect_children_html(vec: &Vec<Node>) -> String {

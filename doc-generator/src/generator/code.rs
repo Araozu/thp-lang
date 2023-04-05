@@ -1,6 +1,6 @@
 use markdown::mdast::Code;
 
-use crate::highlighter::highlight;
+use super::highlighter::highlight;
 
 use super::Printable;
 

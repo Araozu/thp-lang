@@ -10,6 +10,8 @@ mod root;
 mod strong;
 mod text;
 
+mod highlighter;
+
 pub trait Printable {
     fn to_html(&self) -> String;
     fn get_text(&self) -> String;

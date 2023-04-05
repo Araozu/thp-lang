@@ -1,12 +1,13 @@
 use clap::Parser;
 use generator::Printable;
+use sidebar::SidebarGenerator;
 use std::fs::File;
 use std::io::Write;
 use std::{fs, path::Path};
 
 mod generator;
+mod sidebar;
 mod utils;
-mod highlighter;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -116,6 +117,7 @@ fn process_markdown(file: &Path, input_folder: &Path, output_folder: &Path) -> R
     // let html_text = to_html(markdown_text.as_str());
     let md_ast = markdown::to_mdast(&markdown_text, &markdown::ParseOptions::gfm()).unwrap();
     let html_text = md_ast.to_html();
+    let sidebar_html = md_ast.generate_sidebar();
 
     // Read template.html
     let mut template_path = output_folder.clone();
@@ -124,9 +126,13 @@ fn process_markdown(file: &Path, input_folder: &Path, output_folder: &Path) -> R
     let template_contents = fs::read(template_path).unwrap();
     let template_contents = String::from_utf8(template_contents).unwrap();
 
-    let final_output = template_contents.replace("{{markdown}}", &html_text);
+    let final_output = template_contents
+        .replace("{{markdown}}", &html_text)
+        .replace("{{sidebar}}", &sidebar_html);
 
+    //
     // Write to disk
+    //
     let _ = File::create(&output_file)
         .unwrap()
         .write_all(final_output.as_bytes())
