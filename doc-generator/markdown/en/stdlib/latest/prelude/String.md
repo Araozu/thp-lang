@@ -197,6 +197,45 @@ name.charAt(4)!!  //: "o"
 </div>
 
 
+### charCodeAt
+
+```misti
+fun charCodeAt(Num position) -> Num?
+```
+
+Returns an integer between `0` and `65535` representing the UTF-16
+code unit at `position`.
+
+
+<div class="padded">
+
+#### Parameters
+
+- `Num position`: A number between `0` and the string's `length - 1`
+
+#### Return
+
+- `Num?`: The code unit at `position` if it's valid, or `None` if it's invalid.
+
+#### Description
+
+Description
+
+#### Examples
+
+```misti
+val letters = "ABC"
+
+letters.charCodeAt(0)  //: Some(65)
+letters.charCodeAt(1)  //: Some(66)
+```
+
+</div>
+
+
+### codePointAt
+
+
 ### concat
 
 ```misti
@@ -242,6 +281,9 @@ greeting.concat(3, 2, 2)      //: "Hello 322"
 </div>
 
 
+### endsWith
+
+
 
 ### includes
 
@@ -283,6 +325,91 @@ loremIpsum.includes("ipsum", -5) //: true
 
 </div>
 
+
+
+### indexOf
+
+```misti
+fun indexOf(Str searchValue, Num position = 0) -> Num
+```
+
+### lastIndexOf
+
+fun lastIndexOf(Str searchValue, Num position = Infinity) -> Num
+
+### match
+
+```misti
+fun match(RegExp pattern) -> RegExpResult
+```
+
+
+### matchAll
+
+```misti
+fun matchAll(RegExp pattern) -> Iterator[RegExpResult]
+```
+
+
+### normalize
+
+```misti
+fun normalize(Str form = "NFC") -> String
+```
+
+
+### padEnd
+
+```misti
+fun padEnd(Num targetLength, Str padValue = " ") -> String
+```
+
+
+### padStart
+
+```misti
+fun padStart(Num targetLength, Str padValue = " ") -> String
+```
+
+### repeat
+
+```misti
+fun repeat(Num count) -> String
+```
+
+### replace
+
+```misti
+fun replaceAll([RegExp | Str] pattern, Str replacement) -> String
+```
+
+
+### replaceAll
+
+```misti
+fun replaceAll([RegExp | Str] pattern, Str replacement) -> String
+```
+
+
+### search
+
+```misti
+fun search([RegExp | Str] pattern) -> Num
+```
+
+
+### slice
+
+```misti
+fun slice(Num start, Num? end) -> String
+```
+
+
+### split
+
+```misti
+fun split(Str separator, Num? limit) -> Array<Str>
+```
 
 
 

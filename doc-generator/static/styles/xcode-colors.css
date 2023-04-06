@@ -56,7 +56,7 @@ pre[class*="language-"] {
     word-wrap: normal;
     color: var(--code-theme-color);
     background: var(--code-theme-bg-color);
-    font-size: 1em;
+    font-size: 0.8em;
     line-height: 1.5em;
     border-radius: 0.3em;
 
