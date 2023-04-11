@@ -9,3 +9,5 @@ edition = "2021"
 misti = { path = "../compiler"}
 clap = { version = "4.2.0", features = ["derive"] }
 markdown = "1.0.0-alpha.7"
+toml = "0.7.3"
+

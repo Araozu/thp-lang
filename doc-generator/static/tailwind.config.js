@@ -30,6 +30,8 @@ module.exports = {
       "c2-on-primary": "var(--c2-on-primary)",
       "c2-primary-container": "var(--c2-primary-container)",
       "c2-on-primary-container": "var(--c2-on-primary-container)",
+      "c2-surface-variant": "var(--c2-surface-variant)",
+      "c2-on-surface-variant": "var(--c2-on-surface-variant)",
 
       "c3-primary": "var(--c3-primary)",
       "c3-on-primary": "var(--c3-on-primary)",

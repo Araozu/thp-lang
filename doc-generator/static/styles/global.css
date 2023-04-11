@@ -32,6 +32,8 @@ body ::selection {
     --c2-on-primary: #003351;
     --c2-primary-container: #004b72;
     --c2-on-primary-container: #cce5ff;
+    --c2-surface-variant: #41474d;
+    --c2-on-surface-variant: #c1c7ce;
 
     /* C3 Material Colors */
     --c3-primary: #ffaed7;
@@ -70,6 +72,8 @@ body ::selection {
         --c2-on-primary: #ffffff;
         --c2-primary-container: #cce5ff;
         --c2-on-primary-container: #001e31;
+        --c2-surface-variant: #dde3ea;
+        --c2-on-surface-variant: #41474d;
 
         /* C3 Material Colors */
         --c3-primary: #954170;
@@ -95,7 +99,7 @@ body ::selection {
 }
 
 html {
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .padded {

@@ -14,3 +14,14 @@ val remainder = substract(50, 30)
 val total = add(60, -30, 90)
 ```
 
+
+
+```nav
+[previous]
+href = "./simple-datatypes.html"
+title = "Datatypes"
+
+[next]
+href = "./operators.html"
+title = "Operators"
+```

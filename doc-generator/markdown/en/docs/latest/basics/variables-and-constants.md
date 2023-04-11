@@ -106,3 +106,14 @@ val roi =
     val investment = 25000
     income / investment   // This will be the value of `roi`
 ```
+
+
+```nav
+[previous]
+href = "../"
+title = "Welcome"
+
+[next]
+href = "./simple-datatypes.html"
+title = "Datatypes"
+```

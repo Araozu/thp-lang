@@ -20,7 +20,7 @@ pub fn highlight(input: &String) -> String {
     let tokens = misti::tokenize(&input);
 
     if tokens.is_err() {
-        eprintln!("Found a lexical error processing code.\n{:?}", tokens);
+        // eprintln!("Found a lexical error processing code.\n{:?}", tokens);
         return input.clone();
     }
 

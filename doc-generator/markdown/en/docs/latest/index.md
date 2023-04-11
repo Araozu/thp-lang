@@ -21,6 +21,8 @@ Such things will be noted in the documentation where neccesary.
 
 ## Syntax summary
 
+## Variables and constants
+
 ```misti
 //
 // Variables and constants
@@ -44,6 +46,8 @@ val roi =
     income / investment   // This will be the value of `roi`
 ```
 
+## Basic datatypes
+
 ```misti
 //
 // Basic datatypes
@@ -52,6 +56,8 @@ Num number = 40.12345
 Bool boolean = true
 Str string = "John Doe"
 ```
+
+## Conditionals
 
 ```misti
 //
@@ -71,6 +77,8 @@ val response = if risk < 0.2 do "Go ahead" else "Don't"
 
 // There is no ternary conditional
 ```
+
+## Arrays
 
 ```misti
 //
@@ -92,6 +100,8 @@ Array[Num] dates = Array(1990, 1995, 2014, 2015, 2017)
 //     instead of angle brackes.
 ```
 
+## Tuples
+
 ```misti
 //
 // Tuples
@@ -104,6 +114,8 @@ var #(name, age, isMarried) = person
 // Tuple signature
 #(Str, Num, Bool) signature = #("John", 30, true)
 ```
+
+## Loops
 
 ```misti
 //
@@ -120,6 +132,8 @@ for value of array do
 while condition do
     print("while")
 ```
+
+## Functions
 
 ```misti
 //
@@ -147,6 +161,7 @@ calculate(100, 0.25)  // "Your total is 75$"
 calculate(100)        // "Your total is 100$"
 ```
 
+## Objects
 
 ```misti
 //
@@ -178,6 +193,7 @@ val randomObject = #{
 }
 ```
 
+## Classes
 
 ```misti
 //
@@ -247,6 +263,8 @@ class Square(Num length) -> Rectangle(length, length) =
         console.log("A square with perimeter = {$perimeter()} and area = {$area()}")
 ```
 
+## Null safety
+
 ```misti
 //
 // Null safety
@@ -272,6 +290,8 @@ else
 Num? roi = divide(income, investment)
 ```
 
+## Error handling
+
 ```misti
 //
 // Error handling
@@ -294,6 +314,8 @@ try problematicExpression() with
     // must return an expression
     10
 ```
+
+## Pattern matching
 
 ```misti
 //
@@ -336,6 +358,8 @@ match result with
     // reason is Str
 ```
 
+## JSX
+
 ```misti
 //
 // JSX
@@ -348,7 +372,11 @@ val list = items.map fun (item, count) {&lt;li key={count}>{item}&lt;/li>}
 
 
 
-
+```nav
+[next]
+href = "./basics/variables-and-constants.html"
+title = "Variables and constants"
+```
 
 
 
