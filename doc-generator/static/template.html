@@ -41,9 +41,9 @@
 
             {{pages}}
         </div>
-        <div class="text-sm p-4 h-screen py-12 sticky top-0 overflow-y-scroll overflow-x-hidden border-r border-border-color">
+        <nav class="text-sm p-4 h-screen py-12 sticky top-0 overflow-y-scroll overflow-x-hidden border-r border-border-color">
             {{sidebar}}
-        </div>
+        </nav>
         <div class="marked px-8 max-w-screen-lg">
             {{markdown}}
         </div>
@@ -56,6 +56,34 @@
         linkEl.rel = "stylesheet";
 
         document.head.appendChild(linkEl);
+    </script>
+    <script>
+        const anchors = document.querySelectorAll('h2, h3');
+        const links = document.querySelectorAll('nav > ul > li > a');
+
+        window.addEventListener("DOMContentLoaded", () => {
+            window.addEventListener('scroll', (event) => {
+                if (anchors !== null && links !== null) {
+                    let scrollTop = window.scrollY;
+                    let scrollBottom = scrollTop + window.innerHeight;
+
+                    // highlight the last scrolled-to: set everything inactive first
+                    links.forEach((link, index) => {
+                        link.classList.remove("text-c2-primary");
+                    });
+
+                    // then iterate backwards, on the first match highlight it and break
+                    for (let i = 0; i < anchors.length; i++) {
+                        let anchorPos = anchors[i].offsetTop + 30;
+
+                        if (anchorPos > scrollTop && anchorPos < scrollBottom) {
+                            links[i].classList.add('text-c2-primary');
+                            break;
+                        }
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>

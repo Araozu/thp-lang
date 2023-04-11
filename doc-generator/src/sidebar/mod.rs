@@ -54,7 +54,7 @@ impl Topic {
 
         let html_fragment_link = utils::to_html_fragment(&self.text);
         format!(
-            "<li class=\"m-2\"><a href=\"#{}\" class=\"inline-block w-full\">{}</a>{}</li>",
+            "<li class=\"m-2\"><a href=\"#{}\" class=\"inline-block w-full hover:text-c2-primary\">{}</a>{}</li>",
             html_fragment_link, self.text, extra
         )
     }
