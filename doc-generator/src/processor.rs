@@ -59,6 +59,7 @@ pub fn search_config_file(current_path: &Path, input_folder: &Path, output_folde
 }
 
 fn process_toml(current_path: &Path, input_folder: &Path, output_folder: &Path) {
+    println!("YAML:{}", crate::pages::generate_pages(current_path));
     let mut toml_file_path = current_path.canonicalize().unwrap();
     toml_file_path.push("index.toml");
 

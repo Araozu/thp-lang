@@ -2,6 +2,7 @@ use clap::Parser;
 use std::path::Path;
 
 mod generator;
+mod pages;
 mod processor;
 mod sidebar;
 mod utils;
