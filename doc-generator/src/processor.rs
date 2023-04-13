@@ -59,7 +59,8 @@ pub fn search_config_file(current_path: &Path, input_folder: &Path, output_folde
 }
 
 fn process_toml(current_path: &Path, input_folder: &Path, output_folder: &Path) {
-    println!("YAML:{}", crate::pages::generate_pages(current_path));
+    let file_tree_html = crate::pages::generate_pages(current_path, input_folder);
+
     let mut toml_file_path = current_path.canonicalize().unwrap();
     toml_file_path.push("index.toml");
 
@@ -81,7 +82,7 @@ fn process_toml(current_path: &Path, input_folder: &Path, output_folder: &Path) 
     let mut file = current_path.canonicalize().unwrap();
     file.push(format!("{}.md", entry_point));
 
-    compile_md_file(&file, input_folder, output_folder)
+    compile_md_file(&file, input_folder, output_folder, &file_tree_html)
         .expect("FS: entry-point file MUST point to a valid file");
 
     //  Subsequent keys should have schema:
@@ -114,7 +115,7 @@ fn process_toml(current_path: &Path, input_folder: &Path, output_folder: &Path) 
                     file.push(key.clone());
                     file.push(format!("{}.md", file_name));
 
-                    compile_md_file(&file, input_folder, output_folder)
+                    compile_md_file(&file, input_folder, output_folder, &file_tree_html)
                         .expect(format!("Error compiling file {}", file.display()).as_str());
                 }
             }
@@ -127,6 +128,7 @@ fn compile_md_file(
     file: &PathBuf,
     input_folder: &Path,
     output_folder: &Path,
+    file_tree_html: &String,
 ) -> Result<(), String> {
     // /home/fernando/misti/docs/markdown
     let input_folder = input_folder.canonicalize().unwrap();
@@ -164,7 +166,8 @@ fn compile_md_file(
 
     let final_output = template_contents
         .replace("{{markdown}}", &html_text)
-        .replace("{{sidebar}}", &sidebar_html);
+        .replace("{{sidebar}}", &sidebar_html)
+        .replace("{{pages}}", &file_tree_html);
 
     //
     // Write to disk

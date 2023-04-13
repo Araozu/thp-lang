@@ -24,7 +24,7 @@
         <div class="text-sm p-4 h-screen py-8 sticky top-0 overflow-y-scroll overflow-x-hidden border-r border-border-color">
             <a
                 href="/" 
-                class="inline-block border border-transparent 
+                class="inline-block border border-transparent mb-8
                 hover:border-c2-primary hover:text-c2-primary transition-colors rounded-md"
             >
                 <svg style="width: 100%" viewBox="0 0 10240 10240">
@@ -39,9 +39,12 @@
                 <p class="font-extrabold text-6xl text-center">Misti</p>
             </a>
 
-            {{pages}}
+            <nav id="secondary-nav">
+                {{pages}}
+            </nav>
+
         </div>
-        <nav class="text-sm p-4 h-screen py-12 sticky top-0 overflow-y-scroll overflow-x-hidden border-r border-border-color">
+        <nav id="primary-nav" class="text-sm p-4 h-screen py-12 sticky top-0 overflow-y-scroll overflow-x-hidden border-r border-border-color">
             {{sidebar}}
         </nav>
         <div class="marked px-8 max-w-screen-lg">
@@ -59,7 +62,7 @@
     </script>
     <script>
         const anchors = document.querySelectorAll('h2, h3');
-        const links = document.querySelectorAll('nav > ul > li a');
+        const links = document.querySelectorAll('nav#primary-nav > ul > li a');
 
         window.addEventListener("DOMContentLoaded", () => {
             window.addEventListener('scroll', (event) => {
