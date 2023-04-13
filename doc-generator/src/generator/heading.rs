@@ -18,7 +18,7 @@ impl Printable for Heading {
             let html_fragment_text = utils::to_html_fragment(&self.get_text());
 
             format!(
-                "<h{} id=\"{}\" class=\"heading-linked target:underline decoration-js-color decoration-1\"><a href=\"#{}\">{}</a></h{}>",
+                "<h{} id=\"{}\" class=\"heading-linked\"><a href=\"#{}\">{}</a></h{}>",
                 self.depth, html_fragment_text, html_fragment_text, text, self.depth
             )
         } else {

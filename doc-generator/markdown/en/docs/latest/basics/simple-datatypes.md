@@ -33,14 +33,3 @@ True and false
 true
 false
 ```
-
-```nav
-[previous]
-href = "./variables-and-constants.html"
-title = "Variables and constants"
-
-[next]
-href = "./function-calls.html"
-title = "Function calls"
-```
-

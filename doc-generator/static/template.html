@@ -59,11 +59,11 @@
     </script>
     <script>
         const anchors = document.querySelectorAll('h2, h3');
-        const links = document.querySelectorAll('nav > ul > li > a');
+        const links = document.querySelectorAll('nav > ul > li a');
 
         window.addEventListener("DOMContentLoaded", () => {
             window.addEventListener('scroll', (event) => {
-                if (anchors !== null && links !== null) {
+                if (anchors && links) {
                     let scrollTop = window.scrollY;
                     let scrollBottom = scrollTop + window.innerHeight;
 

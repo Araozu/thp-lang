@@ -372,12 +372,4 @@ val list = items.map fun (item, count) {&lt;li key={count}>{item}&lt;/li>}
 
 
 
-```nav
-[next]
-href = "./basics/variables-and-constants.html"
-title = "Variables and constants"
-```
-
-
-
 

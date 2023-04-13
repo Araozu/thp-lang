@@ -81,5 +81,8 @@ fn generate_nav_html(data: &String) -> String {
         _ => String::from("<div></div>"),
     };
 
-    format!("<div class=\"grid grid-cols-2 gap-4 my-16\">{}{}</div>", previous, next)
+    format!(
+        "<div class=\"grid grid-cols-2 gap-4 my-16\">{}{}</div>",
+        previous, next
+    )
 }

@@ -307,7 +307,7 @@ code, pre {
 
 /* Used by headers generated at src/generator/heading.rs */
 .heading-linked :hover::after{
-    color: var(--c1);
+    color: var(--c2-primary);
     content: "#";
     display: inline-block;
     font-size: 0.7em;

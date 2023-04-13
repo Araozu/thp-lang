@@ -1,0 +1,29 @@
+
+entry-point = "index"
+
+[basics]
+section-name = "Basics"
+children = [
+    "variables-and-constants",
+    "simple-datatypes",
+    "function-calls",
+    "operators",
+    "tuples",
+    "indentation-rules",
+]
+
+[flow-control]
+section-name = "Flow control"
+children = [
+    "conditionals",
+    "arrays",
+    "loops",
+]
+
+[functions]
+section-name = "Functions"
+children = [
+    "definition",
+    "lambdas",
+    "parameters",
+]
