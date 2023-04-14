@@ -1,1 +1,8 @@
 path: ""
+name: ""
+children:
+- path: prelude
+  name: Prelude
+  children:
+  - path: String
+  - path: Console

@@ -4,10 +4,41 @@ has_index: true
 children:
 - path: index
 
+- path: basics
+  name: Basics
+  children:
+  - path: variables-and-constants
+  - path: simple-datatypes
+  - path: function-calls
+  - path: operators
+  - path: tuples
+  - path: indentation-rules
+
 - path: flow-control
   name: Flow control
-  has_index: true
   children:
-  - path: arrays
   - path: conditionals
+  - path: arrays
+  - path: loops
 
+- path: functions
+  name: Functions
+  children:
+  - path: definition
+  - path: lambdas
+  - path: parameters
+
+- path: objects
+  name: Objects
+  children:
+  - path: definition
+
+- path: classes
+  name: Classes
+  children:
+  - path: definition
+
+- path: modules
+  name: Modules
+  children:
+  - path: import

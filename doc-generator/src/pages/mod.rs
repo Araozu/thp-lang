@@ -1,6 +1,10 @@
-use std::{fs, path::Path};
+use std::path::Path;
 
-use yaml_rust::{Yaml, YamlLoader};
+use yaml_rust::Yaml;
+
+use crate::utils;
+
+mod md_compiler;
 
 pub enum Node<'a> {
     File(File<'a>),
@@ -30,7 +34,7 @@ macro_rules! y_str {
     };
 }
 
-fn generate_pages_tree(values: &Yaml) -> Node {
+pub fn parse_yaml(values: &Yaml) -> Node {
     let Yaml::Hash(table) = values
     else {panic!("YAML: input MUST be an object")};
 
@@ -61,7 +65,7 @@ fn generate_pages_tree(values: &Yaml) -> Node {
 
             let children_nodes: Vec<Node> = children
                 .into_iter()
-                .map(|values| generate_pages_tree(values))
+                .map(|values| parse_yaml(values))
                 .collect();
 
             Node::Folder(Folder {
@@ -77,7 +81,7 @@ fn generate_pages_tree(values: &Yaml) -> Node {
     }
 }
 
-fn generate_pages_html(file_tree: &Node, current_path: &Path) -> String {
+pub fn generate_pages_html(file_tree: &Node, current_path: &Path) -> String {
     match file_tree {
         Node::File(file) => {
             if file.path == "index" {
@@ -127,21 +131,43 @@ fn generate_pages_html(file_tree: &Node, current_path: &Path) -> String {
     }
 }
 
-pub fn generate_pages(yaml_folder: &Path, input_folder: &Path) -> String {
-    let mut yaml_path = yaml_folder.canonicalize().unwrap();
-    yaml_path.push("index.yaml");
+pub fn compile_md_to_html(
+    file_tree: &Node,
+    current_path: &Path,
+    input_folder: &Path,
+    output_folder: &Path,
+    file_tree_html: &String,
+) {
+    match file_tree {
+        Node::File(file) if file.path != "" => {
+            let mut file_path = current_path.canonicalize().unwrap();
+            file_path.push(format!("{}.md", file.path));
 
-    let yaml_bytes = fs::read(yaml_path).expect("File index.yaml MUST exist");
-    let yaml = String::from_utf8(yaml_bytes).expect("YAML index file MUST be valid UTF-8");
+            md_compiler::compile(&file_path, input_folder, output_folder, file_tree_html);
+        }
+        Node::File(_) => {
+            panic!("YAML: A file cannot have an empty `path` key")
+        }
+        Node::Folder(folder) if folder.path != "" => {
+            let mut new_path = current_path.canonicalize().unwrap();
+            new_path.push(folder.path);
+            utils::ensure_folder_exists(&new_path, input_folder, output_folder)
+                .expect("SHOULD be able to create folder");
 
-    let yaml_docs =
-        YamlLoader::load_from_str(yaml.as_str()).expect("YAML file MUST contain valid YAML");
-    let yaml = &yaml_docs[0];
-
-    let input_folder = input_folder.canonicalize().unwrap();
-    let yaml_folder_2 = yaml_folder.canonicalize().unwrap();
-    let web_absolute_path = yaml_folder_2.strip_prefix(input_folder).unwrap();
-
-    let root_node = generate_pages_tree(yaml);
-    generate_pages_html(&root_node, web_absolute_path)
+            for node in folder.children.iter() {
+                compile_md_to_html(node, &new_path, input_folder, output_folder, file_tree_html);
+            }
+        }
+        Node::Folder(folder) => {
+            for node in folder.children.iter() {
+                compile_md_to_html(
+                    node,
+                    &current_path,
+                    input_folder,
+                    output_folder,
+                    file_tree_html,
+                );
+            }
+        }
+    }
 }
