@@ -15,7 +15,7 @@
 
 - Scan single line comments
 - Refactor String token to include double quotes (") in its content
-
+ 
 ## v0.0.4
 
 - Explicit datatype of variables

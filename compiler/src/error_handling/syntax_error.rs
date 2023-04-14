@@ -94,12 +94,12 @@ fn get_line(
 mod tests {
     use super::*;
     use crate::{
-        error_handling::{PrintableError, SyntaxError},
+        error_handling::{PrintableError, SyntaxError, MistiError},
         lexic::get_tokens,
         syntax::construct_ast,
     };
 
-    fn get_error_data(input: String) -> (Vec<char>, SyntaxError) {
+    fn get_error_data(input: String) -> (Vec<char>, MistiError) {
         let tokens = get_tokens(&input).unwrap();
         let error_holder = construct_ast(&tokens);
 

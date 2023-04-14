@@ -1,4 +1,3 @@
-use chrono::{prelude::Utc, Datelike};
 use clap::{Parser, Subcommand};
 
 // Module to handle the repl and its compilation
@@ -45,11 +44,9 @@ enum Commands {
 const VERSION: &str = "0.0.1";
 
 fn get_copyright() -> String {
-    let year = Utc::now().year();
-
     format!(
-        "Misti {}\nCopyright (c) {} Fernando Enrique Araoz Morales\n",
-        VERSION, year
+        "Misti {}\nCopyright (c) 2023 Fernando Enrique Araoz Morales\n",
+        VERSION,
     )
 }
 

@@ -1,7 +1,0 @@
-entry-point = "index"
-
-[prelude]
-section-name = "Prelude"
-children = [
-    "String"
-]

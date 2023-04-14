@@ -32,8 +32,9 @@ fn build_ast(input: &String, tokens: Vec<Token>) {
 
     match ast {
         Ok(mut ast) => {
-            let mut table = SymbolTable::new();
-            semantic::check_ast(&mut ast, &mut table);
+            let mut symbol_table = SymbolTable::new();
+            semantic::check_ast(&mut ast, &mut symbol_table);
+
             let js_code = codegen::codegen(&ast);
             println!("{}", js_code)
         }
@@ -43,6 +44,8 @@ fn build_ast(input: &String, tokens: Vec<Token>) {
         }
     }
 }
+
+
 
 /// Executes the REPL, reading from stdin, compiling and emitting JS to stdout
 pub fn run() -> io::Result<()> {

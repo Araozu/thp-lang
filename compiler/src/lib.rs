@@ -26,3 +26,7 @@ pub use token::TokenType;
 pub fn tokenize(input: &String) -> Result<Vec<Token>, MistiError> {
     lexic::get_tokens(input)
 }
+
+pub fn repl() {
+    let _ = repl::run();
+}

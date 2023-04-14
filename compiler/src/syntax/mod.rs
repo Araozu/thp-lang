@@ -1,5 +1,5 @@
 use crate::ast_types::Binding;
-use crate::error_handling::SyntaxError;
+use crate::error_handling::{SyntaxError, MistiError};
 
 use super::token::Token;
 
@@ -22,7 +22,7 @@ pub enum SyntaxResult<'a> {
 }
 
 /// Constructs the Misti AST from a vector of tokens
-pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST<'a>, SyntaxError> {
+pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST<'a>, MistiError> {
     let _token_amount = tokens.len();
     let mut current_pos = 0;
 
@@ -30,13 +30,13 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST<'a>, Syntax
         SyntaxResult::Ok(module) => Ok(ModuleAST {
             bindings: vec![module],
         }),
-        SyntaxResult::None => Err(SyntaxError {
+        SyntaxResult::None => Err(MistiError::Syntax(SyntaxError {
             reason: String::from("PARSER couldn't parse any construction"),
             // FIXME: This should get the position of the _token_ that current_pos points to
             error_start: current_pos,
             error_end: current_pos,
-        }),
-        SyntaxResult::Err(err) => Err(err),
+        })),
+        SyntaxResult::Err(err) => Err(MistiError::Syntax(err)),
     }
 }
 

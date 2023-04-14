@@ -1,37 +1,40 @@
 use std::collections::HashMap;
 
+use crate::semantic::Datatype;
+
 // Primitive datatypes
 pub const _NUMBER: &str = "Num";
 pub const _STRING: &str = "Str";
 pub const _BOOLEAN: &str = "Bool";
 
 pub struct SymbolTable {
-    table: HashMap<String, String>,
+    /// For now just stores identifiers and datatypes
+    table: HashMap<String, Datatype>,
 }
 
 impl SymbolTable {
     pub fn new() -> SymbolTable {
-        let symbol_table = HashMap::<String, String>::new();
+        let symbol_table = HashMap::<String, Datatype>::new();
 
         SymbolTable {
             table: symbol_table,
         }
     }
 
-    pub fn add(&mut self, identifier: &str, datatype: &str) {
+    pub fn insert(&mut self, identifier: &str, datatype: Datatype) {
         self.table
-            .insert(String::from(identifier), String::from(datatype));
+            .insert(String::from(identifier), datatype);
     }
 
-    pub fn test(&self, identifier: &str) -> bool {
-        return self.table.contains_key::<String>(&String::from(identifier));
+    pub fn has_id(&self, identifier: &String) -> bool {
+        return self.table.contains_key::<String>(identifier);
     }
 
-    pub fn check_type(&self, identifier: &str, datatype: &str) -> bool {
+    pub fn check_type(&self, identifier: &String, datatype: Datatype) -> bool {
         self.table
-            .get_key_value(&String::from(identifier))
-            .and_then(|(_, value)| {
-                if value == &String::from(datatype) {
+            .get(identifier)
+            .and_then(|value| {
+                if *value == datatype {
                     Some(true)
                 } else {
                     Some(false)
@@ -40,10 +43,11 @@ impl SymbolTable {
             .unwrap_or(false)
     }
 
-    pub fn get_type(&self, identifier: &str) -> Option<String> {
+    /// Returns the Datatype of a given identifier
+    pub fn get_type(&self, identifier: &String) -> Option<&Datatype> {
         self.table
-            .get_key_value(&String::from(identifier))
-            .and_then(|(_, value)| Some(String::from(value)))
+            .get(identifier)
+            .and_then(|value| Some(value))
     }
 }
 
@@ -59,15 +63,18 @@ mod tests {
     #[test]
     fn should_add_identifier() {
         let mut table = SymbolTable::new();
-        table.add("identifier", _NUMBER);
-        assert_eq!(true, table.test("identifier"))
+        table.insert("identifier", Datatype::num());
+
+        let s = String::from("identifier");
+        assert_eq!(true, table.has_id(&s))
     }
 
     #[test]
     fn should_check_type() {
         let mut table = SymbolTable::new();
-        table.add("firstNumber", _NUMBER);
+        table.insert("firstNumber", Datatype::num());
 
-        assert!(table.check_type("firstNumber", _NUMBER));
+        let s = String::from("firstNumber");
+        assert!(table.check_type(&s, Datatype::num()));
     }
 }
