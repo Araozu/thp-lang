@@ -2,25 +2,26 @@ use crate::{ast_types::Expression, symbol_table::SymbolTable};
 
 use super::datatype::Datatype;
 
-trait Typed<'a> {
+pub trait Typed<'a> {
     fn t(&self, symbol_table: &'a mut SymbolTable) -> Datatype;
 }
 
 impl<'a> Typed<'a> for Expression<'a> {
+    /// Returns the Datatype of this Expression
     fn t(&self, symbol_table: &'a mut SymbolTable) -> Datatype {
         match self {
             Expression::Number(_) => Datatype::num(),
             Expression::String(_) => Datatype::str(),
             Expression::Boolean(_) => Datatype::bool(),
             Expression::Identifier(id) => {
-                let res = symbol_table.get_type(id).unwrap();
+                let res = symbol_table
+                    .get_type(id)
+                    .expect("SEMANTIC: identifier doesn't exist in Symbol table");
                 res.clone()
             }
         }
     }
 }
-
-
 
 #[cfg(test)]
 mod t {
@@ -59,4 +60,3 @@ mod t {
         assert!(exp.t(&mut table) == Datatype::num());
     }
 }
-

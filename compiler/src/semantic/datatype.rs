@@ -1,12 +1,10 @@
-
 /// Represents a qualified datatype of the compiler.
-/// 
+///
 /// A datatype is composed of a path, e.g. `base.Str`, `base.Num`
 #[derive(PartialEq)]
 pub struct Datatype {
     t: String,
 }
-
 
 impl Datatype {
     pub fn new(t: String) -> Datatype {
@@ -14,23 +12,27 @@ impl Datatype {
     }
 
     pub fn str() -> Datatype {
-        Datatype { t: String::from("base.Str") }
+        Datatype {
+            t: String::from("base.Str"),
+        }
     }
 
     pub fn num() -> Datatype {
-        Datatype { t: String::from("base.Num") }
+        Datatype {
+            t: String::from("base.Num"),
+        }
     }
 
     pub fn bool() -> Datatype {
-        Datatype { t: String::from("base.Bool") }
+        Datatype {
+            t: String::from("base.Bool"),
+        }
     }
 
     pub fn clone(&self) -> Datatype {
         Datatype { t: self.t.clone() }
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {

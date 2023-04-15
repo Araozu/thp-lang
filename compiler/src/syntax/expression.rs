@@ -41,7 +41,7 @@ mod tests {
         let expression = try_parse(&tokens, 0).unwrap();
 
         match expression {
-            Expression::String(value) => assert_eq!("Hello", value),
+            Expression::String(value) => assert_eq!("\"Hello\"", value),
             _ => panic!(),
         }
     }

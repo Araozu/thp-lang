@@ -30,10 +30,7 @@ pub struct Token {
 
 impl Token {
     pub fn get_end_position(&self) -> usize {
-        match self.token_type {
-            TokenType::String => self.position + self.value.len() + 2,
-            _ => self.position + self.value.len(),
-        }
+        self.position + self.value.len()
     }
 }
 

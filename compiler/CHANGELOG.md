@@ -15,6 +15,7 @@
 
 - Scan single line comments
 - Refactor String token to include double quotes (") in its content
+- Refactor datachecking of semantic analysis
  
 ## v0.0.4
 

@@ -1,5 +1,5 @@
 use crate::ast_types::Binding;
-use crate::error_handling::{SyntaxError, MistiError};
+use crate::error_handling::{MistiError, SyntaxError};
 
 use super::token::Token;
 
@@ -41,13 +41,8 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST<'a>, MistiE
 }
 
 fn next_construct<'a>(tokens: &'a Vec<Token>, current_pos: usize) -> SyntaxResult {
-    None.or_else(|| binding::try_parse(tokens, 0))
+    None.or_else(|| binding::try_parse(tokens, current_pos))
         .unwrap_or_else(|| {
-            SyntaxResult::Err(SyntaxError {
-                reason: String::from("Unrecognized token"),
-                // FIXME: This should get the position of the _token_ that current_pos points to
-                error_start: current_pos,
-                error_end: current_pos,
-            })
+            SyntaxResult::None
         })
 }

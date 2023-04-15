@@ -10,12 +10,12 @@ use super::semantic;
 use super::syntax;
 
 /// Executes Lexical analysis, handles errors and calls build_ast for the next phase
-fn compile(input: &String) {
+fn compile(input: &String, symbol_table: &mut SymbolTable) {
     let tokens = lexic::get_tokens(input);
 
     match tokens {
         Ok(tokens) => {
-            build_ast(input, tokens);
+            build_ast(input, tokens, symbol_table);
         }
         Err(error) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
@@ -27,13 +27,12 @@ fn compile(input: &String) {
 /// Executes Syntax analysis, and for now, Semantic analysis and Code generation.
 ///
 /// Prints the generated code in stdin
-fn build_ast(input: &String, tokens: Vec<Token>) {
+fn build_ast(input: &String, tokens: Vec<Token>, symbol_table: &mut SymbolTable) {
     let ast = syntax::construct_ast(&tokens);
 
     match ast {
-        Ok(mut ast) => {
-            let mut symbol_table = SymbolTable::new();
-            semantic::check_ast(&mut ast, &mut symbol_table);
+        Ok( ast) => {
+            semantic::check_ast(& ast, symbol_table);
 
             let js_code = codegen::codegen(&ast);
             println!("{}", js_code)
@@ -45,17 +44,16 @@ fn build_ast(input: &String, tokens: Vec<Token>) {
     }
 }
 
-
-
 /// Executes the REPL, reading from stdin, compiling and emitting JS to stdout
 pub fn run() -> io::Result<()> {
     let stdin = io::stdin();
     let mut buffer = String::new();
+    let mut repl_symbol_table = SymbolTable::new();
 
     println!("REPL: Enter expressions to evaluate. Type Ctrl-D to exit.");
     loop {
         print!("> ");
-        let _ = io::stdout().flush();
+        io::stdout().flush()?;
         buffer.clear();
         let read = stdin.read_line(&mut buffer);
 
@@ -65,7 +63,7 @@ pub fn run() -> io::Result<()> {
                 break Ok(());
             }
             Ok(_) => {
-                compile(&buffer);
+                compile(&buffer, &mut repl_symbol_table);
             }
             Err(error) => {
                 eprintln!("Error reading stdin.");

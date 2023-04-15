@@ -6,7 +6,7 @@ use crate::lexic::{token, utils, LexResult};
 /// This function assumes that `start_pos` is after the first double quote,
 /// e.g. if the input is `"hello"`, `start_pos == 1`
 pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
-    scan_impl(chars, start_pos, String::from(""))
+    scan_impl(chars, start_pos, String::from("\""))
 }
 
 /// Recursive function that does the scanning
@@ -16,10 +16,11 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
             // start_pos is the position where the token ENDS, not where it STARTS,
             // so this is used to retrieve the original START position of the token
             // 1 is added to account for the opening `"`
-            let current_len = current.len() + 1;
+            let current_len = current.len();
 
+            let final_str = format!("{}\"", current);
             LexResult::Some(
-                token::new_string(current, start_pos - current_len),
+                token::new_string(final_str, start_pos - current_len),
                 start_pos + 1,
             )
         }
@@ -77,7 +78,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(2, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("", token.value);
+            assert_eq!("\"\"", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -91,7 +92,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(15, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Hello, world!", token.value);
+            assert_eq!("\"Hello, world!\"", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -116,7 +117,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\\ntext", token.value);
+            assert_eq!("\"Sample\\ntext\"", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -127,7 +128,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\\\"text", token.value);
+            assert_eq!("\"Sample\\\"text\"", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -138,7 +139,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\\rtext", token.value);
+            assert_eq!("\"Sample\\rtext\"", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -149,7 +150,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\\\\text", token.value);
+            assert_eq!("\"Sample\\\\text\"", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -160,7 +161,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\\ttext", token.value);
+            assert_eq!("\"Sample\\ttext\"", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -171,7 +172,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(14, next);
             assert_eq!(TokenType::String, token.token_type);
-            assert_eq!("Sample\\ text", token.value);
+            assert_eq!("\"Sample\\ text\"", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()

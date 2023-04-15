@@ -2,11 +2,6 @@ use std::collections::HashMap;
 
 use crate::semantic::Datatype;
 
-// Primitive datatypes
-pub const _NUMBER: &str = "Num";
-pub const _STRING: &str = "Str";
-pub const _BOOLEAN: &str = "Bool";
-
 pub struct SymbolTable {
     /// For now just stores identifiers and datatypes
     table: HashMap<String, Datatype>,
@@ -22,8 +17,7 @@ impl SymbolTable {
     }
 
     pub fn insert(&mut self, identifier: &str, datatype: Datatype) {
-        self.table
-            .insert(String::from(identifier), datatype);
+        self.table.insert(String::from(identifier), datatype);
     }
 
     pub fn has_id(&self, identifier: &String) -> bool {
@@ -45,9 +39,7 @@ impl SymbolTable {
 
     /// Returns the Datatype of a given identifier
     pub fn get_type(&self, identifier: &String) -> Option<&Datatype> {
-        self.table
-            .get(identifier)
-            .and_then(|value| Some(value))
+        self.table.get(identifier).and_then(|value| Some(value))
     }
 }
 
