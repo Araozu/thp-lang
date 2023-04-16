@@ -86,8 +86,8 @@ pub fn generate_pages_html(file_tree: &Node, current_path: &Path) -> String {
         Node::File(file) => {
             if file.path == "index" {
                 format!(
-                    "<li class=\"my-2\">
-                        <a class=\"inline-block w-full hover:text-c2-primary\" href=\"/{}\">Index</a>
+                    "<li class=\"my-1\">
+                        <a class=\"inline-block rounded-md w-full hover:text-c2-primary p-1\" href=\"/{}\">Index</a>
                     </li>",
                     current_path.to_str().unwrap()
                 )
@@ -95,8 +95,8 @@ pub fn generate_pages_html(file_tree: &Node, current_path: &Path) -> String {
                 String::from("")
             } else {
                 format!(
-                    "<li class=\"my-2\">
-                        <a class=\"inline-block w-full hover:text-c2-primary\" href=\"/{}/{}.html\">{}</a>
+                    "<li class=\"my-1\">
+                        <a class=\"inline-block rounded-md w-full hover:text-c2-primary p-1\" href=\"/{}/{}.html\">{}</a>
                     </li>",
                     current_path.to_str().unwrap(),
                     file.path,
@@ -119,7 +119,7 @@ pub fn generate_pages_html(file_tree: &Node, current_path: &Path) -> String {
                 format!("<ul>{}</ul>", sub_nodes_html.join(""))
             } else {
                 format!(
-                    "<li class=\"my-2\">
+                    "<li class=\"my-1\">
                     <div class=\"uppercase opacity-80 mt-6 font-semibold\">{}</div>
                     <ul>{}</ul>
                 </li>",

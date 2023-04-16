@@ -31,8 +31,8 @@ fn build_ast(input: &String, tokens: Vec<Token>, symbol_table: &mut SymbolTable)
     let ast = syntax::construct_ast(&tokens);
 
     match ast {
-        Ok( ast) => {
-            semantic::check_ast(& ast, symbol_table);
+        Ok(ast) => {
+            semantic::check_ast(&ast, symbol_table);
 
             let js_code = codegen::codegen(&ast);
             println!("{}", js_code)

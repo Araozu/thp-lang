@@ -2,6 +2,8 @@ use clap::{Parser, Subcommand};
 
 // Module to handle the repl and its compilation
 mod repl;
+// Module to handle file compilation
+mod file;
 // Defines the types of tokens and provides functions to create them
 mod token;
 // Module to handle lexical analysis
@@ -29,7 +31,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// compiles a single file
+    /// Compiles a single file
     C {
         /// File to compile
         file: String,
@@ -41,7 +43,7 @@ enum Commands {
     R {},
 }
 
-const VERSION: &str = "0.0.1";
+const VERSION: &str = "0.0.5";
 
 fn get_copyright() -> String {
     format!(
@@ -57,15 +59,14 @@ fn get_copyright() -> String {
 /// - `misti w, --watch, -w` : Starts the compiler in watch mode
 /// - `misti -c FILE -o OUTPUT` : Compiles FILE and writes the result in OUTPUT
 fn main() {
-    println!("{}", get_copyright());
-
     let cli = Cli::parse();
 
     match &cli.command {
-        Some(Commands::C { file: _, output: _ }) => {
-            println!("Compile a file: Not implemented")
+        Some(Commands::C { file: input, output }) => {
+            file::compile_file(input, output)
         }
         Some(Commands::R {}) => {
+            println!("{}", get_copyright());
             let _ = repl::run();
         }
         None => {

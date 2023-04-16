@@ -42,7 +42,5 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST<'a>, MistiE
 
 fn next_construct<'a>(tokens: &'a Vec<Token>, current_pos: usize) -> SyntaxResult {
     None.or_else(|| binding::try_parse(tokens, current_pos))
-        .unwrap_or_else(|| {
-            SyntaxResult::None
-        })
+        .unwrap_or_else(|| SyntaxResult::None)
 }

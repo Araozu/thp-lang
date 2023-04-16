@@ -73,10 +73,11 @@
         document.head.appendChild(linkEl);
     </script>
     <script>
-        const anchors = document.querySelectorAll('h2, h3');
-        const links = document.querySelectorAll('nav#primary-nav > ul > li a');
-
+        /* Highlight current topic in sidebar */
         window.addEventListener("DOMContentLoaded", () => {
+            const anchors = document.querySelectorAll('h2, h3');
+            const links = document.querySelectorAll('nav#primary-nav > ul > li a');
+
             window.addEventListener('scroll', (event) => {
                 if (anchors && links) {
                     let scrollTop = window.scrollY;
@@ -98,6 +99,22 @@
                     }
                 }
             });
+        });
+    </script>
+    <script>
+        /* Highlight current page in secondary navbar */
+        window.addEventListener("DOMContentLoaded", () => {
+            const links = document.querySelectorAll("nav#secondary-nav > ul a");
+
+            let currentUrl = window.location.href;
+
+            for (let i = 0; i < links.length; i++) {
+                let el = links[i];
+                if (currentUrl === el.href) {
+                    el.classList.add("bg-c2-primary-container");
+                    el.classList.add("text-c2-on-primary-container");
+                }
+            }
         });
     </script>
 </body>
