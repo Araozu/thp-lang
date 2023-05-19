@@ -32,12 +32,14 @@ pub fn compile(file: &PathBuf, input_folder: &Path, output_folder: &Path, file_t
     output_file.set_extension("html");
 
     //
-    //  Compilation
+    //  Read MD from disk
     //
     let file_content_bytes = fs::read(&input_file).unwrap();
     let markdown_text = String::from_utf8(file_content_bytes).unwrap();
 
-    // let html_text = to_html(markdown_text.as_str());
+    //
+    // Compile MD
+    //
     let md_ast = markdown::to_mdast(&markdown_text, &markdown::ParseOptions::gfm()).unwrap();
     let html_text = md_ast.to_html();
     let sidebar_html = md_ast.generate_sidebar();

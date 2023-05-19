@@ -40,10 +40,11 @@ Num aConstant = 30       //  <- `val` is optional
 Num var aVariable = 20   // <- `var` required
 
 // You can assign the result of many operations to a variable
-val roi =
+val roi = do {
     val income = someIncomeCalculation()
     val investment = 25000
     income / investment   // This will be the value of `roi`
+}
 ```
 
 ## Basic datatypes
@@ -63,17 +64,18 @@ Str string = "John Doe"
 //
 // Conditionals
 //
-if name == "John Doe" do
+if name == "John Doe" {
     val message = "Hello John"
     console.log(message)
-else if name == "Mark" do
+} else if name == "Mark" {
     console.log("Hi Mark!")
-else
+} else {
     console.log("Hello there")
+}
 
 
 // You can use conditionals as expressions
-val response = if risk < 0.2 do "Go ahead" else "Don't"
+val response = if risk < 0.2 { "Go ahead" } else { "Don't" }
 
 // There is no ternary conditional
 ```
@@ -121,16 +123,18 @@ var #(name, age, isMarried) = person
 //
 // Loops
 //
-for key in object do
-    console.log("key: {key}, value: {object.[key]}")
+for #(key, value) in object {
+    console.log("key: {key}, value: {value}")
+}
 
-
-for value of array do
+for value of array {
     console.log("value: {value}")
+}
 
 
-while condition do
+while condition {
     print("while")
+}
 ```
 
 ## Functions
@@ -147,15 +151,15 @@ add(10, 20)
 substring(input: "Hello, world!", start: 7, end: 12)
 
 // Funtion declaration
-fun add(Num x, Num y) -> Num =
+fun add(Num x, Num y) -> Num {
     x + y
-
+}
 
 // Function with default value
-fun calculate(Num price, Num discount = 0.0) =
+fun calculate(Num price, Num discount = 0.0) {
     val total = price * (1.0 - discount)
     console.log("Your total is {total}$")
-
+}
 
 calculate(100, 0.25)  // "Your total is 75$"
 calculate(100)        // "Your total is 100$"
@@ -361,15 +365,32 @@ match result with
 ## JSX
 
 ```misti
-//
-// JSX
-//
+use Solid.{createSignal}
+use Search
+use Person
+use Registers
+use NewRegister
 
-val element = &lt;div>This is JSX&lt;/div>
-val list = items.map fun (item, count) {&lt;li key={count}>{item}&lt;/li>}
+pub fun 'Certs() {
+    val #(person, setPerson) = createSignal[Person?](None)
+    val #(lastUpdate, setLastUpdate) = createSignal(0)
+
+    <div>
+        <h1
+            class="px-4 py-2 text-2xl font-bold"
+        >
+            Registrar certificado
+        </h1>
+        <Search setPerson={setPerson}/>
+        <Registers person={person()} lastUpdate={lastUpdate()} />
+        <NewRegister
+            personId={person()?.id ?? -1}
+            onSuccess={{setLastUpdate {$ + 1}}}
+        />
+    </div>
+}
+
 ```
-
-
 
 
 

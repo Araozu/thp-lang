@@ -14,6 +14,8 @@ pub enum Node<'a> {
 pub struct File<'a> {
     /// Name of the file
     path: &'a String,
+    /// Display name of the file
+    name: &'a String,
 }
 
 pub struct Folder<'a> {
@@ -42,18 +44,17 @@ pub fn parse_yaml(values: &Yaml) -> Node {
     let Yaml::String(path) = table.get(y_str!("path")).expect("YAML: Node MUST have a `path` key")
     else { panic!("YAML: `path` MUST be a String") };
 
+    let Yaml::String(name) = table.get(y_str!("name")).expect("YAML: Node MUST have a `name` key")
+    else { panic!("YAML: `name` MUST be a String") };
+
     let input_data = (
-        table.get(y_str!("name")),
         table.get(y_str!("has_index")),
         table.get(y_str!("children")),
     );
 
     match input_data {
-        (None, None, None) => Node::File(File { path }),
-        (Some(name), has_index, Some(children)) => {
-            let Yaml::String(name) = name
-            else { panic!("YAML: `name` MUST be a String") };
-
+        (None, None) => Node::File(File { path, name }),
+        (has_index, Some(children)) => {
             let has_index = match has_index {
                 Some(Yaml::Boolean(v)) => *v,
                 Some(_) => panic!("YAML: if key `has_index` exists, it MUST be a Boolean"),
@@ -100,7 +101,7 @@ pub fn generate_pages_html(file_tree: &Node, current_path: &Path) -> String {
                     </li>",
                     current_path.to_str().unwrap(),
                     file.path,
-                    file.path
+                    file.name
                 )
             }
         }

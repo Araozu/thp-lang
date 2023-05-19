@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "watch": "concurrently -k \"tailwindcss -i ./tailwind/input.css -o ./tailwind/output.css --watch\" \"live-server . --port=3333\"",
-    "server": "live-server . --port=3333",
+    "start": "live-server . --port=3333",
     "styles": "tailwindcss -i ./tailwind/input.css -o ./tailwind/output.css --watch"
   },
   "keywords": [],

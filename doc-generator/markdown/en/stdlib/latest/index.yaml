@@ -5,4 +5,6 @@ children:
   name: Prelude
   children:
   - path: String
+    name: String
   - path: Console
+    name: Console

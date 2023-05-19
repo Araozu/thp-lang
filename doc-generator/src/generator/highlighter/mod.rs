@@ -36,17 +36,7 @@ pub fn highlight(input: &String) -> String {
             TokenType::Identifier if token.value == "true" || token.value == "false" => {
                 replace!("keyword", token, offset, output)
             }
-            TokenType::String => {
-                let start_pos = token.position;
-                let end_pos = token.get_end_position();
-
-                let range = (start_pos + offset)..(end_pos + offset);
-                let html = format!("<span class=\"token string\">\"{}\"</span>", token.value);
-
-                offset += 34;
-
-                output.replace_range(range, html.as_str());
-            }
+            TokenType::String => replace!("string", token, offset, output),
             TokenType::Comment => replace!("comment", token, offset, output),
             TokenType::VAL | TokenType::VAR => replace!("keyword", token, offset, output),
             _ => {}
