@@ -1,7 +1,5 @@
-use crate::{
-    lexic::{token, utils, LexResult},
-    token::TokenType,
-};
+use super::token::TokenType;
+use crate::lexic::{token::Token, utils, LexResult};
 
 /// Checks if a String is a keyword, and returns its TokenType
 fn str_is_keyword(s: &String) -> Option<TokenType> {
@@ -39,17 +37,17 @@ fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String, is_datatype: 
             let current_len = current.len();
             if let Some(token_type) = str_is_keyword(&current) {
                 LexResult::Some(
-                    token::new(current, start_pos - current_len, token_type),
+                    Token::new(current, start_pos - current_len, token_type),
                     start_pos,
                 )
             } else if is_datatype {
                 LexResult::Some(
-                    token::new_datatype(current, start_pos - current_len),
+                    Token::new_datatype(current, start_pos - current_len),
                     start_pos,
                 )
             } else {
                 LexResult::Some(
-                    token::new_identifier(current, start_pos - current_len),
+                    Token::new_identifier(current, start_pos - current_len),
                     start_pos,
                 )
             }

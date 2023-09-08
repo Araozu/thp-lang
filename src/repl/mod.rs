@@ -1,7 +1,7 @@
 use std::io::{self, Write};
 
 use crate::error_handling::PrintableError;
-use crate::token::Token;
+use crate::lexic::token::Token;
 
 use super::codegen;
 use super::lexic;

@@ -1,8 +1,10 @@
 mod scanner;
 mod utils;
 
-use super::token::{self, Token};
+pub mod token;
+
 use crate::error_handling::{LexError, MistiError};
+use token::Token;
 
 type Chars = Vec<char>;
 
@@ -53,8 +55,8 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
         }
     }
 
-    results.push(token::new_semicolon(0));
-    results.push(token::new_eof(0));
+    results.push(Token::new_semicolon(0));
+    results.push(Token::new_eof(0));
     Ok(results)
 }
 

@@ -1,7 +1,7 @@
 use super::ast_types::{Binding, ValBinding, VarBinding};
 use super::{expression, SyntaxResult};
 use crate::error_handling::SyntaxError;
-use crate::token::{Token, TokenType};
+use crate::lexic::token::{Token, TokenType};
 use crate::utils::Result3;
 
 // TODO: Should return a 3 state value:

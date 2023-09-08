@@ -1,5 +1,5 @@
 use super::{
-    token::{self, TokenType},
+    token::{self, Token, TokenType},
     utils, LexResult,
 };
 
@@ -34,7 +34,7 @@ pub fn grouping_sign(c: char, _: &Vec<char>, start_pos: usize) -> Option<LexResu
         _ => return None,
     };
 
-    let token = token::new(c.to_string(), start_pos, token_type);
+    let token = Token::new(c.to_string(), start_pos, token_type);
     Some(LexResult::Some(token, start_pos + 1))
 }
 

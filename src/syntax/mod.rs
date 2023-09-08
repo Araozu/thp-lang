@@ -1,11 +1,11 @@
 use crate::ast_types::Binding;
 use crate::error_handling::{MistiError, SyntaxError};
 
-use super::token::Token;
-
 mod binding;
 mod expression;
+
 use super::ast_types;
+use crate::lexic::token::Token;
 
 use ast_types::ModuleAST;
 

@@ -1,5 +1,6 @@
 use crate::error_handling::LexError;
-use crate::lexic::{token, utils, LexResult};
+use crate::lexic::token::Token;
+use crate::lexic::{utils, LexResult};
 
 /// Function to scan a string
 ///
@@ -20,7 +21,7 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
 
             let final_str = format!("{}\"", current);
             LexResult::Some(
-                token::new_string(final_str, start_pos - current_len),
+                Token::new_string(final_str, start_pos - current_len),
                 start_pos + 1,
             )
         }

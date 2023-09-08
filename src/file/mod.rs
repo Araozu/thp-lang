@@ -1,6 +1,7 @@
 use std::{fs, path::Path};
 
-use crate::{codegen, error_handling::PrintableError, lexic, syntax, token::Token};
+use crate::lexic::token::Token;
+use crate::{codegen, error_handling::PrintableError, lexic, syntax};
 
 pub fn compile_file(input: &String, output: &String) {
     let input_path = Path::new(input);

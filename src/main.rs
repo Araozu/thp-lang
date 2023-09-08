@@ -4,8 +4,6 @@ use clap::{Parser, Subcommand};
 mod repl;
 // Module to handle file compilation
 mod file;
-// Defines the types of tokens and provides functions to create them
-mod token;
 // Module to handle lexical analysis
 mod syntax;
 // Module to handle syntactic analysis

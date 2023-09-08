@@ -1,5 +1,5 @@
 use super::ast_types::Expression;
-use crate::token::{Token, TokenType};
+use crate::lexic::token::{Token, TokenType};
 
 /// An expression can be:
 ///

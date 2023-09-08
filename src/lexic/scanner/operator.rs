@@ -1,4 +1,4 @@
-use crate::lexic::{token, utils, LexResult};
+use crate::lexic::{token::Token, utils, LexResult};
 
 /// Function to scan an operator
 ///
@@ -18,7 +18,7 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
             let current_len = current.len();
 
             LexResult::Some(
-                token::new_operator(current, start_pos - current_len),
+                Token::new_operator(current, start_pos - current_len),
                 start_pos,
             )
         }

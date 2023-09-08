@@ -1,7 +1,5 @@
-use crate::{
-    lexic::{utils, LexResult},
-    token::new_comment,
-};
+use super::token::Token;
+use crate::lexic::{utils, LexResult};
 
 /// Scans a new line.
 ///
@@ -11,7 +9,7 @@ use crate::{
 pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
     let (comment_content, next_pos) =
         scan_any_except_new_line(chars, start_pos + 2, String::from(""));
-    let token = new_comment(format!("//{}", comment_content), start_pos);
+    let token = Token::new_comment(format!("//{}", comment_content), start_pos);
 
     LexResult::Some(token, next_pos)
 }

@@ -1,8 +1,5 @@
 use crate::error_handling::LexError;
-use crate::lexic::{
-    token::{self, Token},
-    utils, LexResult,
-};
+use crate::lexic::{token::Token, utils, LexResult};
 
 /// Function to scan a number
 ///
@@ -39,7 +36,7 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> LexResu
             let current_len = current.len();
 
             LexResult::Some(
-                token::new_number(current, start_pos - current_len),
+                Token::new_number(current, start_pos - current_len),
                 start_pos,
             )
         }
@@ -101,7 +98,7 @@ fn scan_double_impl(chars: &Vec<char>, start_pos: usize, current: String) -> Lex
             let current_len = current.len();
 
             LexResult::Some(
-                token::new_number(current, start_pos - current_len),
+                Token::new_number(current, start_pos - current_len),
                 start_pos,
             )
         }
@@ -147,7 +144,7 @@ fn scan_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, 
             let current_len = current.len();
 
             (
-                token::new_number(current, start_pos - current_len),
+                Token::new_number(current, start_pos - current_len),
                 start_pos,
             )
         }
@@ -166,7 +163,7 @@ fn scan_hex_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Tok
             let current_len = current.len();
 
             (
-                token::new_number(current, start_pos - current_len),
+                Token::new_number(current, start_pos - current_len),
                 start_pos,
             )
         }
