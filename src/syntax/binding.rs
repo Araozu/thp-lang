@@ -1,4 +1,4 @@
-use super::ast_types::{Binding, ValBinding, VarBinding};
+use super::ast::{Binding, ValBinding, VarBinding};
 use super::{expression, SyntaxResult};
 use crate::error_handling::SyntaxError;
 use crate::lexic::token::{Token, TokenType};

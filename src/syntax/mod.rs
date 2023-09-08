@@ -1,13 +1,12 @@
-use crate::ast_types::Binding;
 use crate::error_handling::{MistiError, SyntaxError};
 
 mod binding;
 mod expression;
+pub mod ast;
 
-use super::ast_types;
+use ast::{Binding, ModuleAST};
 use crate::lexic::token::Token;
 
-use ast_types::ModuleAST;
 
 pub enum SyntaxResult {
     ///
@@ -24,7 +23,7 @@ pub enum SyntaxResult {
 /// Constructs the Misti AST from a vector of tokens
 pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError> {
     let _token_amount = tokens.len();
-    let mut current_pos = 0;
+    let current_pos = 0;
 
     match next_construct(tokens, current_pos) {
         SyntaxResult::Ok(module) => Ok(ModuleAST {

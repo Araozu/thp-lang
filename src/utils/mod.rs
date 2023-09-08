@@ -4,6 +4,7 @@ pub enum Result3<T> {
     None,
 }
 
+#[allow(dead_code)]
 impl<T> Result3<T> {
     pub fn unwrap(&self) -> &T {
         match self {

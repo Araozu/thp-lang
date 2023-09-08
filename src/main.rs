@@ -8,8 +8,6 @@ mod file;
 mod syntax;
 // Module to handle syntactic analysis
 mod lexic;
-// Defines the AST
-mod ast_types;
 // Transforms an AST to JS
 mod codegen;
 mod utils;

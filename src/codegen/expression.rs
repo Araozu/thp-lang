@@ -1,5 +1,5 @@
 use super::Transpilable;
-use crate::ast_types::Expression;
+use crate::syntax::ast::Expression;
 
 impl Transpilable for Expression {
     /// Transpiles an Expression to JS
@@ -24,7 +24,7 @@ impl Transpilable for Expression {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast_types::Expression;
+    use crate::syntax::ast::Expression;
 
     #[test]
     fn should_transpile_number() {

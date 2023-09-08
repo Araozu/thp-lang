@@ -1,4 +1,4 @@
-use super::ast_types::Expression;
+use super::ast::Expression;
 use crate::lexic::token::{Token, TokenType};
 
 /// An expression can be:

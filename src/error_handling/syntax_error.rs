@@ -94,7 +94,7 @@ fn get_line(
 mod tests {
     use super::*;
     use crate::{
-        error_handling::{MistiError, PrintableError, SyntaxError},
+        error_handling::{MistiError, PrintableError},
         lexic::get_tokens,
         syntax::construct_ast,
     };

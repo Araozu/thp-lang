@@ -1,4 +1,4 @@
-use super::ast_types::ModuleAST;
+use crate::syntax::ast::ModuleAST;
 
 mod binding;
 mod expression;
@@ -25,7 +25,7 @@ mod tests {
     fn should_codegen_1() {
         let input = String::from("val id = 322");
         let tokens = lexic::get_tokens(&input).unwrap();
-        let mut ast = syntax::construct_ast(&tokens).unwrap();
+        let ast = syntax::construct_ast(&tokens).unwrap();
 
         let out_str = codegen(&ast);
 

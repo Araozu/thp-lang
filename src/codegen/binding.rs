@@ -1,5 +1,5 @@
 use super::Transpilable;
-use crate::ast_types::Binding;
+use crate::syntax::ast::Binding;
 
 impl Transpilable for Binding {
     /// Transpiles val and var bindings into JS.
@@ -22,7 +22,7 @@ impl Transpilable for Binding {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast_types::{Binding, Expression, ValBinding};
+    use crate::syntax::ast::{Binding, Expression, ValBinding};
 
     #[test]
     fn binding_should_transpile() {

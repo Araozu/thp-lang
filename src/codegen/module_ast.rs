@@ -1,5 +1,5 @@
 use super::Transpilable;
-use crate::ast_types::ModuleAST;
+use crate::syntax::ast::ModuleAST;
 
 impl Transpilable for ModuleAST {
     /// Transpiles the whole AST into JS, using this same trait on the
@@ -18,7 +18,7 @@ impl Transpilable for ModuleAST {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast_types::{Binding, Expression, ValBinding};
+    use crate::syntax::ast::{Binding, Expression, ValBinding};
 
     #[test]
     fn module_ast_should_transpile() {
