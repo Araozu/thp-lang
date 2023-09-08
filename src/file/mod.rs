@@ -1,16 +1,6 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{fs, path::Path};
 
-use crate::{
-    codegen,
-    error_handling::PrintableError,
-    lexic, semantic,
-    symbol_table::{self, SymbolTable},
-    syntax,
-    token::Token,
-};
+use crate::{codegen, error_handling::PrintableError, lexic, syntax, token::Token};
 
 pub fn compile_file(input: &String, output: &String) {
     let input_path = Path::new(input);
@@ -48,12 +38,7 @@ fn build_ast(input: &String, tokens: Vec<Token>) -> String {
     let ast = syntax::construct_ast(&tokens);
 
     match ast {
-        Ok(ast) => {
-            let mut symbol_table = SymbolTable::new();
-            semantic::check_ast(&ast, &mut symbol_table);
-
-            codegen::codegen(&ast)
-        }
+        Ok(ast) => codegen::codegen(&ast),
         Err(reason) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
             panic!("{}", reason.get_error_str(&chars))

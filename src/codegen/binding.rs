@@ -1,7 +1,7 @@
 use super::Transpilable;
 use crate::ast_types::Binding;
 
-impl Transpilable for Binding<'_> {
+impl Transpilable for Binding {
     /// Transpiles val and var bindings into JS.
     fn transpile(&self) -> String {
         match self {
@@ -30,8 +30,8 @@ mod tests {
         let value = String::from("322");
         let binding = Binding::Val(ValBinding {
             datatype: None,
-            identifier: &id,
-            expression: Expression::Number(&value),
+            identifier: Box::new(id),
+            expression: Expression::Number(Box::new(value)),
         });
 
         let result = binding.transpile();

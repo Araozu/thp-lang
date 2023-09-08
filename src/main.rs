@@ -10,12 +10,8 @@ mod token;
 mod syntax;
 // Module to handle syntactic analysis
 mod lexic;
-// Module to handle semantic analysis
-mod semantic;
 // Defines the AST
 mod ast_types;
-// Defines the Symbol table and operations within
-mod symbol_table;
 // Transforms an AST to JS
 mod codegen;
 mod utils;
@@ -47,7 +43,7 @@ const VERSION: &str = "0.0.5";
 
 fn get_copyright() -> String {
     format!(
-        "Misti {}\nCopyright (c) 2023 Fernando Enrique Araoz Morales\n",
+        "THP {}\nCopyright (c) 2023 Fernando Enrique Araoz Morales\n",
         VERSION,
     )
 }
@@ -62,9 +58,10 @@ fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
-        Some(Commands::C { file: input, output }) => {
-            file::compile_file(input, output)
-        }
+        Some(Commands::C {
+            file: input,
+            output,
+        }) => file::compile_file(input, output),
         Some(Commands::R {}) => {
             println!("{}", get_copyright());
             let _ = repl::run();

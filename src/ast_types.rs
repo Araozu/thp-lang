@@ -1,27 +1,27 @@
-pub struct ModuleAST<'a> {
-    pub bindings: Vec<Binding<'a>>,
+pub struct ModuleAST {
+    pub bindings: Vec<Binding>,
 }
 
-pub enum Binding<'a> {
-    Val(ValBinding<'a>),
-    Var(VarBinding<'a>),
+pub enum Binding {
+    Val(ValBinding),
+    Var(VarBinding),
 }
 
-pub struct ValBinding<'a> {
+pub struct ValBinding {
     pub datatype: Option<String>,
-    pub identifier: &'a String,
-    pub expression: Expression<'a>,
+    pub identifier: Box<String>,
+    pub expression: Expression,
 }
 
-pub struct VarBinding<'a> {
+pub struct VarBinding {
     pub datatype: Option<String>,
-    pub identifier: &'a String,
-    pub expression: Expression<'a>,
+    pub identifier: Box<String>,
+    pub expression: Expression,
 }
 
-pub enum Expression<'a> {
-    Number(&'a String),
-    String(&'a String),
+pub enum Expression {
+    Number(Box<String>),
+    String(Box<String>),
     Boolean(bool),
-    Identifier(&'a String),
+    Identifier(Box<String>),
 }

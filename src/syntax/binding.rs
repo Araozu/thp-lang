@@ -109,13 +109,13 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     let binding = if is_val {
         Binding::Val(ValBinding {
             datatype: datatype_annotation,
-            identifier: &identifier.value,
+            identifier: Box::new(identifier.value.clone()),
             expression,
         })
     } else {
         Binding::Var(VarBinding {
             datatype: datatype_annotation,
-            identifier: &identifier.value,
+            identifier: Box::new(identifier.value.clone()),
             expression,
         })
     };
@@ -158,7 +158,7 @@ mod tests {
 
         match binding {
             SyntaxResult::Ok(Binding::Val(binding)) => {
-                assert_eq!("identifier", binding.identifier);
+                assert_eq!("identifier", format!("{}", binding.identifier));
             }
             _ => panic!(),
         }
@@ -197,7 +197,7 @@ mod tests {
         match binding {
             SyntaxResult::Ok(Binding::Val(binding)) => {
                 assert_eq!(Some(String::from("Num")), binding.datatype);
-                assert_eq!("identifier", binding.identifier);
+                assert_eq!("identifier", format!("{}", binding.identifier));
             }
             _ => panic!(),
         }
@@ -208,7 +208,7 @@ mod tests {
         match binding {
             SyntaxResult::Ok(Binding::Var(binding)) => {
                 assert_eq!(Some(String::from("Bool")), binding.datatype);
-                assert_eq!("identifier", binding.identifier);
+                assert_eq!("identifier", format!("{}", binding.identifier));
             }
             _ => panic!(),
         }

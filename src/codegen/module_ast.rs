@@ -1,7 +1,7 @@
 use super::Transpilable;
 use crate::ast_types::ModuleAST;
 
-impl Transpilable for ModuleAST<'_> {
+impl Transpilable for ModuleAST {
     /// Transpiles the whole AST into JS, using this same trait on the
     /// nodes and leaves of the AST
     fn transpile(&self) -> String {
@@ -26,8 +26,8 @@ mod tests {
         let value = String::from("322");
         let binding = Binding::Val(ValBinding {
             datatype: None,
-            identifier: &id,
-            expression: Expression::Number(&value),
+            identifier: Box::new(id),
+            expression: Expression::Number(Box::new(value)),
         });
 
         let module = ModuleAST {

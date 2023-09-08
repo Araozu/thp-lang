@@ -9,10 +9,10 @@ use super::ast_types;
 
 use ast_types::ModuleAST;
 
-pub enum SyntaxResult<'a> {
+pub enum SyntaxResult {
     ///
     /// A construct has been found
-    Ok(Binding<'a>),
+    Ok(Binding),
     ///
     /// No construct was found
     None,
@@ -22,7 +22,7 @@ pub enum SyntaxResult<'a> {
 }
 
 /// Constructs the Misti AST from a vector of tokens
-pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST<'a>, MistiError> {
+pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError> {
     let _token_amount = tokens.len();
     let mut current_pos = 0;
 

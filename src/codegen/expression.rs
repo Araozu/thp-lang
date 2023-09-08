@@ -1,7 +1,7 @@
 use super::Transpilable;
 use crate::ast_types::Expression;
 
-impl Transpilable for Expression<'_> {
+impl Transpilable for Expression {
     /// Transpiles an Expression to JS
     ///
     /// Right now the expressions in the grammar are:
@@ -11,12 +11,12 @@ impl Transpilable for Expression<'_> {
     /// - Identifier
     fn transpile(&self) -> String {
         match self {
-            Expression::Number(value) => String::from(*value),
+            Expression::Number(value) => format!("{}", value),
             Expression::String(value) => {
                 format!("\"{}\"", *value)
             }
             Expression::Boolean(value) => String::from(if *value { "true" } else { "false" }),
-            Expression::Identifier(value) => String::from(*value),
+            Expression::Identifier(value) => format!("{}", *value),
         }
     }
 }
@@ -29,7 +29,7 @@ mod tests {
     #[test]
     fn should_transpile_number() {
         let str = String::from("42");
-        let exp = Expression::Number(&str);
+        let exp = Expression::Number(Box::new(str));
         let result = exp.transpile();
 
         assert_eq!("42", result);
@@ -38,7 +38,7 @@ mod tests {
     #[test]
     fn should_transpile_string() {
         let str = String::from("Hello world");
-        let exp = Expression::String(&str);
+        let exp = Expression::String(Box::new(str));
         let result = exp.transpile();
 
         assert_eq!("\"Hello world\"", result);
@@ -55,7 +55,7 @@ mod tests {
     #[test]
     fn should_transpile_identifier() {
         let s = String::from("newValue");
-        let exp = Expression::Identifier(&s);
+        let exp = Expression::Identifier(Box::new(s));
         let result = exp.transpile();
 
         assert_eq!("newValue", result);

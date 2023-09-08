@@ -9,12 +9,12 @@ use crate::token::{Token, TokenType};
 /// - An identifier
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> Option<Expression> {
     tokens.get(pos).and_then(|token| match token.token_type {
-        TokenType::Number => Some(Expression::Number(&token.value)),
-        TokenType::String => Some(Expression::String(&token.value)),
+        TokenType::Number => Some(Expression::Number(Box::new(token.value.clone()))),
+        TokenType::String => Some(Expression::String(Box::new(token.value.clone()))),
         TokenType::Identifier if token.value == "true" || token.value == "false" => {
             Some(Expression::Boolean(token.value == "true"))
         }
-        TokenType::Identifier => Some(Expression::Identifier(&token.value)),
+        TokenType::Identifier => Some(Expression::Identifier(Box::new(token.value.clone()))),
         _ => None,
     })
 }
@@ -30,7 +30,7 @@ mod tests {
         let expression = try_parse(&tokens, 0).unwrap();
 
         match expression {
-            Expression::Number(value) => assert_eq!("40", value),
+            Expression::Number(value) => assert_eq!("40", format!("{}", value)),
             _ => panic!(),
         }
     }
@@ -41,7 +41,7 @@ mod tests {
         let expression = try_parse(&tokens, 0).unwrap();
 
         match expression {
-            Expression::String(value) => assert_eq!("\"Hello\"", value),
+            Expression::String(value) => assert_eq!("\"Hello\"", format!("{}", value)),
             _ => panic!(),
         }
     }
@@ -63,7 +63,7 @@ mod tests {
         let expression = try_parse(&tokens, 0).unwrap();
 
         match expression {
-            Expression::Identifier(value) => assert_eq!("someIdentifier", value),
+            Expression::Identifier(value) => assert_eq!("someIdentifier", format!("{}", value)),
             _ => panic!(),
         }
     }
