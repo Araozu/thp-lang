@@ -2,7 +2,7 @@ use super::Transpilable;
 use crate::syntax::ast::Expression;
 
 impl Transpilable for Expression {
-    /// Transpiles an Expression to JS
+    /// Transpiles an Expression to PHP
     ///
     /// Right now the expressions in the grammar are:
     /// - Number

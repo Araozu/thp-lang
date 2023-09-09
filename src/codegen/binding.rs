@@ -2,18 +2,18 @@ use super::Transpilable;
 use crate::syntax::ast::Binding;
 
 impl Transpilable for Binding {
-    /// Transpiles val and var bindings into JS.
+    /// Transpiles val and var bindings into PHP.
     fn transpile(&self) -> String {
         match self {
             Binding::Val(val_binding) => {
                 let expression_str = val_binding.expression.transpile();
 
-                format!("const {} = {};", val_binding.identifier, expression_str)
+                format!("${} = {};", val_binding.identifier, expression_str)
             }
             Binding::Var(var_binding) => {
                 let expression_str = var_binding.expression.transpile();
 
-                format!("let {} = {};", var_binding.identifier, expression_str)
+                format!("${} = {};", var_binding.identifier, expression_str)
             }
         }
     }
@@ -36,6 +36,6 @@ mod tests {
 
         let result = binding.transpile();
 
-        assert_eq!("const identifier = 322;", result);
+        assert_eq!("$identifier = 322;", result);
     }
 }

@@ -27,9 +27,6 @@ enum Commands {
     C {
         /// File to compile
         file: String,
-
-        /// File to write the JS code to
-        output: String,
     },
     /// Starts the REPL
     R {},
@@ -49,15 +46,14 @@ fn get_copyright() -> String {
 /// Usage:
 /// - `misti` : Starts the compiler in watch mode
 /// - `misti w, --watch, -w` : Starts the compiler in watch mode
-/// - `misti -c FILE -o OUTPUT` : Compiles FILE and writes the result in OUTPUT
+/// - `misti c FILE` : Compiles FILE and writes the result in the same directory
 fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
         Some(Commands::C {
             file: input,
-            output,
-        }) => file::compile_file(input, output),
+        }) => file::compile_file(input),
         Some(Commands::R {}) => {
             println!("{}", get_copyright());
             let _ = repl::run();

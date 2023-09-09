@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use crate::lexic::token::Token;
 use crate::{codegen, error_handling::PrintableError, lexic, syntax};
 
-pub fn compile_file(input: &String, output: &String) {
+pub fn compile_file(input: &String) {
     let input_path = Path::new(input);
 
     if !input_path.is_file() {
@@ -13,10 +13,11 @@ pub fn compile_file(input: &String, output: &String) {
     let bytes = fs::read(input_path).expect("INPUT_PATH should be valid");
     let contents = String::from_utf8(bytes).expect("INPUT_PATH's encoding MUST be UTF-8");
 
-    let js_code = compile(&contents);
+    let out_code = compile(&contents);
 
-    let output_path = Path::new(output);
-    fs::write(output_path, js_code).expect("Error writing to output path");
+    let mut output_path = Path::new(input).canonicalize().unwrap();
+    output_path.set_extension("php");
+    fs::write(output_path, out_code).expect("Error writing to output path");
 }
 
 /// Executes Lexical analysis, handles errors and calls build_ast for the next phase

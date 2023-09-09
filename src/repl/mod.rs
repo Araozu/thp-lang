@@ -40,7 +40,7 @@ fn build_ast(input: &String, tokens: Vec<Token>) {
     }
 }
 
-/// Executes the REPL, reading from stdin, compiling and emitting JS to stdout
+/// Executes the REPL, reading from stdin, compiling and emitting PHP to stdout
 pub fn run() -> io::Result<()> {
     let stdin = io::stdin();
     let mut buffer = String::new();
