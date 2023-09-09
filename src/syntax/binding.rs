@@ -120,9 +120,9 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
         })
     };
 
-    Some(SyntaxResult::Ok(super::ast::TopLevelConstruct::Binding(
-        binding,
-    )))
+    Some(SyntaxResult::Ok(
+        super::ast::TopLevelConstruct::Binding(binding)
+    ))
 }
 
 /// Expects the token at `pos` to be of type `token_type`

@@ -4,6 +4,7 @@ mod binding;
 mod expression;
 mod module_ast;
 mod top_level_construct;
+mod function_declaration;
 
 /// Trait that the AST and its nodes implement to support transformation to PHP
 trait Transpilable {

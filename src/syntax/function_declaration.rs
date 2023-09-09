@@ -130,7 +130,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     current_pos += 1;
 
     // Parse closing brace
-    let closing_brace = match try_token_type(tokens, current_pos, TokenType::RightBrace) {
+    let _closing_brace = match try_token_type(tokens, current_pos, TokenType::RightBrace) {
         Result3::Ok(t) => t,
         Result3::Err(t) => {
             // The parser found a token, but it's not an opening brace

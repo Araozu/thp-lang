@@ -8,7 +8,7 @@ mod utils;
 pub mod ast;
 
 use crate::lexic::token::Token;
-use ast::{Binding, ModuleAST};
+use ast::ModuleAST;
 
 use self::ast::TopLevelConstruct;
 
@@ -46,5 +46,6 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError
 
 fn next_construct<'a>(tokens: &'a Vec<Token>, current_pos: usize) -> SyntaxResult {
     None.or_else(|| binding::try_parse(tokens, current_pos))
+        .or_else(|| function_declaration::try_parse(tokens, current_pos))
         .unwrap_or_else(|| SyntaxResult::None)
 }
