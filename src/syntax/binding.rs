@@ -120,7 +120,9 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
         })
     };
 
-    Some(SyntaxResult::Ok(binding))
+    Some(SyntaxResult::Ok(super::ast::TopLevelConstruct::Binding(
+        binding,
+    )))
 }
 
 /// Expects the token at `pos` to be of type `token_type`
@@ -149,7 +151,7 @@ fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&T
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::lexic::get_tokens;
+    use crate::{lexic::get_tokens, syntax::ast::TopLevelConstruct};
 
     #[test]
     fn should_parse_val_binding() {
@@ -157,7 +159,7 @@ mod tests {
         let binding = try_parse(&tokens, 0).unwrap();
 
         match binding {
-            SyntaxResult::Ok(Binding::Val(binding)) => {
+            SyntaxResult::Ok(TopLevelConstruct::Binding(Binding::Val(binding))) => {
                 assert_eq!("identifier", format!("{}", binding.identifier));
             }
             _ => panic!(),
@@ -195,7 +197,7 @@ mod tests {
         let binding = try_parse(&tokens, 0).unwrap();
 
         match binding {
-            SyntaxResult::Ok(Binding::Val(binding)) => {
+            SyntaxResult::Ok(TopLevelConstruct::Binding(Binding::Val(binding))) => {
                 assert_eq!(Some(String::from("Num")), binding.datatype);
                 assert_eq!("identifier", format!("{}", binding.identifier));
             }
@@ -206,11 +208,11 @@ mod tests {
         let binding = try_parse(&tokens, 0).unwrap();
 
         match binding {
-            SyntaxResult::Ok(Binding::Var(binding)) => {
+            SyntaxResult::Ok(TopLevelConstruct::Binding(Binding::Var(binding))) => {
                 assert_eq!(Some(String::from("Bool")), binding.datatype);
                 assert_eq!("identifier", format!("{}", binding.identifier));
             }
-            _ => panic!(),
+            _ => panic!("D: {:?}", binding),
         }
     }
 

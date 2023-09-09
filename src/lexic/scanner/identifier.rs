@@ -6,6 +6,7 @@ fn str_is_keyword(s: &String) -> Option<TokenType> {
     match s.as_str() {
         "var" => Some(TokenType::VAR),
         "val" => Some(TokenType::VAL),
+        "fun" => Some(TokenType::FUN),
         _ => None,
     }
 }

@@ -51,9 +51,7 @@ fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
-        Some(Commands::C {
-            file: input,
-        }) => file::compile_file(input),
+        Some(Commands::C { file: input }) => file::compile_file(input),
         Some(Commands::R {}) => {
             println!("{}", get_copyright());
             let _ = repl::run();

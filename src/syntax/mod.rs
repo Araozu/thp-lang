@@ -2,16 +2,21 @@ use crate::error_handling::{MistiError, SyntaxError};
 
 mod binding;
 mod expression;
+mod function_declaration;
+mod utils;
+
 pub mod ast;
 
-use ast::{Binding, ModuleAST};
 use crate::lexic::token::Token;
+use ast::{Binding, ModuleAST};
 
+use self::ast::TopLevelConstruct;
 
+#[derive(Debug)]
 pub enum SyntaxResult {
     ///
     /// A construct has been found
-    Ok(Binding),
+    Ok(TopLevelConstruct),
     ///
     /// No construct was found
     None,

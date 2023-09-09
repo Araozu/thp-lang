@@ -18,7 +18,7 @@ impl Transpilable for ModuleAST {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::syntax::ast::{Binding, Expression, ValBinding};
+    use crate::syntax::ast::{Binding, Expression, TopLevelConstruct, ValBinding};
 
     #[test]
     fn module_ast_should_transpile() {
@@ -31,7 +31,7 @@ mod tests {
         });
 
         let module = ModuleAST {
-            bindings: vec![binding],
+            bindings: vec![TopLevelConstruct::Binding(binding)],
         };
 
         let result = module.transpile();

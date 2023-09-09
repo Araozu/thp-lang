@@ -16,6 +16,7 @@ pub enum TokenType {
     VAR,
     VAL,
     EOF,
+    FUN,
 }
 
 #[derive(Debug)]
