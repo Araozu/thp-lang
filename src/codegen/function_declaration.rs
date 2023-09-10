@@ -8,12 +8,13 @@ impl Transpilable for FunctionDeclaration {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{lexic::get_tokens, syntax::{construct_ast, ast::TopLevelConstruct}};
-
+    use crate::{
+        lexic::get_tokens,
+        syntax::{ast::TopLevelConstruct, construct_ast},
+    };
 
     #[test]
     fn should_transpile() {
@@ -28,8 +29,7 @@ mod tests {
                 let transpiled = fun_decl.transpile();
 
                 assert_eq!("function id() {}", transpiled);
-            },
+            }
         }
     }
 }
-

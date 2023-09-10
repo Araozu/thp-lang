@@ -41,16 +41,14 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
     let chars: Vec<char> = input.chars().into_iter().collect();
     let mut results = Vec::new();
     let mut current_pos: usize = 0;
-    let mut indentation_stack = Vec::<usize>::new();
+    let mut indentation_stack = vec![0];
     // Used to emit INDENT & DEDENT tokens
     let mut at_new_line = false;
 
     while has_input(&chars, current_pos) {
         match next_token(&chars, current_pos, &mut indentation_stack, at_new_line) {
             LexResult::Some(token, next_pos) => {
-                if token.token_type == TokenType::NewLine {
-                    at_new_line = true;
-                }
+                at_new_line = token.token_type == TokenType::NewLine;
 
                 results.push(token);
                 current_pos = next_pos;
@@ -73,43 +71,33 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
 }
 
 /// Scans a single token from `chars`, starting from `current_pos`
-fn next_token(chars: &Chars, current_pos: usize, indentation_stack: &mut Vec<usize>, at_new_line: bool) -> LexResult {
-    let next_char = peek(chars, current_pos);
+fn next_token(
+    chars: &Chars,
+    current_pos: usize,
+    indentation_stack: &mut Vec<usize>,
+    at_new_line: bool,
+) -> LexResult {
+    let mut current_pos = current_pos;
 
-    // If EOF is reached return nothing but the current position
-    if next_char == '\0' {
+    // Handle whitespace
+    if peek(chars, current_pos) == ' ' {
+        if at_new_line {
+            return handle_indentation(chars, current_pos, indentation_stack);
+        } else {
+            // Consume whitespace
+            current_pos += 1;
+            while peek(chars, current_pos) == ' ' {
+                current_pos += 1;
+            }
+        }
+    }
+
+    // If EOF is reached return only the current position
+    if peek(chars, current_pos) == '\0' {
         return LexResult::None(current_pos);
     }
 
-    // Handle whitespace recursively.
-    if next_char == ' ' && !at_new_line {
-        return next_token(chars, current_pos + 1, indentation_stack, false);
-    }
-    // When whitespace is found at the start of the line, emit INDENT/DEDENT
-    else if next_char == ' ' && at_new_line {
-        // Count the number of spaces
-        let mut spaces = 0;
-        let mut sub_pos = current_pos;
-        while peek(chars, sub_pos) == ' ' {
-            spaces += 1;
-            sub_pos += 1;
-        }
-
-        // Compare the number of spaces with the top of the stack
-        let top = indentation_stack.last().unwrap_or(&0);
-        if spaces > *top {
-            // Push the new indentation level
-            indentation_stack.push(spaces);
-            return LexResult::Some(Token::new_indent(current_pos), current_pos + spaces);
-        } else if spaces < *top {
-            // Pop the indentation level
-            indentation_stack.pop();
-            return LexResult::Some(Token::new_dedent(current_pos), current_pos + spaces);
-        } else {
-            // Same indentation level
-            return next_token(chars, current_pos + spaces, indentation_stack, true);
-        }
-    }
+    let next_char = peek(chars, current_pos);
 
     // Scanners
     None.or_else(|| scanner::number(next_char, chars, current_pos))
@@ -133,6 +121,35 @@ fn next_token(chars: &Chars, current_pos: usize, indentation_stack: &mut Vec<usi
         })
 }
 
+fn handle_indentation(
+    chars: &Chars,
+    current_pos: usize,
+    indentation_stack: &mut Vec<usize>,
+) -> LexResult {
+    // Count the number of spaces
+    let mut spaces = 0;
+    let mut sub_pos = current_pos;
+    while peek(chars, sub_pos) == ' ' {
+        spaces += 1;
+        sub_pos += 1;
+    }
+
+    // Compare the number of spaces with the top of the stack
+    let top = indentation_stack.last().unwrap_or(&0);
+    if spaces > *top {
+        // Push the new indentation level
+        indentation_stack.push(spaces);
+        return LexResult::Some(Token::new_indent(current_pos), current_pos + spaces);
+    } else if spaces < *top {
+        // Pop the indentation level
+        indentation_stack.pop();
+        return LexResult::Some(Token::new_dedent(current_pos), current_pos + spaces);
+    } else {
+        // Same indentation level
+        return next_token(chars, current_pos + spaces, indentation_stack, true);
+    }
+}
+
 /// Returns the char at `pos`
 fn peek(input: &Chars, pos: usize) -> char {
     let result = input.get(pos).unwrap_or(&'\0');
@@ -151,7 +168,7 @@ mod tests {
 
     /// Should return an EOF token if the input has no tokens
     #[test]
-    fn test1() {
+    fn should_emit_eof() {
         let input = String::from("");
         let tokens = get_tokens(&input).unwrap();
         // 1 semicolon and 1 EOF token
