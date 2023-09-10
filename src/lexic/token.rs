@@ -11,8 +11,10 @@ pub enum TokenType {
     RightBracket,
     LeftBrace,
     RightBrace,
-    Semicolon,
+    NewLine,
     Comment,
+    INDENT,
+    DEDENT,
     VAR,
     VAL,
     EOF,
@@ -86,7 +88,7 @@ impl Token {
 
     pub fn new_semicolon(position: usize) -> Token {
         Token {
-            token_type: TokenType::Semicolon,
+            token_type: TokenType::NewLine,
             value: String::from(";"),
             position,
         }
@@ -104,6 +106,22 @@ impl Token {
         Token {
             token_type: TokenType::Comment,
             value,
+            position,
+        }
+    }
+
+    pub fn new_indent(position: usize) -> Token {
+        Token {
+            token_type: TokenType::INDENT,
+            value: String::from(""),
+            position,
+        }
+    }
+
+    pub fn new_dedent(position: usize) -> Token {
+        Token {
+            token_type: TokenType::INDENT,
+            value: String::from(""),
             position,
         }
     }

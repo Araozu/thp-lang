@@ -3,9 +3,6 @@ use crate::lexic::{token::Token, LexResult};
 
 /// Function to handle new lines
 ///
-/// It performs Automatic Semicolon Insertion, inserting a semicolon after
-/// every new line or group of new lines
-///
 /// Assumes the char at start_pos is a new line
 pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
     let current = chars.get(start_pos);
@@ -15,12 +12,12 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
         Some(c) if *c == ' ' => match look_ahead_for_new_line(chars, start_pos + 1) {
             Some(next_pos) => scan(chars, next_pos),
             None => {
-                let token = Token::new(String::from(";"), start_pos, TokenType::Semicolon);
+                let token = Token::new(String::from(";"), start_pos, TokenType::NewLine);
                 LexResult::Some(token, start_pos)
             }
         },
         Some(_) | None => {
-            let token = Token::new(String::from(";"), start_pos, TokenType::Semicolon);
+            let token = Token::new(String::from(";"), start_pos, TokenType::NewLine);
             LexResult::Some(token, start_pos)
         }
     }
@@ -51,7 +48,7 @@ mod tests {
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
-            assert_eq!(TokenType::Semicolon, token.token_type);
+            assert_eq!(TokenType::NewLine, token.token_type);
             assert_eq!(1, next_pos);
         } else {
             panic!()
@@ -64,7 +61,7 @@ mod tests {
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
-            assert_eq!(TokenType::Semicolon, token.token_type);
+            assert_eq!(TokenType::NewLine, token.token_type);
             assert_eq!(3, next_pos);
         } else {
             panic!()
@@ -74,7 +71,7 @@ mod tests {
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
-            assert_eq!(TokenType::Semicolon, token.token_type);
+            assert_eq!(TokenType::NewLine, token.token_type);
             assert_eq!(3, next_pos);
         } else {
             panic!()
@@ -87,7 +84,7 @@ mod tests {
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
-            assert_eq!(TokenType::Semicolon, token.token_type);
+            assert_eq!(TokenType::NewLine, token.token_type);
             assert_eq!(6, next_pos);
         } else {
             panic!()
@@ -97,7 +94,7 @@ mod tests {
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
-            assert_eq!(TokenType::Semicolon, token.token_type);
+            assert_eq!(TokenType::NewLine, token.token_type);
             assert_eq!(6, next_pos);
         } else {
             panic!()
@@ -107,7 +104,7 @@ mod tests {
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
-            assert_eq!(TokenType::Semicolon, token.token_type);
+            assert_eq!(TokenType::NewLine, token.token_type);
             assert_eq!(6, next_pos);
         } else {
             panic!()

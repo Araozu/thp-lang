@@ -6,6 +6,8 @@ pub mod token;
 use crate::error_handling::{LexError, MistiError};
 use token::Token;
 
+use self::token::TokenType;
+
 type Chars = Vec<char>;
 
 /// Represents the result of scanning a single token from the input
@@ -39,10 +41,17 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
     let chars: Vec<char> = input.chars().into_iter().collect();
     let mut results = Vec::new();
     let mut current_pos: usize = 0;
+    let mut indentation_stack = Vec::<usize>::new();
+    // Used to emit INDENT & DEDENT tokens
+    let mut at_new_line = false;
 
     while has_input(&chars, current_pos) {
-        match next_token(&chars, current_pos) {
+        match next_token(&chars, current_pos, &mut indentation_stack, at_new_line) {
             LexResult::Some(token, next_pos) => {
+                if token.token_type == TokenType::NewLine {
+                    at_new_line = true;
+                }
+
                 results.push(token);
                 current_pos = next_pos;
             }
@@ -56,12 +65,15 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
     }
 
     results.push(Token::new_semicolon(0));
+
+    // TODO: emit DEDENT tokens for each entry in indentation_stack
+
     results.push(Token::new_eof(0));
     Ok(results)
 }
 
 /// Scans a single token from `chars`, starting from `current_pos`
-fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
+fn next_token(chars: &Chars, current_pos: usize, indentation_stack: &mut Vec<usize>, at_new_line: bool) -> LexResult {
     let next_char = peek(chars, current_pos);
 
     // If EOF is reached return nothing but the current position
@@ -70,8 +82,33 @@ fn next_token(chars: &Chars, current_pos: usize) -> LexResult {
     }
 
     // Handle whitespace recursively.
-    if next_char == ' ' {
-        return next_token(chars, current_pos + 1);
+    if next_char == ' ' && !at_new_line {
+        return next_token(chars, current_pos + 1, indentation_stack, false);
+    }
+    // When whitespace is found at the start of the line, emit INDENT/DEDENT
+    else if next_char == ' ' && at_new_line {
+        // Count the number of spaces
+        let mut spaces = 0;
+        let mut sub_pos = current_pos;
+        while peek(chars, sub_pos) == ' ' {
+            spaces += 1;
+            sub_pos += 1;
+        }
+
+        // Compare the number of spaces with the top of the stack
+        let top = indentation_stack.last().unwrap_or(&0);
+        if spaces > *top {
+            // Push the new indentation level
+            indentation_stack.push(spaces);
+            return LexResult::Some(Token::new_indent(current_pos), current_pos + spaces);
+        } else if spaces < *top {
+            // Pop the indentation level
+            indentation_stack.pop();
+            return LexResult::Some(Token::new_dedent(current_pos), current_pos + spaces);
+        } else {
+            // Same indentation level
+            return next_token(chars, current_pos + spaces, indentation_stack, true);
+        }
     }
 
     // Scanners
@@ -141,11 +178,12 @@ mod tests {
     fn t() {
         let input = String::from("126 ");
         let chars: Vec<char> = input.chars().into_iter().collect();
+        let mut indentation_stack = Vec::<usize>::new();
 
         assert_eq!(4, chars.len());
         assert!(has_input(&chars, 0));
 
-        match next_token(&chars, 0) {
+        match next_token(&chars, 0, &mut indentation_stack, true) {
             LexResult::Some(t, _) => {
                 assert_eq!("126", t.value)
             }
@@ -175,7 +213,7 @@ mod tests {
 
         assert_eq!("1789e+1", tokens.get(3).unwrap().value);
         assert_eq!("239.3298e-103", tokens.get(4).unwrap().value);
-        assert_eq!(TokenType::Semicolon, tokens.get(5).unwrap().token_type);
+        assert_eq!(TokenType::NewLine, tokens.get(5).unwrap().token_type);
         assert_eq!(TokenType::EOF, tokens.get(6).unwrap().token_type);
     }
 
@@ -222,7 +260,7 @@ mod tests {
         let input = String::from("3\n22");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Semicolon, tokens[1].token_type);
+        assert_eq!(TokenType::NewLine, tokens[1].token_type);
     }
 
     #[test]
@@ -230,7 +268,7 @@ mod tests {
         let input = String::from("3\n\n\n22");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Semicolon, tokens[1].token_type);
+        assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::Number, tokens[2].token_type);
     }
 
@@ -239,7 +277,45 @@ mod tests {
         let input = String::from("3\n \n   \n22");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Semicolon, tokens[1].token_type);
+        assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::Number, tokens[2].token_type);
+    }
+
+    #[test]
+    fn should_emit_indent_token() {
+        let input = String::from("3\n \n   22");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::NewLine, tokens[1].token_type);
+        assert_eq!(TokenType::INDENT, tokens[2].token_type);
+        assert_eq!(TokenType::Number, tokens[3].token_type);
+    }
+
+    #[test]
+    fn should_emit_indent_when_indentation_increases() {
+        let input = String::from("3\n \n    22\n        111");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::NewLine, tokens[1].token_type);
+        assert_eq!(TokenType::INDENT, tokens[2].token_type);
+        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::NewLine, tokens[4].token_type);
+        assert_eq!(TokenType::INDENT, tokens[5].token_type);
+        assert_eq!(TokenType::Number, tokens[6].token_type);
+    }
+
+    #[test]
+    fn shouldnt_emit_indent_when_indentation_stays() {
+        let input = String::from("3\n \n    22\n    111");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::NewLine, tokens[1].token_type);
+        assert_eq!(TokenType::INDENT, tokens[2].token_type);
+        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::NewLine, tokens[4].token_type);
+        assert_eq!(TokenType::Number, tokens[5].token_type);
     }
 }

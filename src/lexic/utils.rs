@@ -3,7 +3,7 @@ pub fn is_digit(c: char) -> bool {
     '0' <= c && c <= '9'
 }
 
-/// Whether `c` is between `a-fA-F`
+/// Whether `c` is between `0-9a-fA-F`
 pub fn is_hex_digit(c: char) -> bool {
     is_digit(c) || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F'
 }

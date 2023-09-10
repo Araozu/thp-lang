@@ -129,7 +129,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
 fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == token_type => Result3::Ok(t),
-        Some(t) if t.token_type == TokenType::Semicolon || t.token_type == TokenType::EOF => {
+        Some(t) if t.token_type == TokenType::NewLine || t.token_type == TokenType::EOF => {
             Result3::None
         }
         Some(t) => Result3::Err(t),
@@ -140,7 +140,7 @@ fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Res
 fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == TokenType::Operator && t.value == operator => Result3::Ok(t),
-        Some(t) if t.token_type == TokenType::Semicolon || t.token_type == TokenType::EOF => {
+        Some(t) if t.token_type == TokenType::NewLine || t.token_type == TokenType::EOF => {
             Result3::None
         }
         Some(t) => Result3::Err(t),
