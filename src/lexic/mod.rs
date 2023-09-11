@@ -28,6 +28,8 @@ pub enum LexResult {
     /// - `10` is the position where the token ends, and from where the next token
     /// should be scanned
     Some(Token, usize),
+    /// Multiple tokens
+    Multiple(Vec<Token>, usize),
     /// No token was found. This indicates that EOF has been reached.
     ///
     /// Contains the last position, which should be the input lenght - 1
@@ -51,6 +53,12 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
                 at_new_line = token.token_type == TokenType::NewLine;
 
                 results.push(token);
+                current_pos = next_pos;
+            }
+            LexResult::Multiple(tokens, next_pos) => {
+                at_new_line = tokens.last().unwrap().token_type == TokenType::NewLine;
+
+                results.extend(tokens);
                 current_pos = next_pos;
             }
             LexResult::None(next_pos) => {
@@ -79,16 +87,14 @@ fn next_token(
 ) -> LexResult {
     let mut current_pos = current_pos;
 
-    // Handle whitespace
-    if peek(chars, current_pos) == ' ' {
-        if at_new_line {
-            return handle_indentation(chars, current_pos, indentation_stack);
-        } else {
-            // Consume whitespace
+    if at_new_line {
+        return handle_indentation(chars, current_pos, indentation_stack);
+    }
+    else if !at_new_line && peek(chars, current_pos) == ' ' {
+        // Consume whitespace
+        current_pos += 1;
+        while peek(chars, current_pos) == ' ' {
             current_pos += 1;
-            while peek(chars, current_pos) == ' ' {
-                current_pos += 1;
-            }
         }
     }
 
@@ -134,19 +140,48 @@ fn handle_indentation(
         sub_pos += 1;
     }
 
+    // TODO: should emit a DEDENT for every single entry decreased in the stack
+
     // Compare the number of spaces with the top of the stack
     let top = indentation_stack.last().unwrap_or(&0);
+
     if spaces > *top {
         // Push the new indentation level
         indentation_stack.push(spaces);
         return LexResult::Some(Token::new_indent(current_pos), current_pos + spaces);
     } else if spaces < *top {
-        // Pop the indentation level
-        indentation_stack.pop();
-        return LexResult::Some(Token::new_dedent(current_pos), current_pos + spaces);
+        // Emit a DEDENT token for each indentation level that is decreased
+        let mut dedent_tokens = Vec::<Token>::new();
+
+        while let Some(new_top) = indentation_stack.last() {
+            if spaces < *new_top {
+                indentation_stack.pop();
+                dedent_tokens.push(Token::new_dedent(current_pos));
+            }
+            else if spaces == *new_top {
+                break;
+            }
+            else {
+                // Illegal state: Indentation error
+                let error = LexError {
+                    position: current_pos,
+                    reason: format!(
+                        "Indentation error: expected {} spaces, found {}",
+                        new_top,
+                        spaces
+                    ),
+                };
+                return LexResult::Err(error);
+            }
+        }
+
+        return LexResult::Multiple(
+            dedent_tokens,
+            current_pos + spaces
+        );
     } else {
         // Same indentation level
-        return next_token(chars, current_pos + spaces, indentation_stack, true);
+        return next_token(chars, current_pos + spaces, indentation_stack, false);
     }
 }
 
@@ -334,5 +369,55 @@ mod tests {
         assert_eq!(TokenType::Number, tokens[3].token_type);
         assert_eq!(TokenType::NewLine, tokens[4].token_type);
         assert_eq!(TokenType::Number, tokens[5].token_type);
+    }
+
+    #[test]
+    fn should_emit_dedent() {
+        let input = String::from("3\n \n    22\n111");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::NewLine, tokens[1].token_type);
+        assert_eq!(TokenType::INDENT, tokens[2].token_type);
+        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::NewLine, tokens[4].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[5].token_type);
+        assert_eq!(TokenType::Number, tokens[6].token_type);
+    }
+
+    #[test]
+    fn should_emit_multiple_dedents() {
+        let input = String::from("1\n  2\n    3\n  4\n5");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::NewLine, tokens[1].token_type);
+        assert_eq!(TokenType::INDENT, tokens[2].token_type);
+        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::NewLine, tokens[4].token_type);
+        assert_eq!(TokenType::INDENT, tokens[5].token_type);
+        assert_eq!(TokenType::Number, tokens[6].token_type);
+        assert_eq!(TokenType::NewLine, tokens[7].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[8].token_type);
+        assert_eq!(TokenType::Number, tokens[9].token_type);
+        assert_eq!(TokenType::NewLine, tokens[10].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[11].token_type);
+    }
+
+    #[test]
+    fn should_emit_multiple_dedents_2() {
+        let input = String::from("1\n  2\n    3\n4");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::NewLine, tokens[1].token_type);
+        assert_eq!(TokenType::INDENT, tokens[2].token_type);
+        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::NewLine, tokens[4].token_type);
+        assert_eq!(TokenType::INDENT, tokens[5].token_type);
+        assert_eq!(TokenType::Number, tokens[6].token_type);
+        assert_eq!(TokenType::NewLine, tokens[7].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[8].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[9].token_type);
     }
 }

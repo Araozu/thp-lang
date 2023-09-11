@@ -120,7 +120,7 @@ impl Token {
 
     pub fn new_dedent(position: usize) -> Token {
         Token {
-            token_type: TokenType::INDENT,
+            token_type: TokenType::DEDENT,
             value: String::from(""),
             position,
         }
