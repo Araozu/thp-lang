@@ -86,14 +86,6 @@ impl Token {
         }
     }
 
-    pub fn new_semicolon(position: usize) -> Token {
-        Token {
-            token_type: TokenType::NewLine,
-            value: String::from(";"),
-            position,
-        }
-    }
-
     pub fn new_datatype(value: String, position: usize) -> Token {
         Token {
             token_type: TokenType::Datatype,

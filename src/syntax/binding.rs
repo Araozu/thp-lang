@@ -9,13 +9,12 @@ use crate::utils::Result3;
 // - NotFound: the first token (var | val) was not found, so the parser should try other options
 // - Error: token (var | val) was found, but then other expected tokens were not found
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult> {
-    let mut pos = pos;
-
+    let mut current_pos = pos;
     // Optional datatype annotation
     let datatype_annotation = {
-        match try_token_type(tokens, pos, TokenType::Datatype) {
+        match try_token_type(tokens, current_pos, TokenType::Datatype) {
             Result3::Ok(t) => {
-                pos += 1;
+                current_pos += 1;
                 Some(String::from(&t.value))
             }
             Result3::Err(_) => None,
@@ -29,11 +28,11 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
      * val/var keyword
      */
     let (is_val, binding_token) = {
-        let res1 = try_token_type(tokens, pos, TokenType::VAL);
+        let res1 = try_token_type(tokens, current_pos, TokenType::VAL);
         match res1 {
             Result3::Ok(val_token) => (true, val_token),
             _ => {
-                let res2 = try_token_type(tokens, pos, TokenType::VAR);
+                let res2 = try_token_type(tokens, current_pos, TokenType::VAR);
                 match res2 {
                     Result3::Ok(var_token) => (false, var_token),
                     // Neither VAL nor VAR were matched, the parser should try
@@ -47,7 +46,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     /*
      * identifier
      */
-    let identifier = match try_token_type(tokens, pos + 1, TokenType::Identifier) {
+    let identifier = match try_token_type(tokens, current_pos + 1, TokenType::Identifier) {
         Result3::Ok(t) => t,
         Result3::Err(t) => {
             // The parser found a token, but it's not an identifier
@@ -76,7 +75,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     /*
      * Equal (=) operator
      */
-    let equal_operator: &Token = match try_operator(tokens, pos + 2, String::from("=")) {
+    let equal_operator: &Token = match try_operator(tokens, current_pos + 2, String::from("=")) {
         Result3::Ok(t) => t,
         Result3::Err(t) => {
             // The parser found a token, but it's not the `=` operator
@@ -96,7 +95,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
         }
     };
 
-    let expression = expression::try_parse(tokens, pos + 3);
+    let expression = expression::try_parse(tokens, current_pos + 3);
     if expression.is_none() {
         return Some(SyntaxResult::Err(SyntaxError {
             reason: String::from("Expected an expression after the equal `=` operator"),
@@ -120,16 +119,17 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
         })
     };
 
-    Some(SyntaxResult::Ok(super::ast::TopLevelConstruct::Binding(
-        binding,
-    )))
+    Some(SyntaxResult::Ok(
+        super::ast::TopLevelDeclaration::Binding(binding),
+        current_pos + 4,
+    ))
 }
 
 /// Expects the token at `pos` to be of type `token_type`
 fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == token_type => Result3::Ok(t),
-        Some(t) if t.token_type == TokenType::NewLine || t.token_type == TokenType::EOF => {
+        Some(t) if t.token_type == TokenType::EOF => {
             Result3::None
         }
         Some(t) => Result3::Err(t),
@@ -151,7 +151,7 @@ fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&T
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{lexic::get_tokens, syntax::ast::TopLevelConstruct};
+    use crate::{lexic::get_tokens, syntax::ast::TopLevelDeclaration};
 
     #[test]
     fn should_parse_val_binding() {
@@ -159,7 +159,7 @@ mod tests {
         let binding = try_parse(&tokens, 0).unwrap();
 
         match binding {
-            SyntaxResult::Ok(TopLevelConstruct::Binding(Binding::Val(binding))) => {
+            SyntaxResult::Ok(TopLevelDeclaration::Binding(Binding::Val(binding)), _) => {
                 assert_eq!("identifier", format!("{}", binding.identifier));
             }
             _ => panic!(),
@@ -197,7 +197,7 @@ mod tests {
         let binding = try_parse(&tokens, 0).unwrap();
 
         match binding {
-            SyntaxResult::Ok(TopLevelConstruct::Binding(Binding::Val(binding))) => {
+            SyntaxResult::Ok(TopLevelDeclaration::Binding(Binding::Val(binding)), _) => {
                 assert_eq!(Some(String::from("Num")), binding.datatype);
                 assert_eq!("identifier", format!("{}", binding.identifier));
             }
@@ -208,7 +208,7 @@ mod tests {
         let binding = try_parse(&tokens, 0).unwrap();
 
         match binding {
-            SyntaxResult::Ok(TopLevelConstruct::Binding(Binding::Var(binding))) => {
+            SyntaxResult::Ok(TopLevelDeclaration::Binding(Binding::Var(binding)), _) => {
                 assert_eq!(Some(String::from("Bool")), binding.datatype);
                 assert_eq!("identifier", format!("{}", binding.identifier));
             }

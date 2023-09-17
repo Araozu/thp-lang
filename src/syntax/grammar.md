@@ -1,35 +1,45 @@
 # Grammar
 
+
 ## Module
 
 A module is (commonly) a single source file.
 
-- `module = variable_binding*`
+```ebnf
+module = top level declaration*
+```
 
-
-### `variable_binding`
-
-A declaration with `var` or `val`.
+## Top level declaration
 
 ```ebnf
-var = "var"
-val = "val"
-variable_binding = (var | val), identifier, "=", expression
+top level declaration = function declaration
 ```
 
 
-### `expression`
-
-For now just a number, string or boolean
+## Function declaration
 
 ```ebnf
-expression = number | string | boolean
+function declaration = "fun", identifier, params list, return type?, block
+```
+
+### Params list
+
+```ebnf
+params list = "(", ")"
+```
+
+### Return type
+
+```ebnf
+return type = ;
 ```
 
 
-## Type annotations
+### Block
 
 ```ebnf
-variable_binding = Datatype, (var | val), identifier, "=", expression
+block = "{", "}"
 ```
+
+
 

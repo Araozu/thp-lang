@@ -1,9 +1,9 @@
 pub struct ModuleAST {
-    pub bindings: Vec<TopLevelConstruct>,
+    pub declarations: Vec<TopLevelDeclaration>,
 }
 
 #[derive(Debug)]
-pub enum TopLevelConstruct {
+pub enum TopLevelDeclaration {
     Binding(Binding),
     FunctionDeclaration(FunctionDeclaration),
 }

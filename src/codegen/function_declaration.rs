@@ -13,7 +13,7 @@ mod tests {
     use super::*;
     use crate::{
         lexic::get_tokens,
-        syntax::{ast::TopLevelConstruct, construct_ast},
+        syntax::{ast::TopLevelDeclaration, construct_ast},
     };
 
     #[test]
@@ -21,11 +21,11 @@ mod tests {
         let tokens = get_tokens(&String::from("fun id() {}")).unwrap();
         let result = construct_ast(&tokens).unwrap();
 
-        let fun_dec = result.bindings.get(0).unwrap();
+        let fun_dec = result.declarations.get(0).unwrap();
 
         match fun_dec {
-            TopLevelConstruct::Binding(_) => panic!("Expected function declaration"),
-            TopLevelConstruct::FunctionDeclaration(fun_decl) => {
+            TopLevelDeclaration::Binding(_) => panic!("Expected function declaration"),
+            TopLevelDeclaration::FunctionDeclaration(fun_decl) => {
                 let transpiled = fun_decl.transpile();
 
                 assert_eq!("function id() {}", transpiled);

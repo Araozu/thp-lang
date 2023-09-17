@@ -1,12 +1,12 @@
-use crate::syntax::ast::TopLevelConstruct;
+use crate::syntax::ast::TopLevelDeclaration;
 
 use super::Transpilable;
 
-impl Transpilable for TopLevelConstruct {
+impl Transpilable for TopLevelDeclaration {
     fn transpile(&self) -> String {
         match self {
-            TopLevelConstruct::Binding(binding) => binding.transpile(),
-            TopLevelConstruct::FunctionDeclaration(fun) => fun.transpile(),
+            TopLevelDeclaration::Binding(binding) => binding.transpile(),
+            TopLevelDeclaration::FunctionDeclaration(fun) => fun.transpile(),
         }
     }
 }

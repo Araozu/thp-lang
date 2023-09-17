@@ -6,7 +6,7 @@ impl Transpilable for ModuleAST {
     /// nodes and leaves of the AST
     fn transpile(&self) -> String {
         let bindings_str: Vec<String> = self
-            .bindings
+            .declarations
             .iter()
             .map(|binding| binding.transpile())
             .collect();
@@ -18,7 +18,7 @@ impl Transpilable for ModuleAST {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::syntax::ast::{Binding, Expression, TopLevelConstruct, ValBinding};
+    use crate::syntax::ast::{Binding, Expression, TopLevelDeclaration, ValBinding};
 
     #[test]
     fn module_ast_should_transpile() {
@@ -31,7 +31,7 @@ mod tests {
         });
 
         let module = ModuleAST {
-            bindings: vec![TopLevelConstruct::Binding(binding)],
+            declarations: vec![TopLevelDeclaration::Binding(binding)],
         };
 
         let result = module.transpile();

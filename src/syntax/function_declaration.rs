@@ -5,7 +5,7 @@ use crate::{
 };
 
 use super::{
-    ast::{FunctionDeclaration, TopLevelConstruct},
+    ast::{FunctionDeclaration, TopLevelDeclaration},
     utils::try_token_type,
     SyntaxResult,
 };
@@ -154,18 +154,20 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
             }));
         }
     };
+    current_pos += 1;
 
     // Construct and return the function declaration
-    Some(SyntaxResult::Ok(TopLevelConstruct::FunctionDeclaration(
-        FunctionDeclaration {
+    Some(SyntaxResult::Ok(
+        TopLevelDeclaration::FunctionDeclaration(FunctionDeclaration {
             identifier: Box::new(identifier.value.clone()),
-        },
-    )))
+        }),
+        current_pos,
+    ))
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{lexic::get_tokens, syntax::ast::TopLevelConstruct};
+    use crate::{lexic::get_tokens, syntax::ast::TopLevelDeclaration};
 
     use super::*;
 
@@ -344,7 +346,7 @@ mod tests {
         let function_declaration = try_parse(&tokens, 0).unwrap();
 
         match function_declaration {
-            SyntaxResult::Ok(TopLevelConstruct::FunctionDeclaration(declaration)) => {
+            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
                 assert_eq!(declaration.identifier, Box::new(String::from("id")));
             }
             _ => panic!(
