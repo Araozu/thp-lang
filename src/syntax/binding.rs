@@ -1,4 +1,5 @@
 use super::ast::{Binding, ValBinding, VarBinding};
+use super::utils::{try_operator, try_token_type};
 use super::{expression, SyntaxResult};
 use crate::error_handling::SyntaxError;
 use crate::lexic::token::{Token, TokenType};
@@ -123,29 +124,6 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
         super::ast::TopLevelDeclaration::Binding(binding),
         current_pos + 4,
     ))
-}
-
-/// Expects the token at `pos` to be of type `token_type`
-fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
-    match tokens.get(pos) {
-        Some(t) if t.token_type == token_type => Result3::Ok(t),
-        Some(t) if t.token_type == TokenType::EOF => {
-            Result3::None
-        }
-        Some(t) => Result3::Err(t),
-        None => Result3::None,
-    }
-}
-
-fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
-    match tokens.get(pos) {
-        Some(t) if t.token_type == TokenType::Operator && t.value == operator => Result3::Ok(t),
-        Some(t) if t.token_type == TokenType::NewLine || t.token_type == TokenType::EOF => {
-            Result3::None
-        }
-        Some(t) => Result3::Err(t),
-        None => Result3::None,
-    }
 }
 
 #[cfg(test)]

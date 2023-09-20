@@ -6,7 +6,7 @@ use crate::{
 
 use super::{
     ast::{FunctionDeclaration, TopLevelDeclaration},
-    utils::try_token_type,
+    utils::{expect_token_w, try_token_type},
     SyntaxResult,
 };
 
@@ -21,59 +21,43 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     };
     current_pos += 1;
 
+    /*
+
+    try_token_type(
+        tokens,
+        current_pos,
+        TokenType::Identifier,
+        ignore_whitespace,
+        "There should be an identifier after a `fun` token, but found `{}`",
+    ) -> token, usize?
+
+    */
+
     // Parse identifier
-    let identifier = match try_token_type(tokens, current_pos, TokenType::Identifier) {
-        Result3::Ok(t) => t,
-        Result3::Err(t) => {
-            // The parser found a token, but it's not an identifier
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be an identifier after a `fun` token, but found `{}`",
-                    t.value
-                ),
-                error_start: t.position,
-                error_end: t.get_end_position(),
-            }));
-        }
-        Result3::None => {
-            // The parser didn't find any token
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be an identifier after a `fun` token, but found nothing"
-                ),
-                error_start: fun_keyword.position,
-                error_end: fun_keyword.get_end_position(),
-            }));
-        }
+    let identifier = match expect_token_w(
+        tokens,
+        current_pos,
+        TokenType::Identifier,
+        "Expected an identifier after the `fun` keyword.".into(),
+        fun_keyword,
+    ) {
+        Ok(t) => t,
+        Err(err) => return err,
     };
     current_pos += 1;
 
-    // Parse an opening paren
-    let opening_paren = match try_token_type(tokens, current_pos, TokenType::LeftParen) {
-        Result3::Ok(t) => t,
-        Result3::Err(t) => {
-            // The parser found a token, but it's not an opening paren
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be an opening paren after the identifier, but found `{}`",
-                    t.value
-                ),
-                error_start: t.position,
-                error_end: t.get_end_position(),
-            }));
-        }
-        Result3::None => {
-            // The parser didn't find any token
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be an opening paren after the identifier, but found nothing"
-                ),
-                error_start: identifier.position,
-                error_end: identifier.get_end_position(),
-            }));
-        }
+    let opening_paren = match expect_token_w(
+        tokens,
+        current_pos,
+        TokenType::LeftParen,
+        "Expected an opening paren afted the function identifier.".into(),
+        identifier,
+    ) {
+        Ok(t) => t,
+        Err(err) => return err,
     };
     current_pos += 1;
+
 
     // Parse a closing paren
     let closing_paren = match try_token_type(tokens, current_pos, TokenType::RightParen) {
@@ -188,7 +172,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be an identifier after a `fun` token, but found `=`"
+                    "Expected an identifier after the `fun` keyword."
                 );
                 assert_eq!(err.error_start, 4);
                 assert_eq!(err.error_end, 5);
@@ -202,7 +186,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be an identifier after a `fun` token, but found nothing"
+                    "Expected an identifier after the `fun` keyword."
                 );
                 assert_eq!(err.error_start, 0);
                 assert_eq!(err.error_end, 3);
@@ -220,7 +204,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be an opening paren after the identifier, but found `=`"
+                    "Expected an opening paren afted the function identifier."
                 );
                 assert_eq!(err.error_start, 7);
                 assert_eq!(err.error_end, 8);
@@ -234,7 +218,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be an opening paren after the identifier, but found nothing"
+                    "Expected an opening paren afted the function identifier."
                 );
                 assert_eq!(err.error_start, 4);
                 assert_eq!(err.error_end, 6);
@@ -270,6 +254,40 @@ mod tests {
                 );
                 assert_eq!(err.error_start, 6);
                 assert_eq!(err.error_end, 7);
+            }
+            _ => panic!("Expected an error: {:?}", fun_decl),
+        }
+    }
+
+    #[test]
+    fn should_not_parse_fun_when_missing_id() {
+        let tokens = get_tokens(&String::from("fun")).unwrap();
+        let fun_decl = try_parse(&tokens, 0);
+
+        match fun_decl {
+            Some(SyntaxResult::Err(err)) => {
+                assert_eq!(
+                    err.reason,
+                    "Expected an identifier after the `fun` keyword."
+                );
+                assert_eq!(err.error_start, 0);
+                assert_eq!(err.error_end, 3);
+            }
+            _ => panic!("Expected an error: {:?}", fun_decl),
+        }
+
+        let tokens = get_tokens(&String::from("fun\n")).unwrap();
+        println!("{:?}", tokens);
+        let fun_decl = try_parse(&tokens, 0);
+
+        match fun_decl {
+            Some(SyntaxResult::Err(err)) => {
+                assert_eq!(
+                    err.reason,
+                    "Expected an identifier after the `fun` keyword."
+                );
+                assert_eq!(err.error_start, 0);
+                assert_eq!(err.error_end, 3);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }

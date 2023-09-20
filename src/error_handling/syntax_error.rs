@@ -16,31 +16,31 @@ impl PrintableError for SyntaxError {
     }
 }
 
-// Extracts a line of code
-//
-// - `chars`: Input where to extract the line from
-// - `start_position`: Position where the erroneous code starts
-// - `end_position`: Position where the erroneous code ends
-//
-// Returns a tuple of:
-//
-// - `String`: The faulty line
-// - `usize`: The amount of chars *before* the faulty code
-// - `usize`: The lenght of the faulty code
-//
-// ## Example
-//
-// ```
-// let input = String::from("\n\nval number == 50\n\n").chars().into_iter().collect();
-// let start_position = 13;
-// let end_position = 15;
-//
-// let (line, before, length) = get_line(&input, start_position, end_position);
-//
-// assert_eq!("val number == 50", line);
-// assert_eq!(11, before);
-// assert_eq!(2, length);
-// ```
+/// Extracts a lin e of code
+///
+/// - `chars`: Input where to extract the line from
+/// - `start_position`: Position where the erroneous code starts
+/// - `end_position`: Position where the erroneous code ends
+///
+/// Returns a tuple of:
+///
+/// - `String`: The faulty line
+/// - `usize`: The amount of chars *before* the faulty code
+/// - `usize`: The lenght of the faulty code
+///
+/// ## Example
+///
+/// ```
+/// let input = String::from("\n\nval number == 50\n\n").chars().into_iter().collect();
+/// let start_position = 13;
+/// let end_position = 15;
+///
+/// let (line, before, length) = get_line(&input, start_position, end_position);
+///
+/// assert_eq!("val number == 50", line);
+/// assert_eq!(11, before);
+/// assert_eq!(2, length);
+/// ```
 fn get_line(
     chars: &Vec<char>,
     start_position: usize,
