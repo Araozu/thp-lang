@@ -34,7 +34,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     */
 
     // Parse identifier
-    let identifier = match expect_token_w(
+    let (identifier, next_pos) = match expect_token_w(
         tokens,
         current_pos,
         TokenType::Identifier,
@@ -44,9 +44,9 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
         Ok(t) => t,
         Err(err) => return err,
     };
-    current_pos += 1;
+    current_pos = next_pos;
 
-    let opening_paren = match expect_token_w(
+    let (opening_paren, next_pos) = match expect_token_w(
         tokens,
         current_pos,
         TokenType::LeftParen,
@@ -56,89 +56,49 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
         Ok(t) => t,
         Err(err) => return err,
     };
-    current_pos += 1;
+    current_pos = next_pos;
 
 
     // Parse a closing paren
-    let closing_paren = match try_token_type(tokens, current_pos, TokenType::RightParen) {
-        Result3::Ok(t) => t,
-        Result3::Err(t) => {
-            // The parser found a token, but it's not an opening paren
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be a closing paren after the parameter list, but found `{}`",
-                    t.value
-                ),
-                error_start: t.position,
-                error_end: t.get_end_position(),
-            }));
-        }
-        Result3::None => {
-            // The parser didn't find any token
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be a closing paren after the parameter list, but found nothing"
-                ),
-                error_start: opening_paren.position,
-                error_end: opening_paren.get_end_position(),
-            }));
-        }
+    let (closing_paren, next_pos) = match expect_token_w(
+        tokens,
+        current_pos,
+        TokenType::RightParen,
+        "Expected a closing paren afted the function identifier.".into(),
+        opening_paren,
+    ) {
+        Ok(t) => t,
+        Err(err) => return err,
     };
-    current_pos += 1;
+    current_pos = next_pos;
 
+    // TODO: Replace by block parsing
     // Parse opening brace
-    let opening_brace = match try_token_type(tokens, current_pos, TokenType::LeftBrace) {
-        Result3::Ok(t) => t,
-        Result3::Err(t) => {
-            // The parser found a token, but it's not an opening brace
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be an opening brace after the parameter list, but found `{}`",
-                    t.value
-                ),
-                error_start: t.position,
-                error_end: t.get_end_position(),
-            }));
-        }
-        Result3::None => {
-            // The parser didn't find any token
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be an opening brace after the parameter list, but found nothing"
-                ),
-                error_start: closing_paren.position,
-                error_end: closing_paren.get_end_position(),
-            }));
-        }
+    let (opening_brace, next_pos) = match expect_token_w(
+        tokens,
+        current_pos,
+        TokenType::LeftBrace,
+        "Expected an opening brace afted the parameter list.".into(),
+        closing_paren,
+    ) {
+        Ok(t) => t,
+        Err(err) => return err,
     };
-    current_pos += 1;
+    current_pos = next_pos;
 
     // Parse closing brace
-    let _closing_brace = match try_token_type(tokens, current_pos, TokenType::RightBrace) {
-        Result3::Ok(t) => t,
-        Result3::Err(t) => {
-            // The parser found a token, but it's not an opening brace
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be a closing brace after the function body, but found `{}`",
-                    t.value
-                ),
-                error_start: t.position,
-                error_end: t.get_end_position(),
-            }));
-        }
-        Result3::None => {
-            // The parser didn't find any token
-            return Some(SyntaxResult::Err(SyntaxError {
-                reason: format!(
-                    "There should be a closing brace after the function body, but found nothing"
-                ),
-                error_start: opening_brace.position,
-                error_end: opening_brace.get_end_position(),
-            }));
-        }
+    let (_closing_brace, next_pos) = match expect_token_w(
+        tokens,
+        current_pos,
+        TokenType::RightBrace,
+        "Expected a closing brace after afted the function body.".into(),
+        opening_brace,
+    ) {
+        Ok(t) => t,
+        Err(err) => return err,
     };
-    current_pos += 1;
+    current_pos = next_pos;
+
 
     // Construct and return the function declaration
     Some(SyntaxResult::Ok(
@@ -236,7 +196,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be a closing paren after the parameter list, but found `=`"
+                    "Expected a closing paren afted the function identifier."
                 );
                 assert_eq!(err.error_start, 7);
                 assert_eq!(err.error_end, 8);
@@ -250,7 +210,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be a closing paren after the parameter list, but found nothing"
+                    "Expected a closing paren afted the function identifier."
                 );
                 assert_eq!(err.error_start, 6);
                 assert_eq!(err.error_end, 7);
@@ -302,7 +262,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be an opening brace after the parameter list, but found `=`"
+                    "Expected an opening brace afted the parameter list."
                 );
                 assert_eq!(err.error_start, 9);
                 assert_eq!(err.error_end, 10);
@@ -316,7 +276,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be an opening brace after the parameter list, but found nothing"
+                    "Expected an opening brace afted the parameter list."
                 );
                 assert_eq!(err.error_start, 7);
                 assert_eq!(err.error_end, 8);
@@ -334,7 +294,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be a closing brace after the function body, but found `20`"
+                    "Expected a closing brace after afted the function body."
                 );
                 assert_eq!(err.error_start, 11);
                 assert_eq!(err.error_end, 13);
@@ -349,7 +309,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "There should be a closing brace after the function body, but found nothing"
+                    "Expected a closing brace after afted the function body."
                 );
                 assert_eq!(err.error_start, 9);
                 assert_eq!(err.error_end, 10);
@@ -361,6 +321,93 @@ mod tests {
     #[test]
     fn should_parse_simple_function_declaration() {
         let tokens = get_tokens(&String::from("fun id() {}")).unwrap();
+        let function_declaration = try_parse(&tokens, 0).unwrap();
+
+        match function_declaration {
+            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
+                assert_eq!(declaration.identifier, Box::new(String::from("id")));
+            }
+            _ => panic!(
+                "Expected a function declaration: {:?}",
+                function_declaration
+            ),
+        }
+    }
+}
+
+#[cfg(test)]
+mod whitespace_test {
+    use crate::{lexic::get_tokens, syntax::ast::TopLevelDeclaration};
+
+    use super::*;
+
+    #[test]
+    fn should_ignore_whitespace_1() {
+        let tokens = get_tokens(&String::from("fun\nid() {}")).unwrap();
+        let function_declaration = try_parse(&tokens, 0).unwrap();
+
+        match function_declaration {
+            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
+                assert_eq!(declaration.identifier, Box::new(String::from("id")));
+            }
+            _ => panic!(
+                "Expected a function declaration: {:?}",
+                function_declaration
+            ),
+        }
+    }
+
+    #[test]
+    fn should_ignore_whitespace_2() {
+        let tokens = get_tokens(&String::from("fun\nid\n() {}")).unwrap();
+        let function_declaration = try_parse(&tokens, 0).unwrap();
+
+        match function_declaration {
+            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
+                assert_eq!(declaration.identifier, Box::new(String::from("id")));
+            }
+            _ => panic!(
+                "Expected a function declaration: {:?}",
+                function_declaration
+            ),
+        }
+    }
+
+    #[test]
+    fn should_ignore_whitespace_3() {
+        let tokens = get_tokens(&String::from("fun\nid\n(\n) {}")).unwrap();
+        let function_declaration = try_parse(&tokens, 0).unwrap();
+
+        match function_declaration {
+            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
+                assert_eq!(declaration.identifier, Box::new(String::from("id")));
+            }
+            _ => panic!(
+                "Expected a function declaration: {:?}",
+                function_declaration
+            ),
+        }
+    }
+
+    #[test]
+    fn should_ignore_whitespace_4() {
+        let tokens = get_tokens(&String::from("fun id\n(\n)\n{}")).unwrap();
+        let function_declaration = try_parse(&tokens, 0).unwrap();
+
+        match function_declaration {
+            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
+                assert_eq!(declaration.identifier, Box::new(String::from("id")));
+            }
+            _ => panic!(
+                "Expected a function declaration: {:?}",
+                function_declaration
+            ),
+        }
+    }
+
+    #[test]
+    fn should_ignore_whitespace_5() {
+        let tokens = get_tokens(&String::from("fun\nid() \n{\n}")).unwrap();
         let function_declaration = try_parse(&tokens, 0).unwrap();
 
         match function_declaration {
