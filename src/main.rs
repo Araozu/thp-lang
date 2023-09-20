@@ -32,7 +32,7 @@ enum Commands {
     R {},
 }
 
-const VERSION: &str = "0.0.5";
+const VERSION: &str = "0.0.6";
 
 fn get_copyright() -> String {
     format!(

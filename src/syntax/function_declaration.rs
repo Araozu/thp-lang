@@ -1,5 +1,4 @@
 use crate::{
-    error_handling::SyntaxError,
     lexic::token::{Token, TokenType},
     utils::Result3,
 };

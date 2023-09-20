@@ -2,9 +2,9 @@
 
 ## TODO
 
-- Parse multiple bindings
-- Compile from file
-- Automatic semicolon insertion
+- Parse more complex bindings
+- Parse block of code
+- Watch mode
 - Improve error messages
 - Parse other language constructions
 - Type checking
@@ -13,12 +13,22 @@
 - Stdlib
 - Document code
 
+
+## v0.0.6
+
+- Parse function declarations
+- Parse multiple function declarations
+- Parse multiple bindings
+- Compile from file
+- Emit INDENT & DEDENT tokens
+
+
 ## v0.0.5
 
 - Scan single line comments
 - Refactor String token to include double quotes (") in its content
 - Refactor datachecking of semantic analysis
- 
+
 ## v0.0.4
 
 - Explicit datatype of variables
