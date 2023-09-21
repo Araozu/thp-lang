@@ -14,6 +14,9 @@ pub struct FunctionDeclaration {
 }
 
 #[derive(Debug)]
+pub struct Block {}
+
+#[derive(Debug)]
 pub enum Binding {
     Val(ValBinding),
     Var(VarBinding),

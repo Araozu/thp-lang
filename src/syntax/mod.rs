@@ -1,6 +1,7 @@
 use crate::error_handling::{MistiError, SyntaxError};
 
 mod binding;
+mod block;
 mod expression;
 mod function_declaration;
 mod utils;
@@ -23,6 +24,14 @@ pub enum SyntaxResult {
     ///
     /// A construct was found, but there was an error parsing it
     Err(SyntaxError),
+}
+
+#[derive(Debug)]
+pub enum ParseResult<A, B> {
+    Ok(A, usize),
+    Err(SyntaxError),
+    Mismatch(B),
+    Unmatched,
 }
 
 /// Constructs the Misti AST from a vector of tokens

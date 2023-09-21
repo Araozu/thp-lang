@@ -1,12 +1,14 @@
 use crate::{
+    error_handling::SyntaxError,
     lexic::token::{Token, TokenType},
     utils::Result3,
 };
 
 use super::{
     ast::{FunctionDeclaration, TopLevelDeclaration},
+    block::parse_block,
     utils::{expect_token_w, try_token_type},
-    SyntaxResult,
+    ParseResult, SyntaxResult,
 };
 
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult> {
@@ -57,7 +59,6 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     };
     current_pos = next_pos;
 
-
     // Parse a closing paren
     let (closing_paren, next_pos) = match expect_token_w(
         tokens,
@@ -71,33 +72,27 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult>
     };
     current_pos = next_pos;
 
-    // TODO: Replace by block parsing
-    // Parse opening brace
-    let (opening_brace, next_pos) = match expect_token_w(
-        tokens,
-        current_pos,
-        TokenType::LeftBrace,
-        "Expected an opening brace afted the parameter list.".into(),
-        closing_paren,
-    ) {
-        Ok(t) => t,
-        Err(err) => return err,
+    let (_block, next_pos) = match parse_block(tokens, current_pos) {
+        ParseResult::Ok(block, next_pos) => (block, next_pos),
+        ParseResult::Err(error) => {
+            return Some(SyntaxResult::Err(error));
+        }
+        ParseResult::Mismatch(wrong_token) => {
+            return Some(SyntaxResult::Err(SyntaxError {
+                reason: String::from("Expected a block after the function declaration."),
+                error_start: wrong_token.position,
+                error_end: wrong_token.get_end_position(),
+            }));
+        }
+        ParseResult::Unmatched => {
+            return Some(SyntaxResult::Err(SyntaxError {
+                reason: String::from("Expected a block after the function declaration."),
+                error_start: closing_paren.position,
+                error_end: closing_paren.get_end_position(),
+            }));
+        }
     };
     current_pos = next_pos;
-
-    // Parse closing brace
-    let (_closing_brace, next_pos) = match expect_token_w(
-        tokens,
-        current_pos,
-        TokenType::RightBrace,
-        "Expected a closing brace after afted the function body.".into(),
-        opening_brace,
-    ) {
-        Ok(t) => t,
-        Err(err) => return err,
-    };
-    current_pos = next_pos;
-
 
     // Construct and return the function declaration
     Some(SyntaxResult::Ok(
@@ -261,7 +256,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "Expected an opening brace afted the parameter list."
+                    "Expected a block after the function declaration."
                 );
                 assert_eq!(err.error_start, 9);
                 assert_eq!(err.error_end, 10);
@@ -275,7 +270,7 @@ mod tests {
             Some(SyntaxResult::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "Expected an opening brace afted the parameter list."
+                    "Expected a block after the function declaration."
                 );
                 assert_eq!(err.error_start, 7);
                 assert_eq!(err.error_end, 8);
@@ -291,10 +286,7 @@ mod tests {
 
         match fun_decl {
             Some(SyntaxResult::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected a closing brace after afted the function body."
-                );
+                assert_eq!(err.reason, "Expected a closing brace after the block body.");
                 assert_eq!(err.error_start, 11);
                 assert_eq!(err.error_end, 13);
             }
@@ -306,10 +298,7 @@ mod tests {
 
         match fun_decl {
             Some(SyntaxResult::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected a closing brace after afted the function body."
-                );
+                assert_eq!(err.reason, "Expected a closing brace after the block body.");
                 assert_eq!(err.error_start, 9);
                 assert_eq!(err.error_end, 10);
             }
