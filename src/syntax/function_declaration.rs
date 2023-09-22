@@ -1,3 +1,5 @@
+use std::thread::current;
+
 use crate::{
     error_handling::SyntaxError,
     lexic::token::{Token, TokenType},
@@ -7,100 +9,118 @@ use crate::{
 use super::{
     ast::{FunctionDeclaration, TopLevelDeclaration},
     block::parse_block,
-    utils::{expect_token_w, try_token_type},
+    utils::{expect_token_w, parse_token_type, try_token_type},
     ParseResult, SyntaxResult,
 };
 
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> Option<SyntaxResult> {
+pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<FunctionDeclaration, ()> {
     let mut current_pos = pos;
 
     // `fun` keyword
     let fun_keyword = match try_token_type(tokens, current_pos, TokenType::FUN) {
         Result3::Ok(t) => t,
-        Result3::Err(_token) => return None,
-        Result3::None => return None,
+        Result3::Err(_token) => return ParseResult::Unmatched,
+        Result3::None => return ParseResult::Unmatched,
     };
     current_pos += 1;
 
-    /*
-
-    try_token_type(
-        tokens,
-        current_pos,
-        TokenType::Identifier,
-        ignore_whitespace,
-        "There should be an identifier after a `fun` token, but found `{}`",
-    ) -> token, usize?
-
-    */
-
-    // Parse identifier
-    let (identifier, next_pos) = match expect_token_w(
-        tokens,
-        current_pos,
-        TokenType::Identifier,
-        "Expected an identifier after the `fun` keyword.".into(),
-        fun_keyword,
-    ) {
-        Ok(t) => t,
-        Err(err) => return err,
+    let (identifier, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Identifier)
+    {
+        ParseResult::Ok(id, next) => (id, next),
+        ParseResult::Err(err) => return ParseResult::Err(err),
+        ParseResult::Mismatch(wrong_token) => {
+            return ParseResult::Err(SyntaxError {
+                reason: String::from("Expected an identifier after the `fun` keyword."),
+                error_start: wrong_token.position,
+                error_end: wrong_token.get_end_position(),
+            });
+        }
+        ParseResult::Unmatched => {
+            return ParseResult::Err(SyntaxError {
+                reason: String::from("Expected an identifier after the `fun` keyword."),
+                error_start: fun_keyword.position,
+                error_end: fun_keyword.get_end_position(),
+            });
+        }
     };
     current_pos = next_pos;
 
-    let (opening_paren, next_pos) = match expect_token_w(
-        tokens,
-        current_pos,
-        TokenType::LeftParen,
-        "Expected an opening paren afted the function identifier.".into(),
-        identifier,
-    ) {
-        Ok(t) => t,
-        Err(err) => return err,
-    };
+    // TODO: Call function that parses a parameter list
+    let (opening_paren, next_pos) =
+        match parse_token_type(tokens, current_pos, TokenType::LeftParen) {
+            ParseResult::Ok(id, next) => (id, next),
+            ParseResult::Err(err) => return ParseResult::Err(err),
+            ParseResult::Mismatch(wrong_token) => {
+                return ParseResult::Err(SyntaxError {
+                    reason: String::from(
+                        "Expected an opening paren afted the function identifier.",
+                    ),
+                    error_start: wrong_token.position,
+                    error_end: wrong_token.get_end_position(),
+                });
+            }
+            ParseResult::Unmatched => {
+                return ParseResult::Err(SyntaxError {
+                    reason: String::from(
+                        "Expected an opening paren afted the function identifier.",
+                    ),
+                    error_start: identifier.position,
+                    error_end: identifier.get_end_position(),
+                });
+            }
+        };
     current_pos = next_pos;
 
-    // Parse a closing paren
-    let (closing_paren, next_pos) = match expect_token_w(
-        tokens,
-        current_pos,
-        TokenType::RightParen,
-        "Expected a closing paren afted the function identifier.".into(),
-        opening_paren,
-    ) {
-        Ok(t) => t,
-        Err(err) => return err,
-    };
+    let (closing_paren, next_pos) =
+        match parse_token_type(tokens, current_pos, TokenType::RightParen) {
+            ParseResult::Ok(id, next) => (id, next),
+            ParseResult::Err(err) => return ParseResult::Err(err),
+            ParseResult::Mismatch(wrong_token) => {
+                return ParseResult::Err(SyntaxError {
+                    reason: String::from("Expected a closing paren afted the function identifier."),
+                    error_start: wrong_token.position,
+                    error_end: wrong_token.get_end_position(),
+                });
+            }
+            ParseResult::Unmatched => {
+                return ParseResult::Err(SyntaxError {
+                    reason: String::from("Expected a closing paren afted the function identifier."),
+                    error_start: opening_paren.position,
+                    error_end: opening_paren.get_end_position(),
+                });
+            }
+        };
     current_pos = next_pos;
 
     let (_block, next_pos) = match parse_block(tokens, current_pos) {
         ParseResult::Ok(block, next_pos) => (block, next_pos),
         ParseResult::Err(error) => {
-            return Some(SyntaxResult::Err(error));
+            return ParseResult::Err(error);
         }
         ParseResult::Mismatch(wrong_token) => {
-            return Some(SyntaxResult::Err(SyntaxError {
+            return ParseResult::Err(SyntaxError {
                 reason: String::from("Expected a block after the function declaration."),
                 error_start: wrong_token.position,
                 error_end: wrong_token.get_end_position(),
-            }));
+            });
         }
         ParseResult::Unmatched => {
-            return Some(SyntaxResult::Err(SyntaxError {
+            return ParseResult::Err(SyntaxError {
                 reason: String::from("Expected a block after the function declaration."),
                 error_start: closing_paren.position,
                 error_end: closing_paren.get_end_position(),
-            }));
+            });
         }
     };
     current_pos = next_pos;
 
     // Construct and return the function declaration
-    Some(SyntaxResult::Ok(
-        TopLevelDeclaration::FunctionDeclaration(FunctionDeclaration {
+    ParseResult::Ok(
+        FunctionDeclaration {
             identifier: Box::new(identifier.value.clone()),
-        }),
-        current_pos,
-    ))
+        },
+        next_pos,
+    )
 }
 
 #[cfg(test)]
@@ -114,7 +134,9 @@ mod tests {
         let tokens = get_tokens(&String::from("val identifier = 20")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
 
-        assert!(fun_decl.is_none());
+        let ParseResult::Unmatched = fun_decl else {
+            panic!("Expected an unmatched result: {:?}", fun_decl);
+        };
     }
 
     #[test]
@@ -123,7 +145,7 @@ mod tests {
         let fun_decl = try_parse(&tokens, 0);
 
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected an identifier after the `fun` keyword."
@@ -137,7 +159,7 @@ mod tests {
         let tokens = get_tokens(&String::from("fun")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected an identifier after the `fun` keyword."
@@ -155,7 +177,7 @@ mod tests {
         let fun_decl = try_parse(&tokens, 0);
 
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected an opening paren afted the function identifier."
@@ -169,7 +191,7 @@ mod tests {
         let tokens = get_tokens(&String::from("fun id")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected an opening paren afted the function identifier."
@@ -187,7 +209,7 @@ mod tests {
         let fun_decl = try_parse(&tokens, 0);
 
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected a closing paren afted the function identifier."
@@ -201,7 +223,7 @@ mod tests {
         let tokens = get_tokens(&String::from("fun id(")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected a closing paren afted the function identifier."
@@ -219,7 +241,7 @@ mod tests {
         let fun_decl = try_parse(&tokens, 0);
 
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected an identifier after the `fun` keyword."
@@ -235,7 +257,7 @@ mod tests {
         let fun_decl = try_parse(&tokens, 0);
 
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected an identifier after the `fun` keyword."
@@ -253,7 +275,7 @@ mod tests {
         let fun_decl = try_parse(&tokens, 0);
 
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected a block after the function declaration."
@@ -267,7 +289,7 @@ mod tests {
         let tokens = get_tokens(&String::from("fun id()")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(
                     err.reason,
                     "Expected a block after the function declaration."
@@ -285,7 +307,7 @@ mod tests {
         let fun_decl = try_parse(&tokens, 0);
 
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(err.reason, "Expected a closing brace after the block body.");
                 assert_eq!(err.error_start, 11);
                 assert_eq!(err.error_end, 13);
@@ -297,7 +319,7 @@ mod tests {
         let fun_decl = try_parse(&tokens, 0);
 
         match fun_decl {
-            Some(SyntaxResult::Err(err)) => {
+            ParseResult::Err(err) => {
                 assert_eq!(err.reason, "Expected a closing brace after the block body.");
                 assert_eq!(err.error_start, 9);
                 assert_eq!(err.error_end, 10);
@@ -309,17 +331,14 @@ mod tests {
     #[test]
     fn should_parse_simple_function_declaration() {
         let tokens = get_tokens(&String::from("fun id() {}")).unwrap();
-        let function_declaration = try_parse(&tokens, 0).unwrap();
+        let ParseResult::Ok(function_declaration, _) = try_parse(&tokens, 0) else {
+            panic!("Expected a function declaration.")
+        };
 
-        match function_declaration {
-            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
-                assert_eq!(declaration.identifier, Box::new(String::from("id")));
-            }
-            _ => panic!(
-                "Expected a function declaration: {:?}",
-                function_declaration
-            ),
-        }
+        assert_eq!(
+            function_declaration.identifier,
+            Box::new(String::from("id"))
+        );
     }
 }
 
@@ -332,80 +351,48 @@ mod whitespace_test {
     #[test]
     fn should_ignore_whitespace_1() {
         let tokens = get_tokens(&String::from("fun\nid() {}")).unwrap();
-        let function_declaration = try_parse(&tokens, 0).unwrap();
+        let ParseResult::Ok(declaration, _) = try_parse(&tokens, 0) else {
+            panic!("Expected a function declaration.")
+        };
 
-        match function_declaration {
-            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
-                assert_eq!(declaration.identifier, Box::new(String::from("id")));
-            }
-            _ => panic!(
-                "Expected a function declaration: {:?}",
-                function_declaration
-            ),
-        }
+        assert_eq!(declaration.identifier, Box::new(String::from("id")));
     }
 
     #[test]
     fn should_ignore_whitespace_2() {
         let tokens = get_tokens(&String::from("fun\nid\n() {}")).unwrap();
-        let function_declaration = try_parse(&tokens, 0).unwrap();
+        let ParseResult::Ok(declaration, _) = try_parse(&tokens, 0) else {
+            panic!("Expected a function declaration.")
+        };
 
-        match function_declaration {
-            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
-                assert_eq!(declaration.identifier, Box::new(String::from("id")));
-            }
-            _ => panic!(
-                "Expected a function declaration: {:?}",
-                function_declaration
-            ),
-        }
+        assert_eq!(declaration.identifier, Box::new(String::from("id")));
     }
 
     #[test]
     fn should_ignore_whitespace_3() {
         let tokens = get_tokens(&String::from("fun\nid\n(\n) {}")).unwrap();
-        let function_declaration = try_parse(&tokens, 0).unwrap();
+        let ParseResult::Ok(declaration, _) = try_parse(&tokens, 0) else {
+            panic!("Expected a function declaration.")
+        };
 
-        match function_declaration {
-            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
-                assert_eq!(declaration.identifier, Box::new(String::from("id")));
-            }
-            _ => panic!(
-                "Expected a function declaration: {:?}",
-                function_declaration
-            ),
-        }
+        assert_eq!(declaration.identifier, Box::new(String::from("id")));
     }
 
     #[test]
     fn should_ignore_whitespace_4() {
         let tokens = get_tokens(&String::from("fun id\n(\n)\n{}")).unwrap();
-        let function_declaration = try_parse(&tokens, 0).unwrap();
-
-        match function_declaration {
-            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
-                assert_eq!(declaration.identifier, Box::new(String::from("id")));
-            }
-            _ => panic!(
-                "Expected a function declaration: {:?}",
-                function_declaration
-            ),
-        }
+        let ParseResult::Ok(declaration, _) = try_parse(&tokens, 0) else {
+            panic!("Expected a function declaration.")
+        };
+        assert_eq!(declaration.identifier, Box::new(String::from("id")));
     }
 
     #[test]
     fn should_ignore_whitespace_5() {
         let tokens = get_tokens(&String::from("fun\nid() \n{\n}")).unwrap();
-        let function_declaration = try_parse(&tokens, 0).unwrap();
-
-        match function_declaration {
-            SyntaxResult::Ok(TopLevelDeclaration::FunctionDeclaration(declaration), _) => {
-                assert_eq!(declaration.identifier, Box::new(String::from("id")));
-            }
-            _ => panic!(
-                "Expected a function declaration: {:?}",
-                function_declaration
-            ),
-        }
+        let ParseResult::Ok(declaration, _) = try_parse(&tokens, 0) else {
+            panic!("Expected a function declaration.")
+        };
+        assert_eq!(declaration.identifier, Box::new(String::from("id")));
     }
 }

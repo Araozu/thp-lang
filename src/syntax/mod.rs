@@ -1,3 +1,5 @@
+use std::f32::consts::E;
+
 use crate::error_handling::{MistiError, SyntaxError};
 
 mod binding;
@@ -49,11 +51,12 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError
         }
 
         match next_construct(tokens, current_pos) {
-            SyntaxResult::Ok(module, next_pos) => {
+            ParseResult::Ok(module, next_pos) => {
                 top_level_declarations.push(module);
                 current_pos = next_pos;
             }
-            SyntaxResult::None => {
+            ParseResult::Err(err) => return Err(MistiError::Syntax(err)),
+            _ => {
                 return Err(MistiError::Syntax(SyntaxError {
                     reason: String::from("PARSER couldn't parse any construction"),
                     // FIXME: This should get the position of the _token_ that current_pos points to
@@ -61,7 +64,6 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError
                     error_end: current_pos,
                 }));
             }
-            SyntaxResult::Err(err) => return Err(MistiError::Syntax(err)),
         }
     }
 
@@ -70,10 +72,21 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError
     })
 }
 
-fn next_construct<'a>(tokens: &'a Vec<Token>, current_pos: usize) -> SyntaxResult {
-    None.or_else(|| binding::try_parse(tokens, current_pos))
-        .or_else(|| function_declaration::try_parse(tokens, current_pos))
-        .unwrap_or_else(|| SyntaxResult::None)
+fn next_construct<'a>(
+    tokens: &'a Vec<Token>,
+    current_pos: usize,
+) -> ParseResult<TopLevelDeclaration, ()> {
+    None.or_else(
+        || match function_declaration::try_parse(tokens, current_pos) {
+            ParseResult::Ok(declaration, next_pos) => Some(ParseResult::Ok(
+                TopLevelDeclaration::FunctionDeclaration(declaration),
+                next_pos,
+            )),
+            ParseResult::Err(err) => Some(ParseResult::Err(err)),
+            _ => None,
+        },
+    )
+    .unwrap_or_else(|| ParseResult::Unmatched)
 }
 
 #[cfg(test)]
