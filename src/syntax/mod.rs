@@ -1,11 +1,10 @@
-use std::f32::consts::E;
-
 use crate::error_handling::{MistiError, SyntaxError};
 
 mod binding;
 mod block;
 mod expression;
 mod function_declaration;
+mod params_list;
 mod utils;
 
 pub mod ast;

@@ -11,10 +11,14 @@ pub enum TopLevelDeclaration {
 #[derive(Debug)]
 pub struct FunctionDeclaration {
     pub identifier: Box<String>,
+    pub params_list: Box<ParamsList>,
 }
 
 #[derive(Debug)]
 pub struct Block {}
+
+#[derive(Debug)]
+pub struct ParamsList {}
 
 #[derive(Debug)]
 pub enum Binding {
