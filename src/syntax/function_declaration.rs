@@ -5,7 +5,7 @@ use crate::{
 };
 
 use super::{
-    ast::{FunctionDeclaration, ParamsList},
+    ast::FunctionDeclaration,
     block::parse_block,
     params_list::parse_params_list,
     utils::{parse_token_type, try_token_type},
@@ -98,7 +98,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Function
 
 #[cfg(test)]
 mod tests {
-    use crate::{lexic::get_tokens, syntax::ast::TopLevelDeclaration};
+    use crate::lexic::get_tokens;
 
     use super::*;
 
@@ -317,7 +317,7 @@ mod tests {
 
 #[cfg(test)]
 mod whitespace_test {
-    use crate::{lexic::get_tokens, syntax::ast::TopLevelDeclaration};
+    use crate::lexic::get_tokens;
 
     use super::*;
 
