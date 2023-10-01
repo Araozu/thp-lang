@@ -30,9 +30,16 @@ pub enum SyntaxResult {
 
 #[derive(Debug)]
 pub enum ParseResult<A, B> {
+    /// The parsing was a success
     Ok(A, usize),
+    /// The parsing failed past a point of no return.
+    /// 
+    /// For example, when parsing a function declaration
+    /// the `fun` token is found, but then no identifier
     Err(SyntaxError),
+    /// A construct different from the one expected was found
     Mismatch(B),
+    /// No construct was found
     Unmatched,
 }
 
