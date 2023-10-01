@@ -4,7 +4,7 @@ use crate::{
     utils::Result3,
 };
 
-use super::{
+use super::super::{
     ast::FunctionDeclaration,
     block::parse_block,
     params_list::parse_params_list,

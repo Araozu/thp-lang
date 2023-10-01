@@ -4,7 +4,7 @@ use crate::{
     utils::Result3,
 };
 
-use super::{ParseResult, SyntaxResult};
+use super::ParseResult;
 
 /// Expects the token at `pos` to be of type `token_type`
 pub fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
@@ -56,50 +56,5 @@ pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result
         }
         Some(t) => Result3::Err(t),
         None => Result3::None,
-    }
-}
-
-pub fn _try_operator_w<'a>(
-    tokens: &'a Vec<Token>,
-    pos: usize,
-    operator: String,
-    error_message: String,
-    prev_token: &Token,
-) -> Result<(&'a Token, usize), Option<SyntaxResult>> {
-    let mut current_pos = pos;
-
-    // Ignore all whitespace and newlines
-    while let Some(t) = tokens.get(current_pos) {
-        if t.token_type == TokenType::INDENT
-            || t.token_type == TokenType::DEDENT
-            || t.token_type == TokenType::NewLine
-        {
-            current_pos += 1;
-        } else {
-            break;
-        }
-    }
-
-    match tokens.get(current_pos) {
-        Some(t) if t.token_type == TokenType::Operator && t.value == operator => {
-            Ok((t, current_pos + 1))
-        }
-        Some(t) if t.token_type == TokenType::NewLine || t.token_type == TokenType::EOF => {
-            Err(Some(SyntaxResult::Err(SyntaxError {
-                reason: error_message,
-                error_start: prev_token.position,
-                error_end: prev_token.get_end_position(),
-            })))
-        }
-        Some(t) => Err(Some(SyntaxResult::Err(SyntaxError {
-            reason: error_message,
-            error_start: t.position,
-            error_end: t.get_end_position(),
-        }))),
-        None => Err(Some(SyntaxResult::Err(SyntaxError {
-            reason: error_message,
-            error_start: prev_token.position,
-            error_end: prev_token.get_end_position(),
-        }))),
     }
 }

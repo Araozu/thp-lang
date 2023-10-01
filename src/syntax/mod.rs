@@ -3,7 +3,6 @@ use crate::error_handling::{MistiError, SyntaxError};
 mod binding;
 mod block;
 mod expression;
-mod function_declaration;
 mod functions;
 mod params_list;
 mod utils;
@@ -14,19 +13,6 @@ use crate::lexic::token::{Token, TokenType};
 use ast::ModuleAST;
 
 use self::ast::TopLevelDeclaration;
-
-#[derive(Debug)]
-pub enum SyntaxResult {
-    ///
-    /// A construct has been found
-    Ok(TopLevelDeclaration, usize),
-    ///
-    /// No construct was found
-    None,
-    ///
-    /// A construct was found, but there was an error parsing it
-    Err(SyntaxError),
-}
 
 #[derive(Debug)]
 pub enum ParseResult<A, B> {
@@ -84,7 +70,7 @@ fn next_construct<'a>(
     current_pos: usize,
 ) -> ParseResult<TopLevelDeclaration, ()> {
     None.or_else(
-        || match function_declaration::try_parse(tokens, current_pos) {
+        || match functions::function_declaration::try_parse(tokens, current_pos) {
             ParseResult::Ok(declaration, next_pos) => Some(ParseResult::Ok(
                 TopLevelDeclaration::FunctionDeclaration(declaration),
                 next_pos,

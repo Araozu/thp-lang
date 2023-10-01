@@ -38,7 +38,14 @@ return type = ;
 ### Block
 
 ```ebnf
-block = "{", "}"
+block = "{", (statement, (new line, statement)*)?,  "}"
+```
+
+
+### Statement
+
+```ebnf
+statement = function call
 ```
 
 

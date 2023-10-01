@@ -35,7 +35,12 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Function
     };
     current_pos = next_pos;
 
-    ParseResult::Ok(FunctionCall { identifier: Box::new(identifier.value.clone()) }, current_pos)
+    ParseResult::Ok(
+        FunctionCall {
+            identifier: Box::new(identifier.value.clone()),
+        },
+        current_pos,
+    )
 }
 
 #[cfg(test)]
