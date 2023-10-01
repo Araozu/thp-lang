@@ -42,4 +42,17 @@ block = "{", "}"
 ```
 
 
+## Function call
+
+```ebnf
+function call = identifier, arguments list
+```
+
+
+### Arguments list
+
+```ebnf
+arguments list = "(", ")"
+```
+
 

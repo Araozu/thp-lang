@@ -14,6 +14,11 @@
 - Document code
 
 
+## v0.0.7
+
+- Parse minimal function declarations following a grammar
+
+
 ## v0.0.6
 
 - Parse function declarations

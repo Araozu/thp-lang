@@ -6,6 +6,7 @@ mod expression;
 mod function_declaration;
 mod params_list;
 mod utils;
+mod functions;
 
 pub mod ast;
 
