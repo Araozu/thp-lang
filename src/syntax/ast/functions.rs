@@ -1,14 +1,11 @@
-
-
 #[derive(Debug)]
 pub struct FunctionCall {
-    pub identifier: Box<String>
+    pub identifier: Box<String>,
 }
-
 
 #[derive(Debug)]
 pub struct ArgumentsList {
-    pub arguments: Vec<Box<Argument>>
+    pub arguments: Vec<Box<Argument>>,
 }
 
 #[derive(Debug)]

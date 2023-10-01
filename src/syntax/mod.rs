@@ -4,9 +4,9 @@ mod binding;
 mod block;
 mod expression;
 mod function_declaration;
+mod functions;
 mod params_list;
 mod utils;
-mod functions;
 
 pub mod ast;
 
@@ -33,7 +33,7 @@ pub enum ParseResult<A, B> {
     /// The parsing was a success
     Ok(A, usize),
     /// The parsing failed past a point of no return.
-    /// 
+    ///
     /// For example, when parsing a function declaration
     /// the `fun` token is found, but then no identifier
     Err(SyntaxError),

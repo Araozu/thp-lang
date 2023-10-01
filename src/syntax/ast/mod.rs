@@ -1,6 +1,5 @@
 pub mod functions;
 
-
 pub struct ModuleAST {
     pub declarations: Vec<TopLevelDeclaration>,
 }
