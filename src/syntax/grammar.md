@@ -45,7 +45,7 @@ block = "{", (statement, (new line, statement)*)?,  "}"
 ### Statement
 
 ```ebnf
-statement = function call
+statement = function call | binding
 ```
 
 

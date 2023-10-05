@@ -32,12 +32,11 @@ enum Commands {
     R {},
 }
 
-const VERSION: &str = "0.0.6";
-
 fn get_copyright() -> String {
+    let crate_version = env!("CARGO_PKG_VERSION");
     format!(
         "THP {}\nCopyright (c) 2023 Fernando Enrique Araoz Morales\n",
-        VERSION,
+        crate_version,
     )
 }
 

@@ -2,6 +2,8 @@
 
 ## TODO
 
+- Parse multiple statements
+- Parse binary operators
 - Parse more complex bindings
 - Parse block of code
 - Watch mode
@@ -17,6 +19,8 @@
 ## v0.0.7
 
 - Parse minimal function declarations following a grammar
+- Parse function call, binding as statement
+- Parse a statement as body of a function declaration
 
 
 ## v0.0.6
