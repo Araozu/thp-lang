@@ -1,4 +1,5 @@
 pub mod functions;
+pub mod statement;
 
 pub struct ModuleAST {
     pub declarations: Vec<TopLevelDeclaration>,
@@ -17,7 +18,9 @@ pub struct FunctionDeclaration {
 }
 
 #[derive(Debug)]
-pub struct Block {}
+pub struct Block {
+    pub statements: Vec<statement::Statement>,
+}
 
 #[derive(Debug)]
 pub struct ParamsList {}

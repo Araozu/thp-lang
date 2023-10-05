@@ -18,6 +18,21 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block,
         };
     current_pos = next_pos;
 
+    // Parse block statements
+    let mut statements = Vec::new();
+
+    // Only 1 statement for now
+    match super::statement::try_parse(tokens, current_pos) {
+        ParseResult::Ok(statement, next_pos) => {
+            current_pos = next_pos;
+            statements.push(statement);
+        }
+        ParseResult::Err(err) => return ParseResult::Err(err),
+        ParseResult::Unmatched => {}
+        ParseResult::Mismatch(_) => {}
+    }
+
+
     // Parse closing brace
     let (_closing_brace, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::RightBrace) {
@@ -40,5 +55,10 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block,
         };
     current_pos = next_pos;
 
-    ParseResult::Ok(Block {}, current_pos)
+    ParseResult::Ok(
+        Block {
+            statements,
+        },
+        current_pos,
+    )
 }
