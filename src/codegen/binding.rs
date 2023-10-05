@@ -1,5 +1,5 @@
 use super::Transpilable;
-use crate::syntax::ast::Binding;
+use crate::syntax::ast::var_binding::Binding;
 
 impl Transpilable for Binding {
     /// Transpiles val and var bindings into PHP.
@@ -22,7 +22,10 @@ impl Transpilable for Binding {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::syntax::ast::{Binding, Expression, ValBinding};
+    use crate::syntax::ast::{
+        var_binding::{Binding, ValBinding},
+        Expression,
+    };
 
     #[test]
     fn binding_should_transpile() {

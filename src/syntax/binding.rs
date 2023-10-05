@@ -1,14 +1,10 @@
-use super::ast::{Binding, ValBinding, VarBinding};
+use super::ast::var_binding::{Binding, ValBinding, VarBinding};
 use super::utils::{try_operator, try_token_type};
 use super::{expression, ParseResult};
 use crate::error_handling::SyntaxError;
 use crate::lexic::token::{Token, TokenType};
 use crate::utils::Result3;
 
-// TODO: Should return a 3 state value:
-// - Success: binding parsed successfully
-// - NotFound: the first token (var | val) was not found, so the parser should try other options
-// - Error: token (var | val) was found, but then other expected tokens were not found
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding, ()> {
     let mut current_pos = pos;
     // Optional datatype annotation
@@ -19,9 +15,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
                 Some(String::from(&t.value))
             }
             Result3::Err(_) => None,
-            Result3::None => panic!(
-                "Internal compiler error: Illegal token stream at src/syntax/binding.rs#try_parse"
-            ),
+            Result3::None => return ParseResult::Unmatched,
         }
     };
 

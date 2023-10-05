@@ -32,7 +32,6 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block,
         ParseResult::Mismatch(_) => {}
     }
 
-
     // Parse closing brace
     let (_closing_brace, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::RightBrace) {
@@ -55,10 +54,5 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block,
         };
     current_pos = next_pos;
 
-    ParseResult::Ok(
-        Block {
-            statements,
-        },
-        current_pos,
-    )
+    ParseResult::Ok(Block { statements }, current_pos)
 }

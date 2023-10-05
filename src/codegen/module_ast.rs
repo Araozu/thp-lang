@@ -18,7 +18,10 @@ impl Transpilable for ModuleAST {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::syntax::ast::{Binding, Expression, TopLevelDeclaration, ValBinding};
+    use crate::syntax::ast::{
+        var_binding::{Binding, ValBinding},
+        Expression, TopLevelDeclaration,
+    };
 
     #[test]
     fn module_ast_should_transpile() {

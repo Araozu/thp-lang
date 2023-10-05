@@ -1,5 +1,6 @@
 pub mod functions;
 pub mod statement;
+pub mod var_binding;
 
 pub struct ModuleAST {
     pub declarations: Vec<TopLevelDeclaration>,
@@ -7,7 +8,7 @@ pub struct ModuleAST {
 
 #[derive(Debug)]
 pub enum TopLevelDeclaration {
-    Binding(Binding),
+    Binding(var_binding::Binding),
     FunctionDeclaration(FunctionDeclaration),
 }
 
@@ -24,26 +25,6 @@ pub struct Block {
 
 #[derive(Debug)]
 pub struct ParamsList {}
-
-#[derive(Debug)]
-pub enum Binding {
-    Val(ValBinding),
-    Var(VarBinding),
-}
-
-#[derive(Debug)]
-pub struct ValBinding {
-    pub datatype: Option<String>,
-    pub identifier: Box<String>,
-    pub expression: Expression,
-}
-
-#[derive(Debug)]
-pub struct VarBinding {
-    pub datatype: Option<String>,
-    pub identifier: Box<String>,
-    pub expression: Expression,
-}
 
 #[derive(Debug)]
 pub enum Expression {
