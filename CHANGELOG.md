@@ -16,6 +16,10 @@
 - Document code
 
 
+## v0.0.8
+- Parse multiple statements inside a block
+
+
 ## v0.0.7
 
 - Parse minimal function declarations following a grammar

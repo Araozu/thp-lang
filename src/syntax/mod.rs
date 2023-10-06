@@ -5,8 +5,8 @@ mod block;
 mod expression;
 mod functions;
 mod params_list;
-mod utils;
 mod statement;
+mod utils;
 
 pub mod ast;
 

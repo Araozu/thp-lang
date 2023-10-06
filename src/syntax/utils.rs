@@ -17,6 +17,18 @@ pub fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) ->
     }
 }
 
+pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
+    match tokens.get(pos) {
+        Some(t) if t.token_type == TokenType::Operator && t.value == operator => Result3::Ok(t),
+        Some(t) if t.token_type == TokenType::NewLine || t.token_type == TokenType::EOF => {
+            Result3::None
+        }
+        Some(t) => Result3::Err(t),
+        None => Result3::None,
+    }
+}
+
+
 /// Expects the token at `pos` to be of type `token_type`
 pub fn parse_token_type(
     tokens: &Vec<Token>,
@@ -47,13 +59,3 @@ pub fn parse_token_type(
     }
 }
 
-pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
-    match tokens.get(pos) {
-        Some(t) if t.token_type == TokenType::Operator && t.value == operator => Result3::Ok(t),
-        Some(t) if t.token_type == TokenType::NewLine || t.token_type == TokenType::EOF => {
-            Result3::None
-        }
-        Some(t) => Result3::Err(t),
-        None => Result3::None,
-    }
-}

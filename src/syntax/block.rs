@@ -21,7 +21,7 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block,
     // Parse block statements
     let mut statements = Vec::new();
 
-    // Only 1 statement for now
+    // First statement
     match super::statement::try_parse(tokens, current_pos) {
         ParseResult::Ok(statement, next_pos) => {
             current_pos = next_pos;
@@ -30,6 +30,23 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block,
         ParseResult::Err(err) => return ParseResult::Err(err),
         ParseResult::Unmatched => {}
         ParseResult::Mismatch(_) => {}
+    }
+
+    // More statements separated by new lines
+    while let Some(t) = tokens.get(current_pos) {
+        if t.token_type != TokenType::NewLine {
+            break;
+        }
+        current_pos += 1;
+
+        match super::statement::try_parse(tokens, current_pos) {
+            ParseResult::Ok(statement, next_pos) => {
+                current_pos = next_pos;
+                statements.push(statement);
+            }
+            ParseResult::Err(err) => return ParseResult::Err(err),
+            _ => break,
+        }
     }
 
     // Parse closing brace
@@ -55,4 +72,36 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block,
     current_pos = next_pos;
 
     ParseResult::Ok(Block { statements }, current_pos)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lexic::get_tokens;
+
+    #[test]
+    fn test_parse_block() {
+        let tokens = get_tokens(&String::from("{f()}")).unwrap();
+        let block = parse_block(&tokens, 0);
+
+        let block = match block {
+            ParseResult::Ok(p, _) => p,
+            _ => panic!("Expected a block, got: {:?}", block),
+        };
+
+        assert_eq!(block.statements.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_block_2() {
+        let tokens = get_tokens(&String::from("{f()\ng()}")).unwrap();
+        let block = parse_block(&tokens, 0);
+
+        let block = match block {
+            ParseResult::Ok(p, _) => p,
+            _ => panic!("Expected a block, got: {:?}", block),
+        };
+
+        assert_eq!(block.statements.len(), 2);
+    }
 }
