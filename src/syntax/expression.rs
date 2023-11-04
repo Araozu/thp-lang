@@ -1,4 +1,4 @@
-use super::{ast::Expression, ParseResult};
+use super::{ast::Expression, functions::function_call, ParseResult};
 use crate::lexic::token::{Token, TokenType};
 
 /// An expression can be:
@@ -9,14 +9,12 @@ use crate::lexic::token::{Token, TokenType};
 /// - An identifier
 /// - A function call
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
-    /*
     match function_call::try_parse(tokens, pos) {
-        super::ParseResult::Ok(_, _) => todo!(),
-        super::ParseResult::Err(_) => todo!(),
-        super::ParseResult::Mismatch(_) => todo!(),
-        super::ParseResult::Unmatched => todo!(),
-    }
-     */
+        super::ParseResult::Ok(function_call, next_pos) => {
+            return ParseResult::Ok::<_, ()>(Expression::FunctionCall(function_call), next_pos)
+        }
+        _ => {}
+    };
 
     match tokens.get(pos) {
         Some(token) => match token.token_type {

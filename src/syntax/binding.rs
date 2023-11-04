@@ -7,6 +7,7 @@ use crate::utils::Result3;
 
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding, ()> {
     let mut current_pos = pos;
+
     /*
      * val/var keyword
      */
@@ -80,8 +81,9 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
             });
         }
     };
+    current_pos += 1;
 
-    let (expression, _next) = match expression::try_parse(tokens, current_pos + 1) {
+    let (expression, next_pos) = match expression::try_parse(tokens, current_pos) {
         ParseResult::Ok(exp, next) => (exp, next),
         _ => {
             return ParseResult::Err(SyntaxError {
@@ -91,6 +93,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
             });
         }
     };
+    current_pos = next_pos;
 
     let binding = if is_val {
         Binding::Val(ValBinding {
@@ -106,7 +109,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
         })
     };
 
-    ParseResult::Ok(binding, current_pos + 2)
+    ParseResult::Ok(binding, current_pos)
 }
 
 #[cfg(test)]
