@@ -17,16 +17,18 @@ use self::ast::TopLevelDeclaration;
 
 #[derive(Debug)]
 pub enum ParseResult<A, B> {
-    /// The parsing was a success
+    /// The parsing was a success. The first element is the parsed construct,
+    /// the second element is the position of the next token to parse
     Ok(A, usize),
     /// The parsing failed past a point of no return.
     ///
     /// For example, when parsing a function declaration
     /// the `fun` token is found, but then no identifier
     Err(SyntaxError),
-    /// A construct different from the one expected was found
+    /// Some special value was expected, but something else was found.
+    /// The inside element is the something else found.
     Mismatch(B),
-    /// No construct was found
+    /// This parsing didn't succeed, but it's not a fatal error.
     Unmatched,
 }
 

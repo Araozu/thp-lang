@@ -1,3 +1,5 @@
+use self::functions::FunctionCall;
+
 pub mod functions;
 pub mod statement;
 pub mod var_binding;
@@ -32,4 +34,5 @@ pub enum Expression {
     String(Box<String>),
     Boolean(bool),
     Identifier(Box<String>),
+    FunctionCall(FunctionCall),
 }

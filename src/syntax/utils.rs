@@ -28,7 +28,6 @@ pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result
     }
 }
 
-
 /// Expects the token at `pos` to be of type `token_type`
 pub fn parse_token_type(
     tokens: &Vec<Token>,
@@ -58,4 +57,3 @@ pub fn parse_token_type(
         None => ParseResult::Unmatched,
     }
 }
-

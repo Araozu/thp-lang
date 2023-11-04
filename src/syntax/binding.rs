@@ -1,5 +1,5 @@
 use super::ast::var_binding::{Binding, ValBinding, VarBinding};
-use super::utils::{try_operator, parse_token_type};
+use super::utils::{parse_token_type, try_operator};
 use super::{expression, ParseResult};
 use crate::error_handling::SyntaxError;
 use crate::lexic::token::{Token, TokenType};
@@ -30,7 +30,8 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
     /*
      * identifier
      */
-    let (identifier, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Identifier) {
+    let (identifier, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Identifier)
+    {
         ParseResult::Ok(t, n) => (t, n),
         ParseResult::Mismatch(token) => {
             // The parser found a token, but it's not an identifier
@@ -38,7 +39,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
                 error_start: token.position,
                 error_end: token.get_end_position(),
                 reason: "??".into(),
-            })
+            });
         }
         ParseResult::Err(error) => {
             return ParseResult::Err(error);
@@ -60,7 +61,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
     /*
      * Equal (=) operator
      */
-    let equal_operator: &Token = match try_operator(tokens, current_pos, String::from("=")) {
+    let equal_operator = match try_operator(tokens, current_pos, String::from("=")) {
         Result3::Ok(t) => t,
         Result3::Err(t) => {
             // The parser found a token, but it's not the `=` operator
@@ -80,15 +81,16 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
         }
     };
 
-    let expression = expression::try_parse(tokens, current_pos + 1);
-    if expression.is_none() {
-        return ParseResult::Err(SyntaxError {
-            reason: String::from("Expected an expression after the equal `=` operator"),
-            error_start: equal_operator.position,
-            error_end: equal_operator.get_end_position(),
-        });
-    }
-    let expression = expression.unwrap();
+    let (expression, _next) = match expression::try_parse(tokens, current_pos + 1) {
+        ParseResult::Ok(exp, next) => (exp, next),
+        _ => {
+            return ParseResult::Err(SyntaxError {
+                reason: String::from("Expected an expression after the equal `=` operator"),
+                error_start: equal_operator.position,
+                error_end: equal_operator.get_end_position(),
+            });
+        }
+    };
 
     let binding = if is_val {
         Binding::Val(ValBinding {

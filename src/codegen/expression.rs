@@ -17,6 +17,7 @@ impl Transpilable for Expression {
             }
             Expression::Boolean(value) => String::from(if *value { "true" } else { "false" }),
             Expression::Identifier(value) => format!("{}", *value),
+            Expression::FunctionCall(_) => todo!("FunctionCall codegen is not implemented yet"),
         }
     }
 }
