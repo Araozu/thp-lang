@@ -1,5 +1,5 @@
 use super::ast::var_binding::{Binding, ValBinding, VarBinding};
-use super::utils::{try_operator, try_token_type, parse_token_type};
+use super::utils::{try_operator, parse_token_type};
 use super::{expression, ParseResult};
 use crate::error_handling::SyntaxError;
 use crate::lexic::token::{Token, TokenType};
@@ -32,8 +32,15 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
      */
     let (identifier, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Identifier) {
         ParseResult::Ok(t, n) => (t, n),
-        ParseResult::Err(error) => {
+        ParseResult::Mismatch(token) => {
             // The parser found a token, but it's not an identifier
+            return ParseResult::Err(SyntaxError {
+                error_start: token.position,
+                error_end: token.get_end_position(),
+                reason: "??".into(),
+            })
+        }
+        ParseResult::Err(error) => {
             return ParseResult::Err(error);
         }
         _ => {
@@ -103,7 +110,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::lexic::get_tokens;
+    use crate::{lexic::get_tokens, syntax::utils::try_token_type};
 
     #[test]
     fn should_parse_val_binding() {

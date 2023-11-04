@@ -1,5 +1,4 @@
 use crate::{
-    error_handling::SyntaxError,
     lexic::token::{Token, TokenType},
     syntax::{ast::functions::FunctionCall, utils::parse_token_type, ParseResult},
 };
@@ -23,7 +22,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Function
     current_pos = next_pos;
 
     // Parse arguments list
-    let (args_list, next_pos) = match super::arguments_list::try_parse(tokens, current_pos) {
+    let (_args_list, next_pos) = match super::arguments_list::try_parse(tokens, current_pos) {
         ParseResult::Ok(args, next) => (args, next),
         ParseResult::Err(err) => return ParseResult::Err(err),
         ParseResult::Mismatch(_) => {
