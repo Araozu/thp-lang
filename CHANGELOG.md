@@ -2,10 +2,8 @@
 
 ## TODO
 
-- Parse multiple statements
 - Parse binary operators
 - Parse more complex bindings
-- Parse block of code
 - Watch mode
 - Improve error messages
 - Parse other language constructions
@@ -17,6 +15,8 @@
 
 
 ## v0.0.8
+
+- Parse block of code
 - Parse multiple statements inside a block
 
 

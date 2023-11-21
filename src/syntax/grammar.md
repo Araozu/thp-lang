@@ -9,6 +9,7 @@ A module is (commonly) a single source file.
 module = top level declaration*
 ```
 
+
 ## Top level declaration
 
 ```ebnf
@@ -19,18 +20,10 @@ top level declaration = function declaration
 ## Function declaration
 
 ```ebnf
-function declaration = "fun", identifier, params list, return type?, block
-```
+function declaration = "fun", identifier, params list, return type?, block;
 
-### Params list
+params list = "(", ")";
 
-```ebnf
-params list = "(", ")"
-```
-
-### Return type
-
-```ebnf
 return type = ;
 ```
 
@@ -38,28 +31,63 @@ return type = ;
 ### Block
 
 ```ebnf
-block = "{", (statement, (new line, statement)*)?,  "}"
+block = "{", (statement, (new line, statement)*)?, "}"
 ```
 
 
 ### Statement
 
 ```ebnf
-statement = function call | binding
+statement = binding
+          | function call
 ```
 
 
 ## Function call
 
 ```ebnf
-function call = identifier, arguments list
-```
+function call = identifier, arguments list;
 
-
-### Arguments list
-
-```ebnf
 arguments list = "(", ")"
 ```
+
+
+## Binding
+
+```ebnf
+binding = ("val" | "var"), identifier, "=", expression
+```
+
+
+## Operator precedence
+
+From highest to lowest:
+
+- `== !=`, left associative
+- `> >= < <=`, left associative
+- `- +`, left associative
+- `/ *`, left associative
+- `! -`, left associative
+
+## Expression
+
+```ebnf
+expression = equality;
+
+equality = comparison, (("==" | "!="), comparison )*;
+
+comparison = term, ((">" | ">=" | "<" | "<="), term)*;
+
+term = factor, (("-" | "+"), factor)*;
+
+factor = unary, (("/" | "*"), unary)*;
+
+unary = ("!" | "-"), expression
+      | primary;
+
+primary = number | string | boolean | identifier | ("(", expression, ")");
+```
+
+
 
 

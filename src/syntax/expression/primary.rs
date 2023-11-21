@@ -1,20 +1,23 @@
-use super::{ast::Expression, functions::function_call, ParseResult};
-use crate::lexic::token::{Token, TokenType};
+use crate::{
+    lexic::token::{Token, TokenType},
+    syntax::{ast::Expression, ParseResult},
+};
 
-/// An expression can be:
-///
-/// - A number
-/// - A string
-/// - A boolean
-/// - An identifier
-/// - A function call
+/// This grammar may not be up to date. Refer to the spec for the latest grammar.
+/// 
+/// ```ebnf
+/// primary = number | string | boolean | identifier | ("(", expression, ")");
+/// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
+    /*
+    TODO: Incorporate function_call into the grammar, figure out its precedence.
     match function_call::try_parse(tokens, pos) {
         super::ParseResult::Ok(function_call, next_pos) => {
             return ParseResult::Ok::<_, ()>(Expression::FunctionCall(function_call), next_pos)
         }
         _ => {}
     };
+     */
 
     match tokens.get(pos) {
         Some(token) => match token.token_type {
@@ -31,6 +34,7 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
                 Expression::Identifier(Box::new(token.value.clone())),
                 pos + 1,
             ),
+            // TODO: Parse parenthesized expressions.
             _ => ParseResult::Unmatched,
         },
         None => ParseResult::Unmatched,
