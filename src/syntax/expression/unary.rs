@@ -7,7 +7,7 @@ use crate::{
 ///
 /// ```ebnf
 /// unary = ("!" | "-"), expression
-/// | primary;
+///       | primary;
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
     match tokens.get(pos) {
@@ -20,6 +20,7 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
                 _ => ParseResult::Unmatched,
             }
         }
-        _ => return primary::try_parse(tokens, pos),
+        _ => primary::try_parse(tokens, pos),
     }
 }
+
