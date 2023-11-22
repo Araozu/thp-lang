@@ -21,6 +21,9 @@ impl Transpilable for Expression {
             Expression::BinaryOperator(_, _, _) => {
                 todo!("BinaryOperator codegen is not implemented yet")
             }
+            Expression::UnaryOperator(_, _) => {
+                todo!("UnaryOperator codegen is not implemented yet")
+            }
         }
     }
 }

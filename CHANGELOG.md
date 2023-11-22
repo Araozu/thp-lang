@@ -18,6 +18,7 @@
 
 - Parse block of code
 - Parse multiple statements inside a block
+- Parse unary operator (`!` & `-`)
 
 
 ## v0.0.7

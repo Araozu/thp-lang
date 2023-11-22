@@ -4,5 +4,5 @@ use crate::{
 };
 
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
-    return super::comparison::try_parse(tokens, pos);
+    return super::factor::try_parse(tokens, pos);
 }

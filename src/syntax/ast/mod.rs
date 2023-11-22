@@ -35,6 +35,6 @@ pub enum Expression {
     Boolean(bool),
     Identifier(Box<String>),
     FunctionCall(FunctionCall),
+    UnaryOperator(Box<String>, Box<Expression>),
     BinaryOperator(Box<Expression>, Box<Expression>, Box<String>),
 }
-

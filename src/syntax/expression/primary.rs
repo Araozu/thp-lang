@@ -4,7 +4,7 @@ use crate::{
 };
 
 /// This grammar may not be up to date. Refer to the spec for the latest grammar.
-/// 
+///
 /// ```ebnf
 /// primary = number | string | boolean | identifier | ("(", expression, ")");
 /// ```
@@ -34,10 +34,24 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
                 Expression::Identifier(Box::new(token.value.clone())),
                 pos + 1,
             ),
-            // TODO: Parse parenthesized expressions.
+            TokenType::LeftParen => parse_parenthesized_expression(tokens, pos),
             _ => ParseResult::Unmatched,
         },
         None => ParseResult::Unmatched,
+    }
+}
+
+fn parse_parenthesized_expression(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
+    let expression = super::try_parse(tokens, pos + 1);
+    match expression {
+        ParseResult::Ok(expression, next_pos) => match tokens.get(next_pos) {
+            Some(token) => match token.token_type {
+                TokenType::RightParen => ParseResult::Ok(expression, next_pos + 1),
+                _ => ParseResult::Unmatched,
+            },
+            None => ParseResult::Unmatched,
+        },
+        _ => ParseResult::Unmatched,
     }
 }
 
