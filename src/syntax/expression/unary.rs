@@ -23,4 +23,3 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
         _ => primary::try_parse(tokens, pos),
     }
 }
-

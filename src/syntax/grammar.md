@@ -85,6 +85,8 @@ factor = unary, (("/" | "*"), unary)*;
 unary = ("!" | "-"), expression
       | primary;
 
+function call = primary, (arguments list)?;
+
 primary = number | string | boolean | identifier | ("(", expression, ")");
 ```
 
