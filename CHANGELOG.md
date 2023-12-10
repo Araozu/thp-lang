@@ -2,7 +2,7 @@
 
 ## TODO
 
-- Parse binary operators
+- Parse __more__ binary operators
 - Parse more complex bindings
 - Watch mode
 - Improve error messages
@@ -12,6 +12,22 @@
 - Namespace identifiers in the symbol table
 - Stdlib
 - Document code
+- Watch mode
+- Formatter
+- Simple language server
+
+## v0.0.10
+
+- [ ] Typecheck current AST
+
+## v0.0.9
+
+- [ ] Hand made CLI, remove clap
+- [ ] Compile a single file
+- [ ] Implement code generation for ast nodes implemented as of now
+- [ ] Display error messages during compilation
+- [ ] Improve errro messages
+
 
 
 ## v0.0.8
