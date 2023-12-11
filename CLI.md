@@ -1,4 +1,4 @@
-The THP compiler & formatter, v0.0.1
+The THP compiler, linter & formatter, v0.0.1
 
 Usage: `thp [command] [options]`
 
@@ -11,7 +11,7 @@ r				Starts the REPL
 init			Initializes a new project in the current directory
 build, b		Builds the project
 fmt				Formats all files in the project
-watch			Starts compilation of the project in watch mode
+watch, w		Starts compilation of the project in watch mode
 
 
 help, h			Print this message & exit

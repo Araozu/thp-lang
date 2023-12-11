@@ -26,7 +26,7 @@
 - [ ] Compile a single file
 - [ ] Implement code generation for ast nodes implemented as of now
 - [ ] Display error messages during compilation
-- [ ] Improve errro messages
+- [ ] Improve errror messages
 
 
 
