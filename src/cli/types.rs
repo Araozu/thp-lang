@@ -17,7 +17,6 @@ pub enum CommandType {
     None,
 }
 
-
 impl Command {
     pub fn run(&self) {
         println!("Running command! {:?}", self);

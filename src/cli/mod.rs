@@ -3,25 +3,27 @@ mod types;
 
 use types::{Command, CommandType};
 
+use colored::*;
+
 pub const HELP_TEXT: &str = r#"
 Usage: `thp [command] [options]`
 
 Commands
 
-  c _file_	Compiles `file` in-place
-  f _file_	Formats `file`
-  r			Starts the REPL
+  c _file_  Compiles `file` in-place
+  f _file_  Formats `file`
+  r         Starts the REPL
 
-  init		Initializes a new project in the current directory
-  build		Builds the project
-  fmt		Formats all files in the project
-  watch, w	Starts compilation of the project in watch mode
+  init      Initializes a new project in the current directory
+  build     Builds the project
+  fmt       Formats all files in the project
+  watch, w  Starts compilation of the project in watch mode
 
-  help, h	Print this message & exit
+  help, h   Print this message & exit
 
 General options
 
-    -h, --help	Print command-specific usage
+  -h, --help    Print command-specific usage
 "#;
 
 fn get_copyright() -> String {
@@ -34,9 +36,9 @@ pub fn run_cli() {
         Ok(c) => c,
         Err(reason) => {
             println!("{}", HELP_TEXT);
-            println!("Error: {}", reason);
+            println!("{}: {}", "error".red(), reason);
             return;
-        },
+        }
     };
 
     command.run();
@@ -58,10 +60,7 @@ fn parse_args() -> Result<Command, String> {
         if arg.starts_with('-') {
             options.push(arg);
         } else {
-            return Err(format!(
-                "Unexpected command `{}` after the options",
-                arg
-            ));
+            return Err(format!("Unexpected command `{}` after the options", arg));
         }
     }
 
@@ -75,12 +74,10 @@ fn parse_args() -> Result<Command, String> {
             "fmt" => CommandType::Fmt,
             "watch" | "w" => CommandType::Watch,
             "help" | "h" => CommandType::Help,
-            _ => return Err(format!("Unknown command: {}", command)),
+            _ => return Err(format!("Unknown command `{}`", command)),
         },
         None => CommandType::None,
     };
 
     Ok(Command { command, options })
 }
-
-
