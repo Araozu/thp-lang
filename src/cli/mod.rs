@@ -1,17 +1,20 @@
 mod help;
 mod types;
+mod empty;
 
 use types::{Command, CommandType};
 
 use colored::*;
 
-pub const HELP_TEXT: &str = r#"
+pub fn get_help_text() -> String {
+    format!(
+        r#"
 Usage: `thp [command] [options]`
 
 Commands
 
-  c _file_  Compiles `file` in-place
-  f _file_  Formats `file`
+  c {0}  Compiles {0} in-place
+  f {0}  Formats {0}
   r         Starts the REPL
 
   init      Initializes a new project in the current directory
@@ -24,9 +27,12 @@ Commands
 General options
 
   -h, --help    Print command-specific usage
-"#;
+"#,
+        "_file_".green()
+    )
+}
 
-fn get_copyright() -> String {
+fn get_version() -> String {
     let crate_version = env!("CARGO_PKG_VERSION");
     format!("The THP compiler, linter & formatter, v{}", crate_version)
 }
@@ -35,8 +41,8 @@ pub fn run_cli() {
     let command = match parse_args() {
         Ok(c) => c,
         Err(reason) => {
-            println!("{}", HELP_TEXT);
-            println!("{}: {}", "error".red(), reason);
+            println!("{}", get_help_text());
+            println!("{}: {}", "error".on_red(), reason);
             return;
         }
     };
