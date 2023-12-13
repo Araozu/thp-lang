@@ -1,6 +1,6 @@
+mod empty;
 mod help;
 mod types;
-mod empty;
 
 use types::{Command, CommandType};
 
@@ -27,6 +27,7 @@ Commands
 General options
 
   -h, --help    Print command-specific usage
+  -v, --version Print version & exit
 "#,
         "_file_".green()
     )
@@ -55,18 +56,25 @@ fn parse_args() -> Result<Command, String> {
     args.remove(0);
 
     let mut args = args.into_iter();
+    let mut options = Vec::new();
 
     let command = match args.next() {
         Some(command) if !command.starts_with('-') => Some(command),
+        Some(option) => {
+            options.push(option);
+            None
+        }
         _ => None,
     };
 
-    let mut options = Vec::new();
     for arg in args {
         if arg.starts_with('-') {
             options.push(arg);
         } else {
-            return Err(format!("Unexpected command `{}` after the options", arg));
+            return Err(format!(
+                "Unexpected command `{}`. There can only be one command",
+                arg
+            ));
         }
     }
 
