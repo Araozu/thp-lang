@@ -7,11 +7,11 @@ enum EmptyOptions {
     Version,
 }
 
-pub fn empty_command(options: &Vec<String>) {
+pub fn empty_command(arguments: Vec<String>) {
     // Add all options to a set
     let mut options_set = std::collections::HashSet::new();
-    for option in options {
-        match expand_option(option) {
+    for option in arguments {
+        match expand_option(&option) {
             Ok(o) => {
                 options_set.insert(o);
             }

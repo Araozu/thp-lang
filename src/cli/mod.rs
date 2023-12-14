@@ -1,8 +1,9 @@
+mod compile;
 mod empty;
 mod help;
 mod types;
 
-use types::{Command, CommandType};
+use types::CommandType;
 
 use colored::*;
 
@@ -39,7 +40,7 @@ fn get_version() -> String {
 }
 
 pub fn run_cli() {
-    let command = match parse_args() {
+    let (command, args) = match parse_args() {
         Ok(c) => c,
         Err(reason) => {
             println!("{}", get_help_text());
@@ -48,38 +49,17 @@ pub fn run_cli() {
         }
     };
 
-    command.run();
+    command.run(args);
 }
 
-fn parse_args() -> Result<Command, String> {
+fn parse_args() -> Result<(CommandType, Vec<String>), String> {
     let mut args = std::env::args().collect::<Vec<String>>();
+
+    // Remove the first argument, which is the path to the executable
     args.remove(0);
 
-    let mut args = args.into_iter();
-    let mut options = Vec::new();
-
-    let command = match args.next() {
-        Some(command) if !command.starts_with('-') => Some(command),
-        Some(option) => {
-            options.push(option);
-            None
-        }
-        _ => None,
-    };
-
-    for arg in args {
-        if arg.starts_with('-') {
-            options.push(arg);
-        } else {
-            return Err(format!(
-                "Unexpected command `{}`. There can only be one command",
-                arg
-            ));
-        }
-    }
-
-    let command = match command {
-        Some(command) => match command.as_str() {
+    let command = match args.get(0) {
+        Some(command) if !command.starts_with('-') => match command.as_str() {
             "c" | "compile" => CommandType::Compile,
             "f" | "format" => CommandType::Format,
             "r" | "repl" => CommandType::Repl,
@@ -90,8 +70,12 @@ fn parse_args() -> Result<Command, String> {
             "help" | "h" => CommandType::Help,
             _ => return Err(format!("Unknown command `{}`", command)),
         },
-        None => CommandType::None,
+        _ => CommandType::None,
     };
 
-    Ok(Command { command, options })
+    if command != CommandType::None {
+        args.remove(0);
+    }
+
+    Ok((command, args))
 }

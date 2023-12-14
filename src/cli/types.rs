@@ -1,10 +1,4 @@
-#[derive(Debug)]
-pub struct Command {
-    pub command: CommandType,
-    pub options: Vec<String>,
-}
-
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum CommandType {
     Compile,
     Format,
@@ -17,14 +11,8 @@ pub enum CommandType {
     None,
 }
 
-impl Command {
-    pub fn run(&self) {
-        self.command.run(&self.options);
-    }
-}
-
 impl CommandType {
-    pub fn run(&self, options: &Vec<String>) {
+    pub fn run(&self, options: Vec<String>) {
         match self {
             CommandType::Help => super::help::help_command(options),
             CommandType::None => super::empty::empty_command(options),
