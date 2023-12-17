@@ -18,20 +18,18 @@ impl Transpilable for ModuleAST {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::syntax::ast::{
-        var_binding::{Binding, ValBinding},
-        Expression, TopLevelDeclaration,
-    };
+    use crate::syntax::ast::{var_binding::Binding, Expression, TopLevelDeclaration};
 
     #[test]
     fn module_ast_should_transpile() {
         let id = String::from("identifier");
         let value = String::from("322");
-        let binding = Binding::Val(ValBinding {
+        let binding = Binding {
             datatype: None,
             identifier: Box::new(id),
             expression: Expression::Number(Box::new(value)),
-        });
+            is_mutable: false,
+        };
 
         let module = ModuleAST {
             declarations: vec![TopLevelDeclaration::Binding(binding)],

@@ -1,4 +1,4 @@
-use super::ast::var_binding::{Binding, ValBinding, VarBinding};
+use super::ast::var_binding::Binding;
 use super::utils::{parse_token_type, try_operator};
 use super::{expression, ParseResult};
 use crate::error_handling::SyntaxError;
@@ -95,18 +95,11 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
     };
     current_pos = next_pos;
 
-    let binding = if !is_mutable {
-        Binding::Val(ValBinding {
-            datatype: None,
-            identifier: Box::new(identifier.value.clone()),
-            expression,
-        })
-    } else {
-        Binding::Var(VarBinding {
-            datatype: None,
-            identifier: Box::new(identifier.value.clone()),
-            expression,
-        })
+    let binding = Binding {
+        datatype: None,
+        identifier: Box::new(identifier.value.clone()),
+        expression,
+        is_mutable,
     };
 
     ParseResult::Ok(binding, current_pos)
@@ -120,7 +113,7 @@ mod tests {
     #[test]
     fn should_parse_val_binding() {
         let tokens = get_tokens(&String::from("let identifier = 20")).unwrap();
-        let ParseResult::Ok(Binding::Val(binding), _) = try_parse(&tokens, 0) else {
+        let ParseResult::Ok(binding, _) = try_parse(&tokens, 0) else {
             panic!()
         };
 

@@ -4,38 +4,27 @@ use crate::syntax::ast::var_binding::Binding;
 impl Transpilable for Binding {
     /// Transpiles val and var bindings into PHP.
     fn transpile(&self) -> String {
-        match self {
-            Binding::Val(val_binding) => {
-                let expression_str = val_binding.expression.transpile();
+        let expression_str = self.expression.transpile();
 
-                format!("${} = {};", val_binding.identifier, expression_str)
-            }
-            Binding::Var(var_binding) => {
-                let expression_str = var_binding.expression.transpile();
-
-                format!("${} = {};", var_binding.identifier, expression_str)
-            }
-        }
+        format!("${} = {};", self.identifier, expression_str)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::syntax::ast::{
-        var_binding::{Binding, ValBinding},
-        Expression,
-    };
+    use crate::syntax::ast::{var_binding::Binding, Expression};
 
     #[test]
     fn binding_should_transpile() {
         let id = String::from("identifier");
         let value = String::from("322");
-        let binding = Binding::Val(ValBinding {
+        let binding = Binding {
             datatype: None,
             identifier: Box::new(id),
             expression: Expression::Number(Box::new(value)),
-        });
+            is_mutable: false,
+        };
 
         let result = binding.transpile();
 
