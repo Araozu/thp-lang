@@ -37,7 +37,8 @@ pub fn compile_command(arguments: Vec<String>) {
 
 fn compile_help() -> String {
     format!(
-        r#"Compile a single file in place.
+        r#"Compile a single file in place. If the file to compile
+references other THP files, they will be (typechecked?) as well.
 
 Usage:
 

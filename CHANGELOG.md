@@ -22,11 +22,11 @@
 
 ## v0.0.9
 
-- [ ] Hand made CLI, remove clap
-- [ ] Compile a single file
-- [ ] Implement code generation for ast nodes implemented as of now
-- [ ] Display error messages during compilation
+- [x] Hand-make CLI, remove clap
+- [x] Compile a single file
+- [ ] Display error messages during compilation instead of panicking
 - [ ] Improve errror messages
+- [ ] Implement code generation for ast nodes implemented as of now
 
 
 
