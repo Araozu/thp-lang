@@ -8,22 +8,22 @@ use crate::utils::Result3;
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding, ()> {
     let mut current_pos = pos;
 
+    // TODO: Detect if the binding starts with a datatype
+
     /*
-     * val/var keyword
+     * let keyword
      */
-    let (is_val, binding_token, next_pos) = {
-        let res1 = parse_token_type(tokens, current_pos, TokenType::VAL);
-        match res1 {
-            ParseResult::Ok(val_token, next) => (true, val_token, next),
-            _ => {
-                let res2 = parse_token_type(tokens, current_pos, TokenType::VAR);
-                match res2 {
-                    ParseResult::Ok(var_token, next) => (false, var_token, next),
-                    // Neither VAL nor VAR were matched, the caller should try
-                    // other constructs
-                    _ => return ParseResult::Unmatched,
+    let (is_mutable, binding_token, next_pos) = {
+        let let_token = parse_token_type(tokens, current_pos, TokenType::LET);
+        match let_token {
+            ParseResult::Ok(let_token, next_let) => {
+                let mut_token = parse_token_type(tokens, next_let, TokenType::MUT);
+                match mut_token {
+                    ParseResult::Ok(_mut_token, next_mut) => (true, let_token, next_mut),
+                    _ => (false, let_token, next_let),
                 }
             }
+            _ => return ParseResult::Unmatched,
         }
     };
     current_pos = next_pos;
@@ -50,7 +50,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
             return ParseResult::Err(SyntaxError {
                 reason: format!(
                     "There should be an identifier after a `{}` token",
-                    if is_val { "val" } else { "var" }
+                    if is_mutable { "val" } else { "var" }
                 ),
                 error_start: binding_token.position,
                 error_end: binding_token.get_end_position(),
@@ -95,7 +95,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
     };
     current_pos = next_pos;
 
-    let binding = if is_val {
+    let binding = if !is_mutable {
         Binding::Val(ValBinding {
             datatype: None,
             identifier: Box::new(identifier.value.clone()),
@@ -119,7 +119,7 @@ mod tests {
 
     #[test]
     fn should_parse_val_binding() {
-        let tokens = get_tokens(&String::from("val identifier = 20")).unwrap();
+        let tokens = get_tokens(&String::from("let identifier = 20")).unwrap();
         let ParseResult::Ok(Binding::Val(binding), _) = try_parse(&tokens, 0) else {
             panic!()
         };
@@ -129,11 +129,11 @@ mod tests {
 
     #[test]
     fn should_parse_val() {
-        let tokens = get_tokens(&String::from("val")).unwrap();
-        let token = *try_token_type(&tokens, 0, TokenType::VAL).unwrap();
+        let tokens = get_tokens(&String::from("let")).unwrap();
+        let token = *try_token_type(&tokens, 0, TokenType::LET).unwrap();
 
-        assert_eq!(TokenType::VAL, token.token_type);
-        assert_eq!("val", token.value);
+        assert_eq!(TokenType::LET, token.token_type);
+        assert_eq!("let", token.value);
     }
 
     #[test]
@@ -175,8 +175,8 @@ mod tests {
 
     #[test]
     fn should_return_correct_error() {
-        let tokens = get_tokens(&String::from("val")).unwrap();
-        assert_eq!(TokenType::VAL, tokens[0].token_type);
+        let tokens = get_tokens(&String::from("let")).unwrap();
+        assert_eq!(TokenType::LET, tokens[0].token_type);
         assert_eq!(0, tokens[0].position);
         let binding = try_parse(&tokens, 0);
 
@@ -191,8 +191,8 @@ mod tests {
 
     #[test]
     fn should_return_error_when_identifier_is_wrong() {
-        let tokens = get_tokens(&String::from("val 322")).unwrap();
-        assert_eq!(TokenType::VAL, tokens[0].token_type);
+        let tokens = get_tokens(&String::from("let 322")).unwrap();
+        assert_eq!(TokenType::LET, tokens[0].token_type);
         assert_eq!(0, tokens[0].position);
         let binding = try_parse(&tokens, 0);
 
@@ -204,7 +204,7 @@ mod tests {
             _ => panic!("Error expected"),
         }
 
-        let tokens = get_tokens(&String::from("val \"hello\"")).unwrap();
+        let tokens = get_tokens(&String::from("let \"hello\"")).unwrap();
         let binding = try_parse(&tokens, 0);
 
         match binding {
@@ -218,7 +218,7 @@ mod tests {
 
     #[test]
     fn should_return_error_when_equal_op_is_wrong() {
-        let tokens = get_tokens(&String::from("val id \"error\"")).unwrap();
+        let tokens = get_tokens(&String::from("let id \"error\"")).unwrap();
         let binding = try_parse(&tokens, 0);
 
         match binding {
