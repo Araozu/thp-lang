@@ -1,6 +1,7 @@
 mod compile;
 mod empty;
 mod help;
+mod repl;
 mod types;
 
 use types::CommandType;

@@ -16,6 +16,7 @@ impl CommandType {
         match self {
             CommandType::Help => super::help::help_command(options),
             CommandType::Compile => super::compile::compile_command(options),
+            CommandType::Repl => super::repl::repl_command(options),
             CommandType::None => super::empty::empty_command(options),
             _ => {
                 println!("Not implemented yet! {:?} {:?}", self, options);
