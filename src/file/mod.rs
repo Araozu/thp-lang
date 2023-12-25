@@ -1,3 +1,4 @@
+use colored::*;
 use std::{fs, path::Path};
 
 use crate::lexic::token::Token;
@@ -7,28 +8,49 @@ pub fn compile_file(input: &String) {
     let input_path = Path::new(input);
 
     if !input_path.is_file() {
-        panic!("Input path is not a valid file")
+        println!(
+            "{}: {} {}",
+            "error".on_red(),
+            "Input path is not a valid file:".red(),
+            input
+        );
+        return;
     }
 
     let bytes = fs::read(input_path).expect("INPUT_PATH should be valid");
-    let contents = String::from_utf8(bytes).expect("INPUT_PATH's encoding MUST be UTF-8");
 
-    let out_code = compile(&contents);
+    let contents = match String::from_utf8(bytes) {
+        Ok(str) => str,
+        Err(_) => {
+            println!("{}: Input file contains invalid UTF-8", "error".on_red());
+            return;
+        }
+    };
+
+    let Some(out_code) = compile(&contents) else {
+        return;
+    };
 
     let mut output_path = Path::new(input).canonicalize().unwrap();
     output_path.set_extension("php");
+
     fs::write(output_path, out_code).expect("Error writing to output path");
 }
 
 /// Executes Lexical analysis, handles errors and calls build_ast for the next phase
-fn compile(input: &String) -> String {
+fn compile(input: &String) -> Option<String> {
     let tokens = lexic::get_tokens(input);
 
     match tokens {
-        Ok(tokens) => build_ast(input, tokens),
+        Ok(tokens) => Some(build_ast(input, tokens)),
         Err(error) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
-            panic!("{}", error.get_error_str(&chars))
+            println!(
+                "{}:\n{}",
+                "syntax error".on_red(),
+                error.get_error_str(&chars)
+            );
+            None
         }
     }
 }

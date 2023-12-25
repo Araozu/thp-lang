@@ -4,12 +4,14 @@ use std::collections::VecDeque;
 impl PrintableError for LexError {
     // TODO: Count and show line number
     fn get_error_str(&self, chars: &Vec<char>) -> String {
+        let line_number = get_line_number(chars, self.position);
         let (erroneous_code, back_count) = get_line(chars, self.position);
 
-        let whitespace = vec![' '; back_count].iter().collect::<String>();
+        let whitespace = " ".repeat(back_count + line_number.to_string().len() + 1);
 
         format!(
-            "\n{}\n{}^\n\n{}{}\n{}",
+            "\n{}|{}\n{}^\n\n{}{}\n{}",
+            line_number,
             erroneous_code,
             whitespace,
             "Invalid character at pos ",
@@ -69,6 +71,22 @@ fn get_line(chars: &Vec<char>, pos: usize) -> (String, usize) {
     (result_chars.iter().collect::<String>(), pos - before_pos)
 }
 
+fn get_line_number(chars: &Vec<char>, target_pos: usize) -> usize {
+    let mut count = 1;
+
+    for (pos, char) in chars.iter().enumerate() {
+        if pos >= target_pos {
+            break;
+        }
+
+        if *char == '\n' {
+            count += 1;
+        }
+    }
+
+    count
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -85,9 +103,8 @@ mod tests {
                 let chars: Vec<char> = input.chars().into_iter().collect();
                 let err_str = err_data.get_error_str(&chars);
 
-                // TODO: check for line number
                 let expected_str = format!(
-                    "\n{}\n{}^\n\nInvalid character at pos 9\n{}",
+                    "\n1|{}\n  {}^\n\nInvalid character at pos 9\n{}",
                     "val name' = 20", "        ", "Unrecognized character `'` (escaped: `\\'`)"
                 );
 
@@ -113,5 +130,23 @@ mod tests {
 
         assert_eq!("val binding = 322", result);
         assert_eq!(6, back_count);
+    }
+
+    #[test]
+    fn should_get_line_number() {
+        let input = String::from("one\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten");
+        let chars: Vec<char> = input.chars().into_iter().collect();
+
+        let line_number = get_line_number(&chars, 11);
+        assert_eq!(3, line_number);
+
+        let line_number = get_line_number(&chars, 0);
+        assert_eq!(1, line_number);
+
+        let line_number = get_line_number(&chars, 3);
+        assert_eq!(1, line_number);
+
+        let line_number = get_line_number(&chars, 15);
+        assert_eq!(4, line_number);
     }
 }
