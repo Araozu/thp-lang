@@ -120,7 +120,7 @@ fn next_token(
             let error = LexError {
                 position: current_pos,
                 reason: format!(
-                    "Unrecognized character `{}` (escaped: `{}`)",
+                    "Illegal character `{}` (escaped: {})",
                     next_char,
                     next_char.escape_default().to_string(),
                 ),

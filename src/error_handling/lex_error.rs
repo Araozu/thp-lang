@@ -2,21 +2,22 @@ use super::{LexError, PrintableError};
 use std::collections::VecDeque;
 
 impl PrintableError for LexError {
-    // TODO: Count and show line number
     fn get_error_str(&self, chars: &Vec<char>) -> String {
         let line_number = get_line_number(chars, self.position);
-        let (erroneous_code, back_count) = get_line(chars, self.position);
+        let (erroneous_code, column_number_zero) = get_line(chars, self.position);
+        let column_number = column_number_zero + 1;
 
-        let whitespace = " ".repeat(back_count + line_number.to_string().len() + 1);
+        let line_number_whitespace = " ".repeat(line_number.to_string().len());
+        let whitespace = " ".repeat(column_number_zero);
+        let reason = &self.reason;
 
         format!(
-            "\n{}|{}\n{}^\n\n{}{}\n{}",
-            line_number,
-            erroneous_code,
-            whitespace,
-            "Invalid character at pos ",
-            self.position + 1,
-            self.reason,
+            r#"
+{line_number_whitespace} |
+{line_number           } | {erroneous_code}
+{line_number_whitespace} | {whitespace}^
+
+{reason} at line {line_number}:{column_number}"#,
         )
     }
 }
@@ -104,8 +105,12 @@ mod tests {
                 let err_str = err_data.get_error_str(&chars);
 
                 let expected_str = format!(
-                    "\n1|{}\n  {}^\n\nInvalid character at pos 9\n{}",
-                    "val name' = 20", "        ", "Unrecognized character `'` (escaped: `\\'`)"
+                    r#"
+  |
+1 | val name' = 20
+  |         ^
+
+Illegal character `'` (escaped: \') at line 1:9"#,
                 );
 
                 assert_eq!(expected_str, err_str,);
