@@ -15,6 +15,7 @@
 - Watch mode
 - Formatter
 - Simple language server
+- Decide how to handle comments in the syntax (?)
 
 ## v0.0.10
 

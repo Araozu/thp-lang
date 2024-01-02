@@ -449,4 +449,12 @@ mod indentation_tests {
         assert_eq!(TokenType::DEDENT, tokens[8].token_type);
         assert_eq!(TokenType::EOF, tokens[9].token_type);
     }
+
+    #[test]
+    fn should_lex_comments() {
+        let input = String::from("// ??");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(TokenType::Comment, tokens[0].token_type);
+    }
 }

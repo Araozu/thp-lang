@@ -4,7 +4,11 @@ use super::Transpilable;
 
 impl Transpilable for FunctionDeclaration {
     fn transpile(&self) -> String {
-        format!("function {}() {{}}", self.identifier)
+        format!(
+            "function {}() {{\n{}\n}}",
+            self.identifier,
+            self.block.transpile()
+        )
     }
 }
 

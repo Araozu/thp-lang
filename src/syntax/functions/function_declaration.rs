@@ -64,7 +64,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Function
     };
     current_pos = next_pos;
 
-    let (_block, next_pos) = match parse_block(tokens, current_pos) {
+    let (block, next_pos) = match parse_block(tokens, current_pos) {
         ParseResult::Ok(block, next_pos) => (block, next_pos),
         ParseResult::Err(error) => {
             return ParseResult::Err(error);
@@ -91,6 +91,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Function
         FunctionDeclaration {
             identifier: Box::new(identifier.value.clone()),
             params_list: Box::new(params_list),
+            block: Box::new(block),
         },
         current_pos,
     )

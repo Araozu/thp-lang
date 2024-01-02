@@ -18,6 +18,7 @@ pub enum TopLevelDeclaration {
 pub struct FunctionDeclaration {
     pub identifier: Box<String>,
     pub params_list: Box<ParamsList>,
+    pub block: Box<Block>,
 }
 
 #[derive(Debug)]

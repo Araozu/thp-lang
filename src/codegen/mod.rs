@@ -1,9 +1,11 @@
 use crate::syntax::ast::ModuleAST;
 
 mod binding;
+mod block;
 mod expression;
 mod function_declaration;
 mod module_ast;
+mod statement;
 mod top_level_construct;
 
 /// Trait that the AST and its nodes implement to support transformation to PHP

@@ -11,7 +11,7 @@ impl Transpilable for ModuleAST {
             .map(|binding| binding.transpile())
             .collect();
 
-        bindings_str.join("\n")
+        format!("<?php\n\n{}\n", bindings_str.join("\n"))
     }
 }
 
