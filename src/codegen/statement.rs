@@ -4,6 +4,9 @@ use super::Transpilable;
 
 impl Transpilable for Statement {
     fn transpile(&self) -> String {
-        String::from("// TODO (statement)")
+        match self {
+            Statement::Binding(binding) => binding.transpile(),
+            Statement::FunctionCall(function_call) => function_call.transpile(),
+        }
     }
 }

@@ -13,7 +13,7 @@ impl Transpilable for Expression {
         match self {
             Expression::Number(value) => format!("{}", value),
             Expression::String(value) => {
-                format!("\"{}\"", *value)
+                format!("{}", *value)
             }
             Expression::Boolean(value) => String::from(if *value { "true" } else { "false" }),
             Expression::Identifier(value) => format!("{}", *value),

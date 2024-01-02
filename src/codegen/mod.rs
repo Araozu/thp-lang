@@ -3,6 +3,7 @@ use crate::syntax::ast::ModuleAST;
 mod binding;
 mod block;
 mod expression;
+mod function_call;
 mod function_declaration;
 mod module_ast;
 mod statement;
