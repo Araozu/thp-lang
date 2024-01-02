@@ -104,4 +104,19 @@ mod tests {
 
         assert_eq!(block.statements.len(), 2);
     }
+
+    #[test]
+    fn test_parse_block_3() {
+        let tokens = get_tokens(&String::from("{\n    f()\n}")).unwrap();
+        let block = parse_block(&tokens, 0);
+
+        let block = match block {
+            ParseResult::Ok(p, _) => p,
+            _ => {
+                panic!("Expected a block, got: {:?}\n\n{:?}", block, tokens)
+            },
+        };
+
+        assert_eq!(block.statements.len(), 1);
+    }
 }

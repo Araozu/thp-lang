@@ -32,7 +32,7 @@ mod tests {
             TopLevelDeclaration::FunctionDeclaration(fun_decl) => {
                 let transpiled = fun_decl.transpile();
 
-                assert_eq!("function id() {}", transpiled);
+                assert_eq!("function id() {\n\n}", transpiled);
             }
         }
     }

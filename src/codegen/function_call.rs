@@ -4,6 +4,6 @@ use super::Transpilable;
 
 impl Transpilable for FunctionCall {
     fn transpile(&self) -> String {
-        format!("{}();", self.identifier)
+        format!("{}();", self.function.transpile())
     }
 }

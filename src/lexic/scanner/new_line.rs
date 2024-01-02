@@ -12,7 +12,7 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
         Some(c) if *c == ' ' => match look_ahead_for_new_line(chars, start_pos + 1) {
             Some(next_pos) => scan(chars, next_pos),
             None => {
-                let token = Token::new(String::from(";"), start_pos, TokenType::NewLine);
+                let token = Token::new(String::from(""), start_pos, TokenType::NewLine);
                 LexResult::Some(token, start_pos)
             }
         },

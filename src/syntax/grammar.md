@@ -85,11 +85,14 @@ factor = unary, (("/" | "*"), unary)*;
 unary = ("!" | "-"), expression
       | primary;
 
-function call = primary, (arguments list)?;
+function call expr = primary, (arguments list)?
+                   | primary;
 
 primary = number | string | boolean | identifier | ("(", expression, ")");
 ```
 
-
+```thp
+primary()
+```
 
 

@@ -1,6 +1,8 @@
+use super::Expression;
+
 #[derive(Debug)]
 pub struct FunctionCall {
-    pub identifier: Box<String>,
+    pub function: Box<Expression>,
 }
 
 #[derive(Debug)]

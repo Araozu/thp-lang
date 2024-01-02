@@ -4,6 +4,7 @@ use crate::lexic::token::Token;
 mod comparison;
 mod equality;
 mod factor;
+pub mod function_call_expr;
 mod primary;
 mod term;
 mod unary;

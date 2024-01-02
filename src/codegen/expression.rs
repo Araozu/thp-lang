@@ -17,7 +17,7 @@ impl Transpilable for Expression {
             }
             Expression::Boolean(value) => String::from(if *value { "true" } else { "false" }),
             Expression::Identifier(value) => format!("{}", *value),
-            Expression::FunctionCall(_) => todo!("FunctionCall codegen is not implemented yet"),
+            Expression::FunctionCall(f) => f.transpile(),
             Expression::BinaryOperator(_, _, _) => {
                 todo!("BinaryOperator codegen is not implemented yet")
             }
@@ -44,7 +44,7 @@ mod tests {
 
     #[test]
     fn should_transpile_string() {
-        let str = String::from("Hello world");
+        let str = String::from("\"Hello world\"");
         let exp = Expression::String(Box::new(str));
         let result = exp.transpile();
 

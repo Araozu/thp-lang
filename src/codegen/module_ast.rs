@@ -37,6 +37,6 @@ mod tests {
 
         let result = module.transpile();
 
-        assert_eq!("$identifier = 322;", result);
+        assert_eq!("<?php\n\n$identifier = 322;\n", result);
     }
 }

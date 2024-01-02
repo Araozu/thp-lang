@@ -5,6 +5,34 @@ use crate::{
 
 use super::ParseResult;
 
+pub trait Tokenizer {
+    fn get_significant<'a>(&'a self, index: usize) -> Option<(&'a Token, usize)>;
+}
+
+impl Tokenizer for Vec<Token> {
+    /// Returns the first non whitespace token at index & the position the found token
+    fn get_significant<'a>(&'a self, index: usize) -> Option<(&'a Token, usize)> {
+        let mut current_pos = index;
+
+        // Ignore all whitespace and newlines
+        loop {
+            match self.get(current_pos) {
+                Some(token) => {
+                    if token.token_type == TokenType::INDENT
+                        || token.token_type == TokenType::DEDENT
+                        || token.token_type == TokenType::NewLine
+                    {
+                        current_pos += 1;
+                    } else {
+                        return Some((token, current_pos));
+                    }
+                }
+                None => return None,
+            }
+        }
+    }
+}
+
 /// Expects the token at `pos` to be of type `token_type`
 pub fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
     match tokens.get(pos) {

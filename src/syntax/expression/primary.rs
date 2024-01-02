@@ -2,6 +2,7 @@ use crate::{
     lexic::token::{Token, TokenType},
     syntax::{ast::Expression, ParseResult},
 };
+use super::super::utils::Tokenizer;
 
 /// This grammar may not be up to date. Refer to the spec for the latest grammar.
 ///
@@ -9,32 +10,22 @@ use crate::{
 /// primary = number | string | boolean | identifier | ("(", expression, ")");
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
-    /*
-    TODO: Incorporate function_call into the grammar, figure out its precedence.
-    match function_call::try_parse(tokens, pos) {
-        super::ParseResult::Ok(function_call, next_pos) => {
-            return ParseResult::Ok::<_, ()>(Expression::FunctionCall(function_call), next_pos)
-        }
-        _ => {}
-    };
-     */
-
-    match tokens.get(pos) {
-        Some(token) => match token.token_type {
+    match tokens.get_significant(pos) {
+        Some((token, token_pos)) => match token.token_type {
             TokenType::Number => {
-                ParseResult::Ok(Expression::Number(Box::new(token.value.clone())), pos + 1)
+                ParseResult::Ok(Expression::Number(Box::new(token.value.clone())), token_pos + 1)
             }
             TokenType::String => {
-                ParseResult::Ok(Expression::String(Box::new(token.value.clone())), pos + 1)
+                ParseResult::Ok(Expression::String(Box::new(token.value.clone())), token_pos + 1)
             }
             TokenType::Identifier if token.value == "true" || token.value == "false" => {
-                ParseResult::Ok(Expression::Boolean(token.value == "true"), pos + 1)
+                ParseResult::Ok(Expression::Boolean(token.value == "true"), token_pos + 1)
             }
             TokenType::Identifier => ParseResult::Ok(
                 Expression::Identifier(Box::new(token.value.clone())),
-                pos + 1,
+                token_pos + 1,
             ),
-            TokenType::LeftParen => parse_parenthesized_expression(tokens, pos),
+            TokenType::LeftParen => parse_parenthesized_expression(tokens, token_pos),
             _ => ParseResult::Unmatched,
         },
         None => ParseResult::Unmatched,

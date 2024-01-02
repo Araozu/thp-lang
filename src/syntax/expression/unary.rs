@@ -1,13 +1,15 @@
 use crate::{
     lexic::token::Token,
-    syntax::{ast::Expression, expression::primary, ParseResult},
+    syntax::{ast::Expression, ParseResult},
 };
+
+use super::function_call_expr;
 
 /// Parses an unary expression.
 ///
 /// ```ebnf
 /// unary = ("!" | "-"), expression
-///       | primary;
+///       | function call expr;
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
     match tokens.get(pos) {
@@ -20,6 +22,6 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
                 _ => ParseResult::Unmatched,
             }
         }
-        _ => primary::try_parse(tokens, pos),
+        _ => function_call_expr::try_parse(tokens, pos),
     }
 }

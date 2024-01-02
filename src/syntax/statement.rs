@@ -1,6 +1,11 @@
 use crate::lexic::token::Token;
 
-use super::{ast::statement::Statement, binding, functions::function_call, ParseResult};
+use super::{
+    ast::{statement::Statement, Expression},
+    binding,
+    expression::function_call_expr,
+    ParseResult,
+};
 
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Statement, ()> {
     None.or_else(|| match binding::try_parse(tokens, pos) {
@@ -8,8 +13,13 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Statemen
         ParseResult::Err(err) => Some(ParseResult::Err(err)),
         _ => None,
     })
-    .or_else(|| match function_call::try_parse(tokens, pos) {
-        ParseResult::Ok(f, next) => Some(ParseResult::Ok(Statement::FunctionCall(f), next)),
+    .or_else(|| match function_call_expr::try_parse(tokens, pos) {
+        ParseResult::Ok(f, next) => {
+            let Expression::FunctionCall(f) = f else {
+                return None;
+            };
+            Some(ParseResult::Ok(Statement::FunctionCall(f), next))
+        }
         ParseResult::Err(err) => Some(ParseResult::Err(err)),
         _ => None,
     })
