@@ -1,22 +1,29 @@
-use std::collections::VecDeque;
-
 use super::{PrintableError, SyntaxError};
+use std::collections::VecDeque;
 
 impl PrintableError for SyntaxError {
     fn get_error_str(&self, chars: &Vec<char>) -> String {
         let (line, before, length) = get_line(chars, self.error_start, self.error_end);
 
+        let line_number = get_line_number(chars, self.error_start);
+        let line_number_whitespace = " ".repeat(line_number.to_string().len());
+
         let whitespace = vec![' '; before].iter().collect::<String>();
         let indicator = vec!['^'; length].iter().collect::<String>();
+        let reason = &self.reason;
 
         format!(
-            "\n{}\n{}{}\n\n{}{}{}\n{}",
-            line, whitespace, indicator, "Syntax error at pos ", self.error_start, ":", self.reason
+            r#"
+{line_number_whitespace} |
+{line_number           } | {line}
+{line_number_whitespace} | {whitespace}{indicator}
+
+{reason} at line {line_number}:{before}"#,
         )
     }
 }
 
-/// Extracts a lin e of code
+/// Extracts a line of code
 ///
 /// - `chars`: Input where to extract the line from
 /// - `start_position`: Position where the erroneous code starts
@@ -88,6 +95,22 @@ fn get_line(
         start_position - before_pos,
         end_position - start_position,
     )
+}
+
+fn get_line_number(chars: &Vec<char>, target_pos: usize) -> usize {
+    let mut count = 1;
+
+    for (pos, char) in chars.iter().enumerate() {
+        if pos >= target_pos {
+            break;
+        }
+
+        if *char == '\n' {
+            count += 1;
+        }
+    }
+
+    count
 }
 
 #[cfg(test)]

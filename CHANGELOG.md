@@ -24,8 +24,8 @@
 
 - [x] Hand-make CLI, remove clap
 - [x] Compile a single file
-- [ ] Display error messages during compilation instead of panicking
-- [ ] Improve errror messages
+- [x] Display error messages during compilation instead of panicking
+- [x] Improve error messages
 - [ ] Implement code generation for ast nodes implemented as of now
 
 
