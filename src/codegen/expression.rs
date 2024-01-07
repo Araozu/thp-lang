@@ -18,11 +18,21 @@ impl Transpilable for Expression {
             Expression::Boolean(value) => String::from(if *value { "true" } else { "false" }),
             Expression::Identifier(value) => format!("{}", *value),
             Expression::FunctionCall(f) => f.transpile(),
+<<<<<<< HEAD
             Expression::BinaryOperator(_, _, _) => {
                 todo!("BinaryOperator codegen is not implemented yet")
+=======
+            Expression::BinaryOperator(left_expr, right_expr, operator) => {
+                format!(
+                    "{}{}{}",
+                    left_expr.transpile(),
+                    operator,
+                    right_expr.transpile()
+                )
+>>>>>>> f71f9ab ((lazily) codegen parsed expressions. v0.0.9)
             }
-            Expression::UnaryOperator(_, _) => {
-                todo!("UnaryOperator codegen is not implemented yet")
+            Expression::UnaryOperator(operator, expression) => {
+                format!("{}{}", operator, expression.transpile())
             }
         }
     }

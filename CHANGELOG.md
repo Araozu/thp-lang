@@ -15,11 +15,15 @@
 - Watch mode
 - Formatter
 - Simple language server
-- Decide how to handle comments in the syntax (?)
+- Decide how to handle comments in the syntax (?)(should comments mean something like in rust?)
 
 ## v0.0.10
 
-- [ ] Typecheck current AST
+- [ ] Begin work on semantic analysis
+- [ ] Symbol table
+- [ ] Typecheck bindings
+- [ ] Typecheck functions
+- [ ] Transform simple THP expression into PHP statements
 
 ## v0.0.9
 
@@ -27,7 +31,7 @@
 - [x] Compile a single file
 - [x] Display error messages during compilation instead of panicking
 - [x] Improve error messages
-- [ ] Implement code generation for ast nodes implemented as of now
+- [x] Implement code generation for ast nodes implemented as of now
 
 
 

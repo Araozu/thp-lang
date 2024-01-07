@@ -37,6 +37,10 @@ mod tests {
 
         let result = module.transpile();
 
+<<<<<<< HEAD
         assert_eq!("<?php\n\n$identifier = 322;\n", result);
+=======
+        assert_eq!("<?php\n\n$identifier = 322\n", result);
+>>>>>>> f71f9ab ((lazily) codegen parsed expressions. v0.0.9)
     }
 }

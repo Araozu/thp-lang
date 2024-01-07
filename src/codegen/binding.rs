@@ -6,7 +6,7 @@ impl Transpilable for Binding {
     fn transpile(&self) -> String {
         let expression_str = self.expression.transpile();
 
-        format!("${} = {};", self.identifier, expression_str)
+        format!("${} = {}", self.identifier, expression_str)
     }
 }
 
@@ -28,6 +28,6 @@ mod tests {
 
         let result = binding.transpile();
 
-        assert_eq!("$identifier = 322;", result);
+        assert_eq!("$identifier = 322", result);
     }
 }
