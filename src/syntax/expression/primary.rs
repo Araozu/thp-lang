@@ -98,4 +98,17 @@ mod tests {
             _ => panic!(),
         }
     }
+
+    #[test]
+    fn should_parse_grouped_expression() {
+        let tokens = get_tokens(&String::from("(identifier)")).unwrap();
+        let expression = try_parse(&tokens, 0);
+
+        match expression {
+            ParseResult::Ok(Expression::Identifier(value), _) => {
+                assert_eq!("identifier", format!("{}", value))
+            }
+            _ => panic!(),
+        }
+    }
 }

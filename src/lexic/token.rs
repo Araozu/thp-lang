@@ -13,6 +13,7 @@ pub enum TokenType {
     RightBrace,
     NewLine,
     Comment,
+    Comma,
     INDENT,
     DEDENT,
     LET,

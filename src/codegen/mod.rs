@@ -5,7 +5,6 @@ mod block;
 mod expression;
 mod function_call;
 mod function_declaration;
-mod function_call;
 mod module_ast;
 mod statement;
 mod top_level_construct;

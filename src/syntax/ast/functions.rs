@@ -7,8 +7,6 @@ pub struct FunctionCall {
 
 #[derive(Debug)]
 pub struct ArgumentsList {
-    pub arguments: Vec<Box<Argument>>,
+    pub arguments: Vec<Expression>,
 }
 
-#[derive(Debug)]
-pub enum Argument {}

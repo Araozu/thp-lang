@@ -116,6 +116,16 @@ fn next_token(
         .or_else(|| scanner::operator(next_char, chars, current_pos))
         .or_else(|| scanner::grouping_sign(next_char, chars, current_pos))
         .or_else(|| scanner::new_line(next_char, chars, current_pos))
+        .or_else(|| {
+            if next_char == ',' {
+                Some(LexResult::Some(
+                    Token::new(",".into(), current_pos, TokenType::Comma),
+                    current_pos + 1,
+                ))
+            } else {
+                None
+            }
+        })
         .unwrap_or_else(|| {
             let error = LexError {
                 position: current_pos,
