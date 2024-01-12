@@ -1,7 +1,10 @@
 use crate::{
     lexic::token::Token,
     syntax::{
-        ast::{functions::FunctionCall, Expression},
+        ast::{
+            functions::{ArgumentsList, FunctionCall},
+            Expression,
+        },
         functions::arguments_list,
         ParseResult,
     },
@@ -20,7 +23,7 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
     };
 
     // Parse arguments list
-    let (_args_list, next_pos) = match arguments_list::try_parse(tokens, next_pos) {
+    let (arguments, next_pos) = match arguments_list::try_parse(tokens, next_pos) {
         ParseResult::Ok(args, next) => (args, next),
         ParseResult::Err(err) => return ParseResult::Err(err),
         _ => {
@@ -30,13 +33,11 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
 
     let fun_call = FunctionCall {
         function: Box::new(primary_expr),
+        arguments: Box::new(arguments),
     };
 
     ParseResult::Ok(Expression::FunctionCall(fun_call), next_pos)
 }
 
-
 #[cfg(test)]
-mod test {
-
-}
+mod test {}

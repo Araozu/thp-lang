@@ -20,7 +20,7 @@
 ## v0.0.10
 
 - [x] Parse function call parameters
-- [ ] Codegen function call parameters
+- [x] Codegen function call parameters
 - [ ] Parse function declaration arguments
 - [ ] Begin work on semantic analysis
 - [ ] Symbol table
