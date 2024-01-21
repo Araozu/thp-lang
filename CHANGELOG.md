@@ -3,6 +3,7 @@
 ## TODO
 
 - Parse __more__ binary operators
+- Parse `Type name = value` bindings
 - Parse more complex bindings
 - Watch mode
 - Improve error messages
@@ -21,7 +22,7 @@
 
 - [x] Parse function call parameters
 - [x] Codegen function call parameters
-- [ ] Parse function declaration arguments
+- [x] Parse function declaration arguments (Type id)
 - [ ] Begin work on semantic analysis
 - [ ] Symbol table
 - [ ] Typecheck bindings

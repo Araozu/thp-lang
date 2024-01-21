@@ -4,7 +4,10 @@ use crate::{
     syntax::utils::parse_token_type,
 };
 
-use super::{ast::ParamsList, ParseResult};
+use super::{
+    ast::{Parameter, ParamsList},
+    utils, ParseResult,
+};
 
 pub fn parse_params_list<'a>(
     tokens: &'a Vec<Token>,
@@ -20,6 +23,36 @@ pub fn parse_params_list<'a>(
             ParseResult::Unmatched => return ParseResult::Unmatched,
         };
     current_pos = next_pos;
+
+    // Parse parameters definitions, separated by commas
+    let mut parameters = Vec::<Parameter>::new();
+    loop {
+        let (next_parameter, next_pos) = match parse_param_definition(tokens, current_pos) {
+            ParseResult::Ok(parameter, next_pos) => (parameter, next_pos),
+            ParseResult::Err(error) => {
+                return ParseResult::Err(error);
+            }
+            _ => break,
+        };
+        current_pos = next_pos;
+        parameters.push(next_parameter);
+
+        // Parse comma. This also parses a trailing comma
+        match parse_token_type(tokens, current_pos, TokenType::Comma) {
+            ParseResult::Ok(_, next) => {
+                current_pos = next;
+            }
+            // This should never happen
+            ParseResult::Err(err) => return ParseResult::Err(err),
+            ParseResult::Mismatch(_) => {
+                // Something other than a comma was found. It must be a closing paren )
+                // Still, break the loop, assume there are no more arguments
+                // TODO: This could be a good place to write a detailed error?
+                break;
+            }
+            ParseResult::Unmatched => break,
+        };
+    }
 
     // Parse closing paren
     let (_closing_paren, next_pos) =
@@ -44,4 +77,61 @@ pub fn parse_params_list<'a>(
     current_pos = next_pos;
 
     ParseResult::Ok(ParamsList {}, current_pos)
+}
+
+fn parse_param_definition<'a>(
+    tokens: &'a Vec<Token>,
+    pos: usize,
+) -> ParseResult<Parameter, &Token> {
+    // Parse a single parameter definition of the form:
+    // - Type identifier
+    // There will be more constructs in the future, like:
+    // - Type identifier = default_value
+    // - FunctionType identifier
+    // - Pattern identifier (e.g. Some[String] value)?
+
+    let mut current_pos = pos;
+    let (datatype, next_pos) =
+        match utils::parse_token_type(tokens, current_pos, TokenType::Datatype) {
+            ParseResult::Ok(token, next) => (token, next),
+            ParseResult::Err(err) => {
+                return ParseResult::Err(err);
+            }
+            // If there is no datatype this construction doesn't apply.
+            // Return a mismatch and let the caller handle it
+            ParseResult::Mismatch(t) => return ParseResult::Mismatch(t),
+            ParseResult::Unmatched => return ParseResult::Unmatched,
+        };
+    current_pos = next_pos;
+
+    let (identifier, next_pos) =
+        match utils::parse_token_type(tokens, current_pos, TokenType::Identifier) {
+            ParseResult::Ok(token, next) => (token, next),
+            ParseResult::Err(err) => {
+                return ParseResult::Err(err);
+            }
+            // However, if we fail to parse an identifier, it's an error
+            ParseResult::Mismatch(_) => {
+                return ParseResult::Err(SyntaxError {
+                    reason: String::from("Expected an identifier for the parameter."),
+                    error_start: tokens[pos].position,
+                    error_end: tokens[pos].get_end_position(),
+                });
+            }
+            ParseResult::Unmatched => {
+                return ParseResult::Err(SyntaxError {
+                    reason: String::from("Expected an identifier for the parameter."),
+                    error_start: tokens[pos].position,
+                    error_end: tokens[pos].get_end_position(),
+                })
+            }
+        };
+
+    ParseResult::Ok(
+        Parameter {
+            identifier: Box::new(identifier.value.clone()),
+            datatype: Box::new(datatype.value.clone()),
+        },
+        next_pos,
+    )
 }

@@ -29,6 +29,11 @@ pub struct Block {
 #[derive(Debug)]
 pub struct ParamsList {}
 
+pub struct Parameter {
+    pub identifier: Box<String>,
+    pub datatype: Box<String>,
+}
+
 #[derive(Debug)]
 pub enum Expression {
     Number(Box<String>),
