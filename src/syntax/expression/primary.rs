@@ -1,8 +1,8 @@
+use super::super::utils::Tokenizer;
 use crate::{
     lexic::token::{Token, TokenType},
     syntax::{ast::Expression, ParseResult},
 };
-use super::super::utils::Tokenizer;
 
 /// This grammar may not be up to date. Refer to the spec for the latest grammar.
 ///
@@ -12,12 +12,14 @@ use super::super::utils::Tokenizer;
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
     match tokens.get_significant(pos) {
         Some((token, token_pos)) => match token.token_type {
-            TokenType::Number => {
-                ParseResult::Ok(Expression::Number(Box::new(token.value.clone())), token_pos + 1)
-            }
-            TokenType::String => {
-                ParseResult::Ok(Expression::String(Box::new(token.value.clone())), token_pos + 1)
-            }
+            TokenType::Number => ParseResult::Ok(
+                Expression::Number(Box::new(token.value.clone())),
+                token_pos + 1,
+            ),
+            TokenType::String => ParseResult::Ok(
+                Expression::String(Box::new(token.value.clone())),
+                token_pos + 1,
+            ),
             TokenType::Identifier if token.value == "true" || token.value == "false" => {
                 ParseResult::Ok(Expression::Boolean(token.value == "true"), token_pos + 1)
             }

@@ -4,7 +4,6 @@ mod binding;
 mod block;
 mod expression;
 mod functions;
-mod params_list;
 mod statement;
 mod utils;
 

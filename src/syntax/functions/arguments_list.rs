@@ -79,8 +79,6 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Argument
 
 #[cfg(test)]
 mod tests {
-    use std::net;
-
     use super::*;
     use crate::lexic::get_tokens;
 
@@ -123,7 +121,6 @@ mod tests {
         assert_eq!(list.arguments.len(), 0);
     }
 
-
     #[test]
     fn should_parse_one_argument() {
         let tokens = get_tokens(&String::from("(0)")).unwrap();
@@ -142,7 +139,7 @@ mod tests {
             panic!("Expected a number")
         };
     }
-    
+
     #[test]
     fn should_parse_one_argument_with_trailing_comma() {
         let tokens = get_tokens(&String::from("(0, )")).unwrap();

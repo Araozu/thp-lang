@@ -14,8 +14,5 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
     return equality::try_parse(tokens, pos);
 }
 
-
 #[cfg(test)]
-mod tests {
-    
-}
+mod tests {}

@@ -9,6 +9,8 @@ mod file;
 mod syntax;
 // Module to handle syntactic analysis
 mod lexic;
+// Module to handle semantic analysis
+mod semantic;
 // Transforms an AST to JS
 mod codegen;
 mod utils;

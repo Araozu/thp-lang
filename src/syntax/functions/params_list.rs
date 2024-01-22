@@ -4,7 +4,7 @@ use crate::{
     syntax::utils::parse_token_type,
 };
 
-use super::{
+use super::super::{
     ast::{Parameter, ParamsList},
     utils, ParseResult,
 };

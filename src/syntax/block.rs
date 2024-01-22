@@ -114,7 +114,7 @@ mod tests {
             ParseResult::Ok(p, _) => p,
             _ => {
                 panic!("Expected a block, got: {:?}\n\n{:?}", block, tokens)
-            },
+            }
         };
 
         assert_eq!(block.statements.len(), 1);
