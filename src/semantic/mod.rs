@@ -10,6 +10,8 @@ use symbol_table::{SymbolEntry, SymbolTable};
 
 #[cfg(test)]
 mod tests {
+    use std::{borrow::BorrowMut, rc::Rc};
+
     use super::*;
 
     #[test]
@@ -24,17 +26,18 @@ mod tests {
 
     #[test]
     fn test_2() {
-        let mut global_scope = SymbolTable::new();
+        let global_scope = SymbolTable::new();
+
         let main_function = SymbolEntry::new_function(vec![], String::from("Unit"));
         global_scope.insert("main".into(), main_function);
         global_scope.insert("db_url".into(), SymbolEntry::Variable("String".into()));
 
         let add_function =
             SymbolEntry::new_function(vec!["Int".into(), "Int".into()], "Int".into());
+
         global_scope.insert("add".into(), add_function);
 
-        let mut main_function_scope = SymbolTable::new_from_parent(&global_scope);
-
+        let main_function_scope = SymbolTable::new_from_parent(&global_scope);
         main_function_scope.insert("message".into(), SymbolEntry::Variable("String".into()));
 
         assert!(main_function_scope.test(&"message".into()));
@@ -42,11 +45,11 @@ mod tests {
         assert_eq!(main_function_scope.test(&"non_existant".into()), false);
 
         let mut add_function_scope = SymbolTable::new_from_parent(&global_scope);
+
         add_function_scope.insert("a".into(), SymbolEntry::Variable("Int".into()));
         add_function_scope.insert("b".into(), SymbolEntry::Variable("Int".into()));
 
         assert!(add_function_scope.test(&"a".into()));
-
         global_scope.insert("test".into(), SymbolEntry::Variable("Int".into()));
     }
 }

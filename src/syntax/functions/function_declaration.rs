@@ -4,12 +4,15 @@ use crate::{
     utils::Result3,
 };
 
-use super::{super::{
-    ast::FunctionDeclaration,
-    block::parse_block,
-    utils::{parse_token_type, try_token_type},
-    ParseResult,
-}, params_list::parse_params_list};
+use super::{
+    super::{
+        ast::FunctionDeclaration,
+        block::parse_block,
+        utils::{parse_token_type, try_token_type},
+        ParseResult,
+    },
+    params_list::parse_params_list,
+};
 
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<FunctionDeclaration, ()> {
     let mut current_pos = pos;
