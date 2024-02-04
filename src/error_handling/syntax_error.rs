@@ -117,12 +117,12 @@ fn get_line_number(chars: &Vec<char>, target_pos: usize) -> usize {
 mod tests {
     use super::*;
     use crate::{
-        error_handling::{MistiError, PrintableError},
+        error_handling::MistiError,
         lexic::get_tokens,
         syntax::construct_ast,
     };
 
-    fn get_error_data(input: String) -> (Vec<char>, MistiError) {
+    fn _get_error_data(input: String) -> (Vec<char>, MistiError) {
         let tokens = get_tokens(&input).unwrap();
         let error_holder = construct_ast(&tokens);
 
@@ -137,38 +137,6 @@ mod tests {
                 (chars, error)
             }
         }
-    }
-
-    #[test]
-    fn should_show_an_error_for_missing_binding_name() {
-        let (chars, error) = get_error_data(String::from("val"));
-        let actual_err = error.get_error_str(&chars);
-        // TODO: Write a better error message (something that explains why it failed)
-        let expected_str = format!(
-            "\n{}\n{}\n\n{}\n{}",
-            "val",
-            "^^^",
-            "Syntax error at pos 0:",
-            "There should be an identifier after a `val` token"
-        );
-
-        // assert_eq!(expected_str, actual_err);
-    }
-
-    #[test]
-    fn should_show_an_error_for_missing_equal_operator() {
-        let (chars, error) = get_error_data(String::from("val name"));
-        let actual_err = error.get_error_str(&chars);
-        // TODO: Write a better error message (something that explains why it failed)
-        let expected_str = format!(
-            "\n{}\n{}\n\n{}\n{}",
-            "val name",
-            "    ^^^^",
-            "Syntax error at pos 4:",
-            "There should be an equal sign `=` after the identifier"
-        );
-
-        // assert_eq!(expected_str, actual_err);
     }
 
     #[test]
