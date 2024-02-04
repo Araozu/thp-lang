@@ -1,10 +1,22 @@
+use crate::syntax::ast::ModuleAST;
+
+mod impls;
 mod symbol_table;
+
+use impls::SemanticCheck;
 
 // What to do?
 // 1. Create a mutable symbol table
 // 2. Walk the AST
 // 3. Add the symbols declared to the symbol table, annotating them with their type
 // 4. Check if the symbols used are declared
+
+pub fn check_semantics(ast: &ModuleAST) -> Result<(), String> {
+    // For now there's only support for a single file
+    let global_scope = symbol_table::SymbolTable::new();
+
+    ast.check_semantics(&global_scope)
+}
 
 #[cfg(test)]
 mod tests {

@@ -116,11 +116,7 @@ fn get_line_number(chars: &Vec<char>, target_pos: usize) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        error_handling::MistiError,
-        lexic::get_tokens,
-        syntax::construct_ast,
-    };
+    use crate::{error_handling::MistiError, lexic::get_tokens, syntax::construct_ast};
 
     fn _get_error_data(input: String) -> (Vec<char>, MistiError) {
         let tokens = get_tokens(&input).unwrap();

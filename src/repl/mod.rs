@@ -30,6 +30,15 @@ fn build_ast(input: &String, tokens: Vec<Token>) {
 
     match ast {
         Ok(ast) => {
+            let res1 = crate::semantic::check_semantics(&ast);
+            match res1 {
+                Ok(_) => {}
+                Err(reason) => {
+                    eprintln!("{}", reason);
+                    return;
+                }
+            }
+
             let js_code = codegen::codegen(&ast);
             println!("{}", js_code)
         }

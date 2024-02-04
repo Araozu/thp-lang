@@ -62,7 +62,16 @@ fn build_ast(input: &String, tokens: Vec<Token>) -> String {
     let ast = syntax::construct_ast(&tokens);
 
     match ast {
-        Ok(ast) => codegen::codegen(&ast),
+        Ok(ast) => {
+            match crate::semantic::check_semantics(&ast) {
+                Ok(_) => {}
+                Err(reason) => {
+                    panic!("{}", reason)
+                }
+            };
+
+            codegen::codegen(&ast)
+        }
         Err(reason) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
             panic!("{}", reason.get_error_str(&chars))

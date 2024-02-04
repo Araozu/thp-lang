@@ -23,8 +23,9 @@
 - [x] Parse function call parameters
 - [x] Codegen function call parameters
 - [x] Parse function declaration arguments (Type id)
-- [ ] Begin work on semantic analysis
-- [ ] Symbol table
+- [x] Begin work on semantic analysis
+- [x] Minimal symbol table
+- [x] Check duplicate function declarations
 - [ ] Typecheck bindings
 - [ ] Typecheck functions
 - [ ] Transform simple THP expression into PHP statements
