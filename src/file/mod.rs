@@ -35,8 +35,12 @@ pub fn compile_file(input: &String) -> Result<(), ()> {
         }
     };
 
-    let Some(out_code) = compile(&contents) else {
-        return Err(());
+    let out_code = match compile(&contents) {
+        Ok(out_code) => out_code,
+        Err(error) => {
+            eprintln!("{}", error);
+            return Err(());
+        }
     };
 
     let mut output_path = Path::new(input)
@@ -54,44 +58,41 @@ pub fn compile_file(input: &String) -> Result<(), ()> {
     }
 }
 
-/// Executes Lexical analysis, handles errors and calls build_ast for the next phase
-fn compile(input: &String) -> Option<String> {
+/// THP source code goes in, PHP code or an error comes out
+fn compile(input: &String) -> Result<String, String> {
     let tokens = lexic::get_tokens(input);
 
-    match tokens {
-        Ok(tokens) => Some(build_ast(input, tokens)),
+    let tokens = match tokens {
+        Ok(tokens) => tokens,
         Err(error) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
-            println!(
+            return Err(format!(
                 "{}:\n{}",
                 "syntax error".on_red(),
                 error.get_error_str(&chars)
-            );
-            None
+            ))
         }
-    }
+    };
+
+    build_ast(input, tokens)
 }
 
 /// Executes Syntax analysis, and for now, Semantic analysis and Code generation.
 ///
 /// Prints the generated code in stdin
-fn build_ast(input: &String, tokens: Vec<Token>) -> String {
+fn build_ast(input: &String, tokens: Vec<Token>) -> Result<String, String> {
     let ast = syntax::construct_ast(&tokens);
 
-    match ast {
-        Ok(ast) => {
-            match crate::semantic::check_semantics(&ast) {
-                Ok(_) => {}
-                Err(reason) => {
-                    panic!("{}", reason)
-                }
-            };
-
-            codegen::codegen(&ast)
-        }
+    let ast = match ast {
+        Ok(ast) => ast,
         Err(reason) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
-            panic!("{}", reason.get_error_str(&chars))
+            let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
+            return Err(error)
         }
-    }
+    };
+
+    crate::semantic::check_semantics(&ast)?;
+
+    Ok(codegen::codegen(&ast))
 }

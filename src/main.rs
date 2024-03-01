@@ -17,6 +17,9 @@ mod utils;
 
 mod error_handling;
 
-fn main() -> Result<(), ()> {
-    cli::run_cli()
+fn main() {
+    match cli::run_cli() {
+        Ok(_) => (),
+        Err(_) => std::process::exit(1),
+    }
 }
