@@ -1,19 +1,19 @@
 use colored::*;
 
-pub fn compile_command(arguments: Vec<String>) {
+pub fn compile_command(arguments: Vec<String>) -> Result<(), ()> {
     if arguments.is_empty() {
-        println!("{}", compile_help());
-        println!("{}: {}", "error".on_red(), "No file specified");
-        return;
+        eprintln!("{}", compile_help());
+        eprintln!("{}: {}", "error".on_red(), "No file specified");
+        return Err(());
     }
     if arguments.len() > 1 {
-        println!("{}", compile_help());
-        println!(
+        eprintln!("{}", compile_help());
+        eprintln!(
             "{}: {}",
             "error".on_red(),
             "Only a single file can be compiled at a time"
         );
-        return;
+        return Err(());
     }
 
     let argument = &arguments[0];
@@ -23,16 +23,16 @@ pub fn compile_command(arguments: Vec<String>) {
         println!("{}", compile_help());
 
         if opt_str != "-h" && opt_str != "--help" {
-            println!(
+            eprintln!(
                 "{}: {}",
                 "error".on_red(),
-                "Invalid option. The compile command only accepts the `-h` or `--help` option"
+                "Invalid option. The compile command only accepts the `-h` or `--help` options"
             );
         }
-        return;
+        return Err(());
     }
 
-    crate::file::compile_file(argument);
+    crate::file::compile_file(argument)
 }
 
 fn compile_help() -> String {

@@ -17,6 +17,6 @@ mod utils;
 
 mod error_handling;
 
-fn main() {
-    cli::run_cli();
+fn main() -> Result<(), ()> {
+    cli::run_cli()
 }

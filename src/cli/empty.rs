@@ -7,7 +7,7 @@ enum EmptyOptions {
     Version,
 }
 
-pub fn empty_command(arguments: Vec<String>) {
+pub fn empty_command(arguments: Vec<String>) -> Result<(), ()> {
     // Add all options to a set
     let mut options_set = std::collections::HashSet::new();
     for option in arguments {
@@ -16,9 +16,9 @@ pub fn empty_command(arguments: Vec<String>) {
                 options_set.insert(o);
             }
             Err(invalid_option) => {
-                println!("{}", get_help_text());
-                println!("{}: invalid option: `{}`", "error".on_red(), invalid_option);
-                return;
+                eprintln!("{}", get_help_text());
+                eprintln!("{}: invalid option: `{}`", "error".on_red(), invalid_option);
+                return Err(());
             }
         };
     }
@@ -35,6 +35,8 @@ pub fn empty_command(arguments: Vec<String>) {
             println!("{}", get_help_text());
         }
     }
+
+    Ok(())
 }
 
 fn expand_option(option: &String) -> Result<EmptyOptions, String> {

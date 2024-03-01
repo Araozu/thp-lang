@@ -40,17 +40,17 @@ fn get_version() -> String {
     format!("The THP compiler, linter & formatter, v{}", crate_version)
 }
 
-pub fn run_cli() {
+pub fn run_cli() -> Result<(), ()> {
     let (command, args) = match parse_args() {
         Ok(c) => c,
         Err(reason) => {
-            println!("{}", get_help_text());
-            println!("{}: {}", "error".on_red(), reason);
-            return;
+            eprintln!("{}", get_help_text());
+            eprintln!("{}: {}", "error".on_red(), reason);
+            return Err(());
         }
     };
 
-    command.run(args);
+    command.run(args)
 }
 
 fn parse_args() -> Result<(CommandType, Vec<String>), String> {

@@ -4,37 +4,54 @@ use std::{fs, path::Path};
 use crate::lexic::token::Token;
 use crate::{codegen, error_handling::PrintableError, lexic, syntax};
 
-pub fn compile_file(input: &String) {
+pub fn compile_file(input: &String) -> Result<(), ()> {
     let input_path = Path::new(input);
 
     if !input_path.is_file() {
-        println!(
+        eprintln!(
             "{}: {} {}",
             "error".on_red(),
             "Input path is not a valid file:".red(),
             input
         );
-        return;
+        return Err(());
     }
 
-    let bytes = fs::read(input_path).expect("INPUT_PATH should be valid");
+    let bytes = match fs::read(input_path) {
+        Ok(bytes) => bytes,
+        Err(error) => {
+            eprintln!("{}: Error reading input file", "error".on_red());
+            eprintln!("{}", error);
+            return Err(());
+        }
+    };
 
     let contents = match String::from_utf8(bytes) {
         Ok(str) => str,
-        Err(_) => {
-            println!("{}: Input file contains invalid UTF-8", "error".on_red());
-            return;
+        Err(error) => {
+            eprintln!("{}: Input file contains invalid UTF-8", "error".on_red());
+            eprintln!("{}", error);
+            return Err(());
         }
     };
 
     let Some(out_code) = compile(&contents) else {
-        return;
+        return Err(());
     };
 
-    let mut output_path = Path::new(input).canonicalize().unwrap();
+    let mut output_path = Path::new(input)
+        .canonicalize()
+        .expect("Invalid input path: Cannot be canonicalized");
     output_path.set_extension("php");
 
-    fs::write(output_path, out_code).expect("Error writing to output path");
+    match fs::write(output_path, out_code) {
+        Ok(_) => Ok(()),
+        Err(error) => {
+            eprintln!("{}: Error writing output file", "error".on_red());
+            eprintln!("{}", error);
+            Err(())
+        }
+    }
 }
 
 /// Executes Lexical analysis, handles errors and calls build_ast for the next phase

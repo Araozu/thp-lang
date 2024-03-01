@@ -26,6 +26,7 @@
 - [x] Begin work on semantic analysis
 - [x] Minimal symbol table
 - [x] Check duplicate function declarations
+- [ ] Improve REPL/File compilation code
 - [ ] Typecheck bindings
 - [ ] Typecheck functions
 - [ ] Transform simple THP expression into PHP statements
