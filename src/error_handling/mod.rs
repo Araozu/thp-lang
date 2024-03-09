@@ -1,5 +1,9 @@
+use self::semantic_error::SemanticError;
+
 mod lex_error;
+pub mod semantic_error;
 mod syntax_error;
+mod utils;
 
 pub trait PrintableError {
     fn get_error_str(&self, chars: &Vec<char>) -> String;
@@ -9,6 +13,7 @@ pub trait PrintableError {
 pub enum MistiError {
     Lex(LexError),
     Syntax(SyntaxError),
+    Semantic(SemanticError),
 }
 
 #[derive(Debug)]
@@ -29,6 +34,7 @@ impl PrintableError for MistiError {
         match self {
             Self::Lex(err) => err.get_error_str(chars),
             Self::Syntax(err) => err.get_error_str(chars),
+            Self::Semantic(err) => err.get_error_str(chars),
         }
     }
 }

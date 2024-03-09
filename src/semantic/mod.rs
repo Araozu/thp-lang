@@ -1,4 +1,4 @@
-use crate::syntax::ast::ModuleAST;
+use crate::{error_handling::MistiError, syntax::ast::ModuleAST};
 
 mod impls;
 mod symbol_table;
@@ -11,8 +11,11 @@ use impls::SemanticCheck;
 // 3. Add the symbols declared to the symbol table, annotating them with their type
 // 4. Check if the symbols used are declared
 
-pub fn check_semantics(ast: &ModuleAST) -> Result<(), String> {
+/// Checks that the AST is semantically correct
+pub fn check_semantics(ast: &ModuleAST) -> Result<(), MistiError> {
     // For now there's only support for a single file
+    // TODO: Receive a symbol table as a reference and work on it.
+    // this way we can implement a unique symbol table for REPL session
     let global_scope = symbol_table::SymbolTable::new();
 
     ast.check_semantics(&global_scope)

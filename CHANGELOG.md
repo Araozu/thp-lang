@@ -2,6 +2,11 @@
 
 ## TODO
 
+- Implement AST transformation before codegen:
+    Create a new AST to represent PHP source code
+    and a THP ast -> PHP ast process, so that the
+    codegen section can focus only in codegen, not in
+    translation of thp->php.
 - Parse __more__ binary operators
 - Parse `Type name = value` bindings
 - Parse more complex bindings
@@ -26,9 +31,9 @@
 - [x] Begin work on semantic analysis
 - [x] Minimal symbol table
 - [x] Check duplicate function declarations
-- [ ] Improve REPL/File compilation code
+- [x] Improve REPL/File compilation code
 - [ ] Typecheck bindings
-- [ ] Typecheck functions
+- [x] Typecheck functions
 - [ ] Transform simple THP expression into PHP statements
 
 ## v0.0.9

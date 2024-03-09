@@ -1,13 +1,18 @@
-use crate::syntax::ast::{ModuleAST, TopLevelDeclaration};
+use crate::{
+    error_handling::semantic_error::SemanticError,
+    error_handling::MistiError,
+    syntax::ast::{ModuleAST, TopLevelDeclaration},
+};
 
 use super::symbol_table::SymbolTable;
 
 pub trait SemanticCheck {
-    fn check_semantics(&self, scope: &SymbolTable) -> Result<(), String>;
+    fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError>;
 }
 
 impl SemanticCheck for ModuleAST {
-    fn check_semantics(&self, scope: &SymbolTable) -> Result<(), String> {
+    /// Checks that this AST is semantically correct, given a symbol table
+    fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError> {
         for declaration in &self.declarations {
             declaration.check_semantics(scope)?;
         }
@@ -17,14 +22,30 @@ impl SemanticCheck for ModuleAST {
 }
 
 impl SemanticCheck for TopLevelDeclaration {
-    fn check_semantics(&self, scope: &SymbolTable) -> Result<(), String> {
+    fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError> {
         match self {
-            TopLevelDeclaration::Binding(_) => Err("Binding not implemented".into()),
+            TopLevelDeclaration::Binding(_) => {
+                let error = SemanticError {
+                    error_start: 0,
+                    error_end: 0,
+                    reason: "Binding typechecking: Not implemented".into(),
+                };
+
+                Err(MistiError::Semantic(error))
+            }
             TopLevelDeclaration::FunctionDeclaration(function) => {
                 let function_name = function.identifier.as_ref().clone();
 
                 if scope.test(&function_name) {
-                    return Err(format!("Function {} already defined", function_name));
+                    let error = SemanticError {
+                        // TODO: Get the position of the function name. For this, these structs
+                        // should store the token instead of just the string
+                        error_start: 0,
+                        error_end: 0,
+                        reason: format!("Function {} already defined", function_name),
+                    };
+
+                    return Err(MistiError::Semantic(error));
                 }
 
                 scope.insert(

@@ -1,5 +1,7 @@
 use std::io::{self, Write};
 
+use colored::Colorize;
+
 use crate::error_handling::PrintableError;
 use crate::lexic::token::Token;
 
@@ -34,7 +36,9 @@ fn build_ast(input: &String, tokens: Vec<Token>) {
             match res1 {
                 Ok(_) => {}
                 Err(reason) => {
-                    eprintln!("{}", reason);
+                    let chars: Vec<char> = input.chars().into_iter().collect();
+                    let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
+                    eprintln!("{}", error);
                     return;
                 }
             }

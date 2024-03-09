@@ -70,7 +70,7 @@ fn compile(input: &String) -> Result<String, String> {
                 "{}:\n{}",
                 "syntax error".on_red(),
                 error.get_error_str(&chars)
-            ))
+            ));
         }
     };
 
@@ -88,11 +88,18 @@ fn build_ast(input: &String, tokens: Vec<Token>) -> Result<String, String> {
         Err(reason) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
             let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
-            return Err(error)
+            return Err(error);
         }
     };
 
-    crate::semantic::check_semantics(&ast)?;
+    match crate::semantic::check_semantics(&ast) {
+        Ok(_) => {}
+        Err(reason) => {
+            let chars: Vec<char> = input.chars().into_iter().collect();
+            let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
+            return Err(error);
+        }
+    };
 
     Ok(codegen::codegen(&ast))
 }
