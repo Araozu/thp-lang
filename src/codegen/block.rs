@@ -2,7 +2,7 @@ use crate::syntax::ast::Block;
 
 use super::Transpilable;
 
-impl Transpilable for Block {
+impl Transpilable for Block<'_> {
     fn transpile(&self) -> String {
         // TODO: Handle indentation
         self.statements

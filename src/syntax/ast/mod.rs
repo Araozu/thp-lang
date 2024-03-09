@@ -12,7 +12,7 @@ pub struct ModuleAST<'a> {
 
 #[derive(Debug)]
 pub enum TopLevelDeclaration<'a> {
-    Binding(var_binding::Binding),
+    Binding(var_binding::Binding<'a>),
     FunctionDeclaration(FunctionDeclaration<'a>),
 }
 
@@ -20,29 +20,29 @@ pub enum TopLevelDeclaration<'a> {
 pub struct FunctionDeclaration<'a> {
     pub identifier: &'a Token,
     pub params_list: Box<ParamsList>,
-    pub block: Box<Block>,
+    pub block: Box<Block<'a>>,
 }
 
 #[derive(Debug)]
-pub struct Block {
-    pub statements: Vec<statement::Statement>,
+pub struct Block<'a> {
+    pub statements: Vec<statement::Statement<'a>>,
 }
 
 #[derive(Debug)]
 pub struct ParamsList {}
 
-pub struct Parameter {
-    pub identifier: Box<String>,
-    pub datatype: Box<String>,
+pub struct Parameter<'a> {
+    pub identifier: &'a String,
+    pub datatype: &'a String,
 }
 
 #[derive(Debug)]
-pub enum Expression {
-    Number(Box<String>),
-    String(Box<String>),
+pub enum Expression<'a> {
+    Number(&'a String),
+    String(&'a String),
     Boolean(bool),
-    Identifier(Box<String>),
-    FunctionCall(FunctionCall),
-    UnaryOperator(Box<String>, Box<Expression>),
-    BinaryOperator(Box<Expression>, Box<Expression>, Box<String>),
+    Identifier(&'a String),
+    FunctionCall(FunctionCall<'a>),
+    UnaryOperator(&'a String, Box<Expression<'a>>),
+    BinaryOperator(Box<Expression<'a>>, Box<Expression<'a>>, &'a String),
 }

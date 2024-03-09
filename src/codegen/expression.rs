@@ -1,7 +1,7 @@
 use super::Transpilable;
 use crate::syntax::ast::Expression;
 
-impl Transpilable for Expression {
+impl Transpilable for Expression<'_> {
     /// Transpiles an Expression to PHP
     ///
     /// Right now the expressions in the grammar are:
@@ -41,7 +41,7 @@ mod tests {
     #[test]
     fn should_transpile_number() {
         let str = String::from("42");
-        let exp = Expression::Number(Box::new(str));
+        let exp = Expression::Number(&str);
         let result = exp.transpile();
 
         assert_eq!("42", result);
@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn should_transpile_string() {
         let str = String::from("\"Hello world\"");
-        let exp = Expression::String(Box::new(str));
+        let exp = Expression::String(&str);
         let result = exp.transpile();
 
         assert_eq!("\"Hello world\"", result);
@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn should_transpile_identifier() {
         let s = String::from("newValue");
-        let exp = Expression::Identifier(Box::new(s));
+        let exp = Expression::Identifier(&s);
         let result = exp.transpile();
 
         assert_eq!("newValue", result);

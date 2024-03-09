@@ -12,21 +12,14 @@ use crate::{
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
     match tokens.get_significant(pos) {
         Some((token, token_pos)) => match token.token_type {
-            TokenType::Number => ParseResult::Ok(
-                Expression::Number(Box::new(token.value.clone())),
-                token_pos + 1,
-            ),
-            TokenType::String => ParseResult::Ok(
-                Expression::String(Box::new(token.value.clone())),
-                token_pos + 1,
-            ),
+            TokenType::Number => ParseResult::Ok(Expression::Number(&token.value), token_pos + 1),
+            TokenType::String => ParseResult::Ok(Expression::String(&token.value), token_pos + 1),
             TokenType::Identifier if token.value == "true" || token.value == "false" => {
                 ParseResult::Ok(Expression::Boolean(token.value == "true"), token_pos + 1)
             }
-            TokenType::Identifier => ParseResult::Ok(
-                Expression::Identifier(Box::new(token.value.clone())),
-                token_pos + 1,
-            ),
+            TokenType::Identifier => {
+                ParseResult::Ok(Expression::Identifier(&token.value), token_pos + 1)
+            }
             TokenType::LeftParen => parse_parenthesized_expression(tokens, token_pos),
             _ => ParseResult::Unmatched,
         },

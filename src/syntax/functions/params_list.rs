@@ -129,8 +129,8 @@ fn parse_param_definition<'a>(
 
     ParseResult::Ok(
         Parameter {
-            identifier: Box::new(identifier.value.clone()),
-            datatype: Box::new(datatype.value.clone()),
+            identifier: &identifier.value,
+            datatype: &datatype.value,
         },
         next_pos,
     )

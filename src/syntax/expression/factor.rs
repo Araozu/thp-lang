@@ -17,11 +17,11 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
     parse_many(tokens, next_pos, unary)
 }
 
-fn parse_many(
-    tokens: &Vec<Token>,
+fn parse_many<'a>(
+    tokens: &'a Vec<Token>,
     pos: usize,
-    prev_expr: Expression,
-) -> ParseResult<Expression, ()> {
+    prev_expr: Expression<'a>,
+) -> ParseResult<Expression<'a>, ()> {
     // (("/" | "*"), unary)*
 
     match tokens.get(pos) {
@@ -31,7 +31,7 @@ fn parse_many(
                     let expr = Expression::BinaryOperator(
                         Box::new(prev_expr),
                         Box::new(expr),
-                        Box::new(token.value.clone()),
+                        &token.value,
                     );
 
                     parse_many(tokens, next_pos, expr)

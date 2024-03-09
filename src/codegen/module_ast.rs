@@ -27,7 +27,7 @@ mod tests {
         let binding = Binding {
             datatype: None,
             identifier: Box::new(id),
-            expression: Expression::Number(Box::new(value)),
+            expression: Expression::Number(&value),
             is_mutable: false,
         };
 

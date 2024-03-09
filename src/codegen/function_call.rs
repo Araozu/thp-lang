@@ -2,7 +2,7 @@ use crate::syntax::ast::functions::FunctionCall;
 
 use super::Transpilable;
 
-impl Transpilable for FunctionCall {
+impl Transpilable for FunctionCall<'_> {
     fn transpile(&self) -> String {
         let parameters = &self
             .arguments

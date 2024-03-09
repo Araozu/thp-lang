@@ -1,7 +1,7 @@
 use super::Transpilable;
 use crate::syntax::ast::var_binding::Binding;
 
-impl Transpilable for Binding {
+impl Transpilable for Binding<'_> {
     /// Transpiles val and var bindings into PHP.
     fn transpile(&self) -> String {
         let expression_str = self.expression.transpile();
@@ -22,7 +22,7 @@ mod tests {
         let binding = Binding {
             datatype: None,
             identifier: Box::new(id),
-            expression: Expression::Number(Box::new(value)),
+            expression: Expression::Number(&value),
             is_mutable: false,
         };
 

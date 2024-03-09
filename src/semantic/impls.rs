@@ -40,7 +40,10 @@ impl SemanticCheck for TopLevelDeclaration<'_> {
                     let error = SemanticError {
                         error_start: function.identifier.position,
                         error_end: function.identifier.get_end_position(),
-                        reason: format!("Duplicated function: A function with name {} was already defined", function_name),
+                        reason: format!(
+                            "Duplicated function: A function with name {} was already defined",
+                            function_name
+                        ),
                     };
 
                     return Err(MistiError::Semantic(error));
