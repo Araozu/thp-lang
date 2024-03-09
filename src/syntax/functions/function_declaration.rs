@@ -91,7 +91,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Function
     // Construct and return the function declaration
     ParseResult::Ok(
         FunctionDeclaration {
-            identifier: Box::new(identifier.value.clone()),
+            identifier: &identifier,
             params_list: Box::new(params_list),
             block: Box::new(block),
         },
@@ -311,10 +311,7 @@ mod tests {
             panic!("Expected a function declaration.")
         };
 
-        assert_eq!(
-            function_declaration.identifier,
-            Box::new(String::from("id"))
-        );
+        assert_eq!(function_declaration.identifier.value, String::from("id"));
     }
 }
 
@@ -331,7 +328,7 @@ mod whitespace_test {
             panic!("Expected a function declaration.")
         };
 
-        assert_eq!(declaration.identifier, Box::new(String::from("id")));
+        assert_eq!(declaration.identifier.value, (String::from("id")));
     }
 
     #[test]
@@ -341,7 +338,7 @@ mod whitespace_test {
             panic!("Expected a function declaration.")
         };
 
-        assert_eq!(declaration.identifier, Box::new(String::from("id")));
+        assert_eq!(declaration.identifier.value, (String::from("id")));
     }
 
     #[test]
@@ -351,7 +348,7 @@ mod whitespace_test {
             panic!("Expected a function declaration.")
         };
 
-        assert_eq!(declaration.identifier, Box::new(String::from("id")));
+        assert_eq!(declaration.identifier.value, (String::from("id")));
     }
 
     #[test]
@@ -360,7 +357,7 @@ mod whitespace_test {
         let ParseResult::Ok(declaration, _) = try_parse(&tokens, 0) else {
             panic!("Expected a function declaration.")
         };
-        assert_eq!(declaration.identifier, Box::new(String::from("id")));
+        assert_eq!(declaration.identifier.value, (String::from("id")));
     }
 
     #[test]
@@ -369,6 +366,6 @@ mod whitespace_test {
         let ParseResult::Ok(declaration, _) = try_parse(&tokens, 0) else {
             panic!("Expected a function declaration.")
         };
-        assert_eq!(declaration.identifier, Box::new(String::from("id")));
+        assert_eq!(declaration.identifier.value, (String::from("id")));
     }
 }

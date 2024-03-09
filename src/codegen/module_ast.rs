@@ -1,7 +1,7 @@
 use super::Transpilable;
 use crate::syntax::ast::ModuleAST;
 
-impl Transpilable for ModuleAST {
+impl Transpilable for ModuleAST<'_> {
     /// Transpiles the whole AST into PHP, using this same trait on the
     /// nodes and leaves of the AST
     fn transpile(&self) -> String {

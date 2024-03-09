@@ -10,7 +10,7 @@ pub trait SemanticCheck {
     fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError>;
 }
 
-impl SemanticCheck for ModuleAST {
+impl SemanticCheck for ModuleAST<'_> {
     /// Checks that this AST is semantically correct, given a symbol table
     fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError> {
         for declaration in &self.declarations {
@@ -21,7 +21,7 @@ impl SemanticCheck for ModuleAST {
     }
 }
 
-impl SemanticCheck for TopLevelDeclaration {
+impl SemanticCheck for TopLevelDeclaration<'_> {
     fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError> {
         match self {
             TopLevelDeclaration::Binding(_) => {
@@ -34,15 +34,13 @@ impl SemanticCheck for TopLevelDeclaration {
                 Err(MistiError::Semantic(error))
             }
             TopLevelDeclaration::FunctionDeclaration(function) => {
-                let function_name = function.identifier.as_ref().clone();
+                let function_name = function.identifier.value.clone();
 
                 if scope.test(&function_name) {
                     let error = SemanticError {
-                        // TODO: Get the position of the function name. For this, these structs
-                        // should store the token instead of just the string
-                        error_start: 0,
-                        error_end: 0,
-                        reason: format!("Function {} already defined", function_name),
+                        error_start: function.identifier.position,
+                        error_end: function.identifier.get_end_position(),
+                        reason: format!("Duplicated function: A function with name {} was already defined", function_name),
                     };
 
                     return Err(MistiError::Semantic(error));

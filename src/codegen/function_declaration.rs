@@ -2,11 +2,11 @@ use crate::syntax::ast::FunctionDeclaration;
 
 use super::Transpilable;
 
-impl Transpilable for FunctionDeclaration {
+impl Transpilable for FunctionDeclaration<'_> {
     fn transpile(&self) -> String {
         format!(
             "function {}() {{\n{}\n}}",
-            self.identifier,
+            self.identifier.value,
             self.block.transpile()
         )
     }

@@ -1,22 +1,24 @@
+use crate::lexic::token::Token;
+
 use self::functions::FunctionCall;
 
 pub mod functions;
 pub mod statement;
 pub mod var_binding;
 
-pub struct ModuleAST {
-    pub declarations: Vec<TopLevelDeclaration>,
+pub struct ModuleAST<'a> {
+    pub declarations: Vec<TopLevelDeclaration<'a>>,
 }
 
 #[derive(Debug)]
-pub enum TopLevelDeclaration {
+pub enum TopLevelDeclaration<'a> {
     Binding(var_binding::Binding),
-    FunctionDeclaration(FunctionDeclaration),
+    FunctionDeclaration(FunctionDeclaration<'a>),
 }
 
 #[derive(Debug)]
-pub struct FunctionDeclaration {
-    pub identifier: Box<String>,
+pub struct FunctionDeclaration<'a> {
+    pub identifier: &'a Token,
     pub params_list: Box<ParamsList>,
     pub block: Box<Block>,
 }
