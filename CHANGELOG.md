@@ -2,6 +2,7 @@
 
 ## TODO
 
+- Formally define the top level constructs
 - Implement AST transformation before codegen:
     Create a new AST to represent PHP source code
     and a THP ast -> PHP ast process, so that the
@@ -32,9 +33,9 @@
 - [x] Minimal symbol table
 - [x] Check duplicate function declarations
 - [x] Improve REPL/File compilation code
-- [ ] Typecheck bindings
-- [x] Typecheck functions
-- [ ] Transform simple THP expression into PHP statements
+- [x] Check binding duplication in it's scope
+- [x] Check function duplication in it's scope
+- [x] Transform simple THP expression into PHP statements
 
 ## v0.0.9
 

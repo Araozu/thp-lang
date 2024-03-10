@@ -97,7 +97,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding,
 
     let binding = Binding {
         datatype: None,
-        identifier: Box::new(identifier.value.clone()),
+        identifier: &identifier,
         expression,
         is_mutable,
     };
@@ -117,7 +117,7 @@ mod tests {
             panic!()
         };
 
-        assert_eq!("identifier", format!("{}", binding.identifier));
+        assert_eq!("identifier", format!("{}", binding.identifier.value));
     }
 
     #[test]

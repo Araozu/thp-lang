@@ -18,15 +18,20 @@ impl Transpilable for ModuleAST<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::syntax::ast::{var_binding::Binding, Expression, TopLevelDeclaration};
+    use crate::{lexic::token::{Token, TokenType}, syntax::ast::{var_binding::Binding, Expression, TopLevelDeclaration}};
 
     #[test]
     fn module_ast_should_transpile() {
         let id = String::from("identifier");
+        let id_token = Token {
+            token_type: TokenType::Identifier,
+            value: id,
+            position: 0,
+        };
         let value = String::from("322");
         let binding = Binding {
             datatype: None,
-            identifier: Box::new(id),
+            identifier: &id_token,
             expression: Expression::Number(&value),
             is_mutable: false,
         };

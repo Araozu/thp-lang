@@ -6,22 +6,27 @@ impl Transpilable for Binding<'_> {
     fn transpile(&self) -> String {
         let expression_str = self.expression.transpile();
 
-        format!("${} = {}", self.identifier, expression_str)
+        format!("${} = {}", self.identifier.value, expression_str)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::syntax::ast::{var_binding::Binding, Expression};
+    use crate::{lexic::token::{Token, TokenType}, syntax::ast::{var_binding::Binding, Expression}};
 
     #[test]
     fn binding_should_transpile() {
         let id = String::from("identifier");
+        let id_token = Token {
+            token_type: TokenType::Identifier,
+            value: id,
+            position: 0,
+        };
         let value = String::from("322");
         let binding = Binding {
             datatype: None,
-            identifier: Box::new(id),
+            identifier: &id_token,
             expression: Expression::Number(&value),
             is_mutable: false,
         };
