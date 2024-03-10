@@ -2,14 +2,12 @@
 
 ## TODO
 
-- Formally define the top level constructs
 - Implement AST transformation before codegen:
     Create a new AST to represent PHP source code
     and a THP ast -> PHP ast process, so that the
     codegen section can focus only in codegen, not in
     translation of thp->php.
 - Parse __more__ binary operators
-- Parse `Type name = value` bindings
 - Parse more complex bindings
 - Watch mode
 - Improve error messages
@@ -24,11 +22,32 @@
 - Simple language server
 - Decide how to handle comments in the syntax (?)(should comments mean something like in rust?)
 
+## v0.0.12
+
+- [ ] Infer datatype of a function call expression
+- [ ] Infer datatype of binary operators
+- [ ] Execute semantic analysis on the function's block
+- [ ] Write tests
+
+
+## v0.0.11
+
+- [ ] Parse binding of form `val Type variable = value`
+- [ ] Parse binding of form `Type variable = value`
+- [ ] Infer datatype of `value` in the above for a simple expression
+- [ ] Ensure that the anotated datatype matches the datatype of `value` in the above
+- [ ] Infer datatype of a `val variable = value` in the AST: Use the infered datatype
+- [ ] Formally define the top level constructs
+- [ ] Parse bindings and function declarations as top level constructs
+- [ ] Parse function declaration arguments (`Type id`)
+- [ ] Parse function return datatype (`fun f() -> Type`)
+- [ ] Write tests
+
+
 ## v0.0.10
 
 - [x] Parse function call parameters
 - [x] Codegen function call parameters
-- [x] Parse function declaration arguments (Type id)
 - [x] Begin work on semantic analysis
 - [x] Minimal symbol table
 - [x] Check duplicate function declarations
