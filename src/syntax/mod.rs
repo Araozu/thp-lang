@@ -15,7 +15,7 @@ use ast::ModuleAST;
 use self::ast::TopLevelDeclaration;
 
 #[derive(Debug)]
-pub enum ParseResult<A> {
+pub enum ParseResult<'a, A> {
     /// The parsing was a success. The first element is the parsed construct,
     /// the second element is the position of the next token to parse
     Ok(A, usize),
@@ -26,18 +26,24 @@ pub enum ParseResult<A> {
     Err(SyntaxError),
     /// Some special value was expected, but something else was found.
     /// The inside element is the something else found.
-    Mismatch(Token),
+    Mismatch(&'a Token),
     /// This parsing didn't succeed, but it's not a fatal error.
     Unmatched,
 }
 
-enum ParsingError {
-    Mismatch(Token),
-    Unmatch,
-    Error(SyntaxError),
-}
+pub type ParsingResult<'a, A> = Result<(A, usize), ParsingError<'a>>;
 
-type ParsingResult<A> = Result<(A, usize), ParsingError>;
+pub enum ParsingError<'a> {
+    /// Some other token was found than the expected one
+    Mismatch(&'a Token),
+    /// The parsing didn't succeed, but it's not a fatal error
+    Unmatched,
+    /// The parsing failed past a point of no return.
+    ///
+    /// For example, when parsing a function declaration
+    /// the `fun` token is found, but then no identifier
+    Err(SyntaxError),
+}
 
 /// Constructs the Misti AST from a vector of tokens
 pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError> {

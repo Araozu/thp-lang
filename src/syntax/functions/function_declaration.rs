@@ -1,6 +1,7 @@
 use crate::{
     error_handling::SyntaxError,
     lexic::token::{Token, TokenType},
+    syntax::ParsingError,
     utils::Result3,
 };
 
@@ -8,7 +9,7 @@ use super::{
     super::{
         ast::FunctionDeclaration,
         block::parse_block,
-        utils::{parse_token_type, try_token_type},
+        utils::{parse_immediate_token_type, parse_token_type},
         ParseResult,
     },
     params_list::parse_params_list,
@@ -18,7 +19,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Function
     let mut current_pos = pos;
 
     // `fun` keyword
-    let fun_keyword = match try_token_type(tokens, current_pos, TokenType::FUN) {
+    let fun_keyword = match parse_immediate_token_type(tokens, current_pos, TokenType::FUN) {
         Result3::Ok(t) => t,
         Result3::Err(_token) => return ParseResult::Unmatched,
         Result3::None => return ParseResult::Unmatched,
@@ -47,16 +48,16 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Function
     current_pos = next_pos;
 
     let (params_list, next_pos) = match parse_params_list(tokens, current_pos) {
-        ParseResult::Ok(params, next_pos) => (params, next_pos),
-        ParseResult::Err(err) => return ParseResult::Err(err),
-        ParseResult::Mismatch(wrong_token) => {
+        Ok((params, next_pos)) => (params, next_pos),
+        Err(ParsingError::Err(err)) => return ParseResult::Err(err),
+        Err(ParsingError::Mismatch(wrong_token)) => {
             return ParseResult::Err(SyntaxError {
                 reason: String::from("Expected an opening paren afted the function identifier."),
                 error_start: wrong_token.position,
                 error_end: wrong_token.get_end_position(),
             });
         }
-        ParseResult::Unmatched => {
+        Err(ParsingError::Unmatched) => {
             return ParseResult::Err(SyntaxError {
                 reason: String::from("Expected an opening paren afted the function identifier."),
                 error_start: identifier.position,

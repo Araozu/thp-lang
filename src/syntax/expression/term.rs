@@ -21,7 +21,7 @@ fn parse_many<'a>(
     tokens: &'a Vec<Token>,
     pos: usize,
     prev_expr: Expression<'a>,
-) -> ParseResult<Expression<'a>> {
+) -> ParseResult<'a, Expression<'a>> {
     // term = factor, (("-" | "+"), factor)*;
 
     match tokens.get(pos) {

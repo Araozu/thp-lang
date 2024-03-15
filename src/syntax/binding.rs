@@ -108,7 +108,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding>
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{lexic::get_tokens, syntax::utils::try_token_type};
+    use crate::{lexic::get_tokens, syntax::utils::parse_immediate_token_type};
 
     #[test]
     fn should_parse_val_binding() {
@@ -123,7 +123,7 @@ mod tests {
     #[test]
     fn should_parse_val() {
         let tokens = get_tokens(&String::from("let")).unwrap();
-        let token = *try_token_type(&tokens, 0, TokenType::LET).unwrap();
+        let token = *parse_immediate_token_type(&tokens, 0, TokenType::LET).unwrap();
 
         assert_eq!(TokenType::LET, token.token_type);
         assert_eq!("let", token.value);
@@ -132,7 +132,7 @@ mod tests {
     #[test]
     fn should_parse_identifier() {
         let tokens = get_tokens(&String::from("identifier")).unwrap();
-        let token = *try_token_type(&tokens, 0, TokenType::Identifier).unwrap();
+        let token = *parse_immediate_token_type(&tokens, 0, TokenType::Identifier).unwrap();
 
         assert_eq!("identifier", token.value);
     }

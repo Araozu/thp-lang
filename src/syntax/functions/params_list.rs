@@ -1,7 +1,7 @@
 use crate::{
     error_handling::SyntaxError,
     lexic::token::{Token, TokenType},
-    syntax::utils::parse_token_type,
+    syntax::{utils::parse_token_type, ParsingError, ParsingResult},
 };
 
 use super::super::{
@@ -9,15 +9,15 @@ use super::super::{
     utils, ParseResult,
 };
 
-pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<ParamsList> {
+pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<ParamsList> {
     let mut current_pos = pos;
 
     let (opening_paren, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::LeftParen) {
             ParseResult::Ok(t, next) => (t, next),
-            ParseResult::Err(err) => return ParseResult::Err(err),
-            ParseResult::Mismatch(t) => return ParseResult::Mismatch(t),
-            ParseResult::Unmatched => return ParseResult::Unmatched,
+            ParseResult::Err(err) => return Err(ParsingError::Err(err)),
+            ParseResult::Mismatch(t) => return Err(ParsingError::Mismatch(&t)),
+            ParseResult::Unmatched => return Err(ParsingError::Unmatched),
         };
     current_pos = next_pos;
 
@@ -35,7 +35,7 @@ pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<
         let (next_parameter, next_pos) = match parse_param_definition(tokens, current_pos) {
             ParseResult::Ok(parameter, next_pos) => (parameter, next_pos),
             ParseResult::Err(error) => {
-                return ParseResult::Err(error);
+                return Err(ParsingError::Err(error));
             }
             _ => break,
         };
@@ -48,7 +48,7 @@ pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<
                 current_pos = next;
             }
             // This should never happen
-            ParseResult::Err(err) => return ParseResult::Err(err),
+            ParseResult::Err(err) => return Err(ParsingError::Err(err)),
             ParseResult::Mismatch(_) => {
                 // Something other than a comma was found. It must be a closing paren )
                 // Still, break the loop, assume there are no more arguments
@@ -63,25 +63,25 @@ pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<
     let (_closing_paren, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::RightParen) {
             ParseResult::Ok(t, next) => (t, next),
-            ParseResult::Err(err) => return ParseResult::Err(err),
+            ParseResult::Err(err) => return Err(ParsingError::Err(err)),
             ParseResult::Mismatch(t) => {
-                return ParseResult::Err(SyntaxError {
+                return Err(ParsingError::Err(SyntaxError {
                     reason: String::from("Expected a closing paren after the function identifier."),
                     error_start: t.position,
                     error_end: t.get_end_position(),
-                });
+                }));
             }
             ParseResult::Unmatched => {
-                return ParseResult::Err(SyntaxError {
+                return Err(ParsingError::Err(SyntaxError {
                     reason: String::from("Expected a closing paren after the function identifier."),
                     error_start: opening_paren.position,
                     error_end: opening_paren.get_end_position(),
-                });
+                }));
             }
         };
     current_pos = next_pos;
 
-    ParseResult::Ok(ParamsList {}, current_pos)
+    Ok((ParamsList {}, current_pos))
 }
 
 fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Parameter> {

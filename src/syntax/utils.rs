@@ -33,8 +33,14 @@ impl Tokenizer for Vec<Token> {
     }
 }
 
-/// Expects the token at `pos` to be of type `token_type`. Doesn't ignore whitespace or newlines
-pub fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
+/// Expects the token at `pos` to be of type `token_type`.
+///
+/// **Doesn't ignore whitespace or newlines**
+pub fn parse_immediate_token_type(
+    tokens: &Vec<Token>,
+    pos: usize,
+    token_type: TokenType,
+) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == token_type => Result3::Ok(t),
         Some(t) if t.token_type == TokenType::EOF || t.token_type == TokenType::NewLine => {
@@ -57,7 +63,9 @@ pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result
     }
 }
 
-/// Expects the token at `pos` to be of type `token_type`, ignoring all whitespace & newlines
+/// Expects the token at `pos` to be of type `token_type`, and returns the token and the next position.
+///
+/// Ignores all whitespace and newlines
 pub fn parse_token_type(
     tokens: &Vec<Token>,
     pos: usize,
@@ -82,7 +90,7 @@ pub fn parse_token_type(
         Some(t) if t.token_type == TokenType::EOF || t.token_type == TokenType::NewLine => {
             ParseResult::Unmatched
         }
-        Some(t) => ParseResult::Mismatch(t.clone()),
+        Some(t) => ParseResult::Mismatch(t),
         None => ParseResult::Unmatched,
     }
 }
