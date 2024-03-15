@@ -3,7 +3,7 @@ use crate::{
     utils::Result3,
 };
 
-use super::ParseResult;
+use super::{ParsingError, ParsingResult};
 
 pub trait Tokenizer {
     fn get_significant<'a>(&'a self, index: usize) -> Option<(&'a Token, usize)>;
@@ -33,24 +33,6 @@ impl Tokenizer for Vec<Token> {
     }
 }
 
-/// Expects the token at `pos` to be of type `token_type`.
-///
-/// **Doesn't ignore whitespace or newlines**
-pub fn parse_immediate_token_type(
-    tokens: &Vec<Token>,
-    pos: usize,
-    token_type: TokenType,
-) -> Result3<&Token> {
-    match tokens.get(pos) {
-        Some(t) if t.token_type == token_type => Result3::Ok(t),
-        Some(t) if t.token_type == TokenType::EOF || t.token_type == TokenType::NewLine => {
-            Result3::None
-        }
-        Some(t) => Result3::Err(t),
-        None => Result3::None,
-    }
-}
-
 /// Expects the token at `pos` to be an operator of value `operator`. Doesn't ignore whitespace or newlines
 pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
     match tokens.get(pos) {
@@ -66,13 +48,13 @@ pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result
 /// Expects the token at `pos` to be of type `token_type`, and returns the token and the next position.
 ///
 /// Ignores all whitespace and newlines.
-/// 
+///
 /// Only returns: Ok, Unmatched, Mismatched
 pub fn parse_token_type(
     tokens: &Vec<Token>,
     pos: usize,
     token_type: TokenType,
-) -> ParseResult<&Token> {
+) -> ParsingResult<&Token> {
     let mut current_pos = pos;
 
     // Ignore all whitespace and newlines
@@ -88,11 +70,11 @@ pub fn parse_token_type(
     }
 
     match tokens.get(current_pos) {
-        Some(t) if t.token_type == token_type => ParseResult::Ok(t, current_pos + 1),
+        Some(t) if t.token_type == token_type => Ok((t, current_pos + 1)),
         Some(t) if t.token_type == TokenType::EOF || t.token_type == TokenType::NewLine => {
-            ParseResult::Unmatched
+            Err(ParsingError::Unmatched)
         }
-        Some(t) => ParseResult::Mismatch(t),
-        None => ParseResult::Unmatched,
+        Some(t) => Err(ParsingError::Mismatch(t)),
+        None => Err(ParsingError::Unmatched),
     }
 }

@@ -4,7 +4,7 @@ use crate::{
     syntax::{
         ast::{functions::ArgumentsList, Expression},
         utils::parse_token_type,
-        ParseResult,
+        ParseResult, ParsingError,
     },
 };
 
@@ -13,10 +13,10 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Argument
 
     let (opening_paren, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::LeftParen) {
-            ParseResult::Ok(t, next) => (t, next),
-            ParseResult::Err(err) => return ParseResult::Err(err),
-            ParseResult::Mismatch(t) => return ParseResult::Mismatch(t),
-            ParseResult::Unmatched => return ParseResult::Unmatched,
+            Ok((t, next)) => (t, next),
+            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
+            Err(ParsingError::Mismatch(t)) => return ParseResult::Mismatch(t),
+            Err(ParsingError::Unmatched) => return ParseResult::Unmatched,
         };
     current_pos = next_pos;
 
@@ -37,34 +37,34 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Argument
 
         // Parse comma. This also parses a trailing comma
         match parse_token_type(tokens, current_pos, TokenType::Comma) {
-            ParseResult::Ok(_, next) => {
+            Ok((_, next)) => {
                 current_pos = next;
             }
             // This should never happen
-            ParseResult::Err(err) => return ParseResult::Err(err),
-            ParseResult::Mismatch(_) => {
+            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
+            Err(ParsingError::Mismatch(_)) => {
                 // Something other than a comma was found. It must be a closing paren )
                 // Still, break the loop, assume there are no more arguments
                 // TODO: This could be a good place to write a detailed error?
                 break;
             }
-            ParseResult::Unmatched => break,
+            Err(ParsingError::Unmatched) => break,
         };
     }
 
     // Parse closing paren
     let (_closing_paren, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::RightParen) {
-            ParseResult::Ok(t, next) => (t, next),
-            ParseResult::Err(err) => return ParseResult::Err(err),
-            ParseResult::Mismatch(t) => {
+            Ok((t, next)) => (t, next),
+            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
+            Err(ParsingError::Mismatch(t)) => {
                 return ParseResult::Err(SyntaxError {
                     reason: String::from("Expected a closing paren after the function identifier."),
                     error_start: t.position,
                     error_end: t.get_end_position(),
                 });
             }
-            ParseResult::Unmatched => {
+            Err(ParsingError::Unmatched) => {
                 return ParseResult::Err(SyntaxError {
                     reason: String::from("Expected a closing paren after the function identifier."),
                     error_start: opening_paren.position,

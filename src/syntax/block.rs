@@ -3,7 +3,7 @@ use crate::{
     lexic::token::{Token, TokenType},
 };
 
-use super::{ast::Block, utils::parse_token_type, ParseResult};
+use super::{ast::Block, utils::parse_token_type, ParseResult, ParsingError};
 
 // Assumes that the token at `pos` is a {
 pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block> {
@@ -11,10 +11,10 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block>
 
     let (opening_brace, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::LeftBrace) {
-            ParseResult::Ok(t, next) => (t, next),
-            ParseResult::Err(err) => return ParseResult::Err(err),
-            ParseResult::Mismatch(t) => return ParseResult::Mismatch(t),
-            ParseResult::Unmatched => return ParseResult::Unmatched,
+            Ok((t, next)) => (t, next),
+            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
+            Err(ParsingError::Mismatch(t)) => return ParseResult::Mismatch(t),
+            Err(ParsingError::Unmatched) => return ParseResult::Unmatched,
         };
     current_pos = next_pos;
 
@@ -52,16 +52,16 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block>
     // Parse closing brace
     let (_closing_brace, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::RightBrace) {
-            ParseResult::Ok(t, next) => (t, next),
-            ParseResult::Err(err) => return ParseResult::Err(err),
-            ParseResult::Mismatch(t) => {
+            Ok((t, next)) => (t, next),
+            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
+            Err(ParsingError::Mismatch(t)) => {
                 return ParseResult::Err(SyntaxError {
                     reason: String::from("Expected a closing brace after the block body."),
                     error_start: t.position,
                     error_end: t.get_end_position(),
                 });
             }
-            ParseResult::Unmatched => {
+            Err(ParsingError::Unmatched) => {
                 return ParseResult::Err(SyntaxError {
                     reason: String::from("Expected a closing brace after the block body."),
                     error_start: opening_brace.position,

@@ -14,23 +14,23 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Functi
 
     // `fun` keyword
     let (fun_keyword, next_pos) = match parse_token_type(tokens, current_pos, TokenType::FUN) {
-        ParseResult::Ok(t, next) => (t, next),
+        Ok((t, next)) => (t, next),
         _ => return Err(ParsingError::Unmatched),
     };
     current_pos = next_pos;
 
     let (identifier, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Identifier)
     {
-        ParseResult::Ok(id, next) => (id, next),
-        ParseResult::Err(err) => return Err(ParsingError::Err(err)),
-        ParseResult::Mismatch(wrong_token) => {
+        Ok((id, next)) => (id, next),
+        Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+        Err(ParsingError::Mismatch(wrong_token)) => {
             return Err(ParsingError::Err(SyntaxError {
                 reason: String::from("Expected an identifier after the `fun` keyword."),
                 error_start: wrong_token.position,
                 error_end: wrong_token.get_end_position(),
             }));
         }
-        ParseResult::Unmatched => {
+        Err(ParsingError::Unmatched) => {
             return Err(ParsingError::Err(SyntaxError {
                 reason: String::from("Expected an identifier after the `fun` keyword."),
                 error_start: fun_keyword.position,

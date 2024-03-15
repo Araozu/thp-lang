@@ -1,6 +1,6 @@
 use super::ast::var_binding::Binding;
 use super::utils::{parse_token_type, try_operator};
-use super::{expression, ParseResult};
+use super::{expression, ParseResult, ParsingError};
 use crate::error_handling::SyntaxError;
 use crate::lexic::token::{Token, TokenType};
 use crate::utils::Result3;
@@ -9,6 +9,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding>
     let mut current_pos = pos;
 
     // TODO: Detect if the binding starts with a datatype
+    // TODO: Revert to val/var
 
     /*
      * let keyword
@@ -16,10 +17,10 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding>
     let (is_mutable, binding_token, next_pos) = {
         let let_token = parse_token_type(tokens, current_pos, TokenType::LET);
         match let_token {
-            ParseResult::Ok(let_token, next_let) => {
+            Ok((let_token, next_let)) => {
                 let mut_token = parse_token_type(tokens, next_let, TokenType::MUT);
                 match mut_token {
-                    ParseResult::Ok(_mut_token, next_mut) => (true, let_token, next_mut),
+                    Ok((_mut_token, next_mut)) => (true, let_token, next_mut),
                     _ => (false, let_token, next_let),
                 }
             }
@@ -33,8 +34,8 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding>
      */
     let (identifier, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Identifier)
     {
-        ParseResult::Ok(t, n) => (t, n),
-        ParseResult::Mismatch(token) => {
+        Ok((t, n)) => (t, n),
+        Err(ParsingError::Mismatch(token)) => {
             // The parser found a token, but it's not an identifier
             return ParseResult::Err(SyntaxError {
                 error_start: token.position,
@@ -42,7 +43,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding>
                 reason: "??".into(),
             });
         }
-        ParseResult::Err(error) => {
+        Err(ParsingError::Err(error)) => {
             return ParseResult::Err(error);
         }
         _ => {
@@ -108,7 +109,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding>
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{lexic::get_tokens, syntax::utils::parse_immediate_token_type};
+    use crate::{lexic::get_tokens, syntax::utils::parse_token_type};
 
     #[test]
     fn should_parse_val_binding() {
@@ -123,7 +124,7 @@ mod tests {
     #[test]
     fn should_parse_val() {
         let tokens = get_tokens(&String::from("let")).unwrap();
-        let token = *parse_immediate_token_type(&tokens, 0, TokenType::LET).unwrap();
+        let (token, _) = parse_token_type(&tokens, 0, TokenType::LET).unwrap();
 
         assert_eq!(TokenType::LET, token.token_type);
         assert_eq!("let", token.value);
@@ -132,7 +133,7 @@ mod tests {
     #[test]
     fn should_parse_identifier() {
         let tokens = get_tokens(&String::from("identifier")).unwrap();
-        let token = *parse_immediate_token_type(&tokens, 0, TokenType::Identifier).unwrap();
+        let (token, _) = parse_token_type(&tokens, 0, TokenType::Identifier).unwrap();
 
         assert_eq!("identifier", token.value);
     }
