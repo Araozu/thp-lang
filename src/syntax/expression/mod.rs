@@ -1,4 +1,4 @@
-use super::{ast::Expression, ParseResult};
+use super::{ast::Expression, ParsingResult};
 use crate::lexic::token::Token;
 
 mod comparison;
@@ -10,8 +10,8 @@ mod term;
 mod unary;
 
 /// Expression is defined in the grammar.
-pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
-    return equality::try_parse(tokens, pos);
+pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
+    equality::try_parse(tokens, pos)
 }
 
 #[cfg(test)]

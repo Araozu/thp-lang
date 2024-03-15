@@ -5,7 +5,7 @@ use crate::{
 };
 
 use super::{
-    super::{ast::FunctionDeclaration, block::parse_block, utils::parse_token_type, ParseResult},
+    super::{ast::FunctionDeclaration, block::parse_block, utils::parse_token_type},
     params_list::parse_params_list,
 };
 
@@ -61,18 +61,18 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Functi
     current_pos = next_pos;
 
     let (block, next_pos) = match parse_block(tokens, current_pos) {
-        ParseResult::Ok(block, next_pos) => (block, next_pos),
-        ParseResult::Err(error) => {
+        Ok((block, next_pos)) => (block, next_pos),
+        Err(ParsingError::Err(error)) => {
             return Err(ParsingError::Err(error));
         }
-        ParseResult::Mismatch(wrong_token) => {
+        Err(ParsingError::Mismatch(wrong_token)) => {
             return Err(ParsingError::Err(SyntaxError {
                 reason: String::from("Expected a block after the function declaration."),
                 error_start: wrong_token.position,
                 error_end: wrong_token.get_end_position(),
             }));
         }
-        ParseResult::Unmatched => {
+        Err(ParsingError::Unmatched) => {
             return Err(ParsingError::Err(SyntaxError {
                 reason: String::from("Expected a block after the function declaration."),
                 error_start: identifier.position,

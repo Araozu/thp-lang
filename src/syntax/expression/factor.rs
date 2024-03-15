@@ -1,6 +1,6 @@
 use crate::{
     lexic::token::Token,
-    syntax::{ast::Expression, ParseResult},
+    syntax::{ast::Expression, ParsingError, ParsingResult},
 };
 
 /// Parses a factor expression.
@@ -8,10 +8,10 @@ use crate::{
 /// ```ebnf
 /// factor = unary, (("/" | "*"), unary)*;
 /// ```
-pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
+pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     let (unary, next_pos) = match super::unary::try_parse(tokens, pos) {
-        ParseResult::Ok(expr, next_pos) => (expr, next_pos),
-        _ => return ParseResult::Unmatched,
+        Ok((expr, next_pos)) => (expr, next_pos),
+        _ => return Err(ParsingError::Unmatched),
     };
 
     parse_many(tokens, next_pos, unary)
@@ -21,13 +21,13 @@ fn parse_many<'a>(
     tokens: &'a Vec<Token>,
     pos: usize,
     prev_expr: Expression<'a>,
-) -> ParseResult<'a, Expression<'a>> {
+) -> ParsingResult<'a, Expression<'a>> {
     // (("/" | "*"), unary)*
 
     match tokens.get(pos) {
         Some(token) if token.value == "/" || token.value == "*" => {
             match super::unary::try_parse(tokens, pos + 1) {
-                ParseResult::Ok(expr, next_pos) => {
+                Ok((expr, next_pos)) => {
                     let expr = Expression::BinaryOperator(
                         Box::new(prev_expr),
                         Box::new(expr),
@@ -36,9 +36,9 @@ fn parse_many<'a>(
 
                     parse_many(tokens, next_pos, expr)
                 }
-                _ => ParseResult::Unmatched,
+                _ => Err(ParsingError::Unmatched),
             }
         }
-        _ => ParseResult::Ok(prev_expr, pos),
+        _ => Ok((prev_expr, pos)),
     }
 }

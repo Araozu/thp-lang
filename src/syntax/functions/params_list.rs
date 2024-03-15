@@ -6,7 +6,7 @@ use crate::{
 
 use super::super::{
     ast::{Parameter, ParamsList},
-    utils, ParseResult,
+    utils,
 };
 
 pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<ParamsList> {
@@ -33,8 +33,8 @@ pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResul
     let mut parameters = Vec::<Parameter>::new();
     loop {
         let (next_parameter, next_pos) = match parse_param_definition(tokens, current_pos) {
-            ParseResult::Ok(parameter, next_pos) => (parameter, next_pos),
-            ParseResult::Err(error) => {
+            Ok((parameter, next_pos)) => (parameter, next_pos),
+            Err(ParsingError::Err(error)) => {
                 return Err(ParsingError::Err(error));
             }
             _ => break,
@@ -84,7 +84,7 @@ pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResul
     Ok((ParamsList {}, current_pos))
 }
 
-fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Parameter> {
+fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Parameter> {
     // Parse a single parameter definition of the form:
     // - Type identifier
     // There will be more constructs in the future, like:
@@ -97,12 +97,12 @@ fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult
         match utils::parse_token_type(tokens, current_pos, TokenType::Datatype) {
             Ok((token, next)) => (token, next),
             Err(ParsingError::Err(err)) => {
-                return ParseResult::Err(err);
+                return Err(ParsingError::Err(err));
             }
             // If there is no datatype this construction doesn't apply.
             // Return a mismatch and let the caller handle it
-            Err(ParsingError::Mismatch(t)) => return ParseResult::Mismatch(t),
-            Err(ParsingError::Unmatched) => return ParseResult::Unmatched,
+            Err(ParsingError::Mismatch(t)) => return Err(ParsingError::Mismatch(t)),
+            Err(ParsingError::Unmatched) => return Err(ParsingError::Unmatched),
         };
     current_pos = next_pos;
 
@@ -110,30 +110,30 @@ fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult
         match utils::parse_token_type(tokens, current_pos, TokenType::Identifier) {
             Ok((token, next)) => (token, next),
             Err(ParsingError::Err(err)) => {
-                return ParseResult::Err(err);
+                return Err(ParsingError::Err(err));
             }
             // However, if we fail to parse an identifier, it's an error
             Err(ParsingError::Mismatch(_)) => {
-                return ParseResult::Err(SyntaxError {
+                return Err(ParsingError::Err(SyntaxError {
                     reason: String::from("Expected an identifier for the parameter."),
                     error_start: tokens[pos].position,
                     error_end: tokens[pos].get_end_position(),
-                });
+                }));
             }
             Err(ParsingError::Unmatched) => {
-                return ParseResult::Err(SyntaxError {
+                return Err(ParsingError::Err(SyntaxError {
                     reason: String::from("Expected an identifier for the parameter."),
                     error_start: tokens[pos].position,
                     error_end: tokens[pos].get_end_position(),
-                })
+                }))
             }
         };
 
-    ParseResult::Ok(
+    Ok((
         Parameter {
             identifier: &identifier.value,
             datatype: &datatype.value,
         },
         next_pos,
-    )
+    ))
 }

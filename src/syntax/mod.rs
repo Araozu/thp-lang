@@ -14,23 +14,6 @@ use ast::ModuleAST;
 
 use self::ast::TopLevelDeclaration;
 
-#[derive(Debug)]
-pub enum ParseResult<'a, A> {
-    /// The parsing was a success. The first element is the parsed construct,
-    /// the second element is the position of the next token to parse
-    Ok(A, usize),
-    /// The parsing failed past a point of no return.
-    ///
-    /// For example, when parsing a function declaration
-    /// the `fun` token is found, but then no identifier
-    Err(SyntaxError),
-    /// Some special value was expected, but something else was found.
-    /// The inside element is the something else found.
-    Mismatch(&'a Token),
-    /// This parsing didn't succeed, but it's not a fatal error.
-    Unmatched,
-}
-
 pub type ParsingResult<'a, A> = Result<(A, usize), ParsingError<'a>>;
 
 #[derive(Debug)]

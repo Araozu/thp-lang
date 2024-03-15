@@ -54,7 +54,7 @@ pub fn parse_token_type(
 ) -> ParsingResult<&Token> {
     let mut current_pos = pos;
 
-    // Ignore all whitespace and newlines
+    // Ignore all whitespace, newlines and semicolons
     while let Some(t) = tokens.get(current_pos) {
         if t.token_type == TokenType::INDENT
             || t.token_type == TokenType::DEDENT

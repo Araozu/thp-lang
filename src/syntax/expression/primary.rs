@@ -1,7 +1,7 @@
 use super::super::utils::Tokenizer;
 use crate::{
     lexic::token::{Token, TokenType},
-    syntax::{ast::Expression, ParseResult},
+    syntax::{ast::Expression, ParsingError, ParsingResult},
 };
 
 /// This grammar may not be up to date. Refer to the spec for the latest grammar.
@@ -9,35 +9,33 @@ use crate::{
 /// ```ebnf
 /// primary = number | string | boolean | identifier | ("(", expression, ")");
 /// ```
-pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
+pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     match tokens.get_significant(pos) {
         Some((token, token_pos)) => match token.token_type {
-            TokenType::Number => ParseResult::Ok(Expression::Number(&token.value), token_pos + 1),
-            TokenType::String => ParseResult::Ok(Expression::String(&token.value), token_pos + 1),
+            TokenType::Number => Ok((Expression::Number(&token.value), token_pos + 1)),
+            TokenType::String => Ok((Expression::String(&token.value), token_pos + 1)),
             TokenType::Identifier if token.value == "true" || token.value == "false" => {
-                ParseResult::Ok(Expression::Boolean(token.value == "true"), token_pos + 1)
+                Ok((Expression::Boolean(token.value == "true"), token_pos + 1))
             }
-            TokenType::Identifier => {
-                ParseResult::Ok(Expression::Identifier(&token.value), token_pos + 1)
-            }
+            TokenType::Identifier => Ok((Expression::Identifier(&token.value), token_pos + 1)),
             TokenType::LeftParen => parse_parenthesized_expression(tokens, token_pos),
-            _ => ParseResult::Unmatched,
+            _ => Err(ParsingError::Unmatched),
         },
-        None => ParseResult::Unmatched,
+        None => Err(ParsingError::Unmatched),
     }
 }
 
-fn parse_parenthesized_expression(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
+fn parse_parenthesized_expression(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     let expression = super::try_parse(tokens, pos + 1);
     match expression {
-        ParseResult::Ok(expression, next_pos) => match tokens.get(next_pos) {
+        Ok((expression, next_pos)) => match tokens.get(next_pos) {
             Some(token) => match token.token_type {
-                TokenType::RightParen => ParseResult::Ok(expression, next_pos + 1),
-                _ => ParseResult::Unmatched,
+                TokenType::RightParen => Ok((expression, next_pos + 1)),
+                _ => Err(ParsingError::Unmatched),
             },
-            None => ParseResult::Unmatched,
+            None => Err(ParsingError::Unmatched),
         },
-        _ => ParseResult::Unmatched,
+        _ => Err(ParsingError::Unmatched),
     }
 }
 
@@ -52,7 +50,9 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            ParseResult::Ok(Expression::Number(value), _) => assert_eq!("40", format!("{}", value)),
+            Ok((Expression::Number(value), _)) => {
+                assert_eq!("40", format!("{}", value))
+            }
             _ => panic!(),
         }
     }
@@ -63,7 +63,7 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            ParseResult::Ok(Expression::String(value), _) => {
+            Ok((Expression::String(value), _)) => {
                 assert_eq!("\"Hello\"", format!("{}", value))
             }
             _ => panic!(),
@@ -76,7 +76,7 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            ParseResult::Ok(Expression::Boolean(value), _) => assert!(value),
+            Ok((Expression::Boolean(value), _)) => assert!(value),
             _ => panic!(),
         }
     }
@@ -87,7 +87,7 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            ParseResult::Ok(Expression::Identifier(value), _) => {
+            Ok((Expression::Identifier(value), _)) => {
                 assert_eq!("someIdentifier", format!("{}", value))
             }
             _ => panic!(),
@@ -100,7 +100,7 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            ParseResult::Ok(Expression::Identifier(value), _) => {
+            Ok((Expression::Identifier(value), _)) => {
                 assert_eq!("identifier", format!("{}", value))
             }
             _ => panic!(),

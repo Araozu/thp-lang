@@ -1,6 +1,6 @@
 use crate::{
     lexic::token::Token,
-    syntax::{ast::Expression, ParseResult},
+    syntax::{ast::Expression, ParsingError, ParsingResult},
 };
 
 use super::function_call_expr;
@@ -11,15 +11,15 @@ use super::function_call_expr;
 /// unary = ("!" | "-"), expression
 ///       | function call expr;
 /// ```
-pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
+pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     match tokens.get(pos) {
         Some(token) if token.value == "!" || token.value == "-" => {
             match super::try_parse(tokens, pos + 1) {
-                ParseResult::Ok(expression, next_pos) => ParseResult::Ok(
+                Ok((expression, next_pos)) => Ok((
                     Expression::UnaryOperator(&token.value, Box::new(expression)),
                     next_pos,
-                ),
-                _ => ParseResult::Unmatched,
+                )),
+                _ => Err(ParsingError::Unmatched),
             }
         }
         _ => function_call_expr::try_parse(tokens, pos),
@@ -37,7 +37,7 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            ParseResult::Ok(Expression::Identifier(value), _) => {
+            Ok((Expression::Identifier(value), _)) => {
                 assert_eq!("identifier", format!("{}", value))
             }
             _ => panic!(),
@@ -50,7 +50,7 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            ParseResult::Ok(Expression::UnaryOperator(operator, expression), _) => {
+            Ok((Expression::UnaryOperator(operator, expression), _)) => {
                 match (operator, *expression) {
                     (op, Expression::Number(value)) => {
                         assert_eq!(*op, "-");
@@ -69,7 +69,7 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            ParseResult::Ok(Expression::UnaryOperator(operator, expression), _) => {
+            Ok((Expression::UnaryOperator(operator, expression), _)) => {
                 assert_eq!(*operator, "-");
                 match *expression {
                     Expression::BinaryOperator(_, _, _) => {

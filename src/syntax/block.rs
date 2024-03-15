@@ -3,19 +3,13 @@ use crate::{
     lexic::token::{Token, TokenType},
 };
 
-use super::{ast::Block, utils::parse_token_type, ParseResult, ParsingError};
+use super::{ast::Block, utils::parse_token_type, ParsingError, ParsingResult};
 
 // Assumes that the token at `pos` is a {
-pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block> {
+pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Block> {
     let mut current_pos = pos;
 
-    let (opening_brace, next_pos) =
-        match parse_token_type(tokens, current_pos, TokenType::LeftBrace) {
-            Ok((t, next)) => (t, next),
-            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
-            Err(ParsingError::Mismatch(t)) => return ParseResult::Mismatch(t),
-            Err(ParsingError::Unmatched) => return ParseResult::Unmatched,
-        };
+    let (opening_brace, next_pos) = parse_token_type(tokens, current_pos, TokenType::LeftBrace)?;
     current_pos = next_pos;
 
     // Parse block statements
@@ -23,13 +17,12 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block>
 
     // First statement
     match super::statement::try_parse(tokens, current_pos) {
-        ParseResult::Ok(statement, next_pos) => {
+        Ok((statement, next_pos)) => {
             current_pos = next_pos;
             statements.push(statement);
         }
-        ParseResult::Err(err) => return ParseResult::Err(err),
-        ParseResult::Unmatched => {}
-        ParseResult::Mismatch(_) => {}
+        Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+        _ => {}
     }
 
     // More statements separated by new lines
@@ -40,11 +33,11 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block>
         current_pos += 1;
 
         match super::statement::try_parse(tokens, current_pos) {
-            ParseResult::Ok(statement, next_pos) => {
+            Ok((statement, next_pos)) => {
                 current_pos = next_pos;
                 statements.push(statement);
             }
-            ParseResult::Err(err) => return ParseResult::Err(err),
+            Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             _ => break,
         }
     }
@@ -53,25 +46,25 @@ pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block>
     let (_closing_brace, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::RightBrace) {
             Ok((t, next)) => (t, next),
-            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
+            Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(t)) => {
-                return ParseResult::Err(SyntaxError {
+                return Err(ParsingError::Err(SyntaxError {
                     reason: String::from("Expected a closing brace after the block body."),
                     error_start: t.position,
                     error_end: t.get_end_position(),
-                });
+                }));
             }
             Err(ParsingError::Unmatched) => {
-                return ParseResult::Err(SyntaxError {
+                return Err(ParsingError::Err(SyntaxError {
                     reason: String::from("Expected a closing brace after the block body."),
                     error_start: opening_brace.position,
                     error_end: opening_brace.get_end_position(),
-                });
+                }));
             }
         };
     current_pos = next_pos;
 
-    ParseResult::Ok(Block { statements }, current_pos)
+    Ok((Block { statements }, current_pos))
 }
 
 #[cfg(test)]
@@ -85,7 +78,7 @@ mod tests {
         let block = parse_block(&tokens, 0);
 
         let block = match block {
-            ParseResult::Ok(p, _) => p,
+            ParsingResult::Ok((p, _)) => p,
             _ => panic!("Expected a block, got: {:?}", block),
         };
 
@@ -98,7 +91,7 @@ mod tests {
         let block = parse_block(&tokens, 0);
 
         let block = match block {
-            ParseResult::Ok(p, _) => p,
+            ParsingResult::Ok((p, _)) => p,
             _ => panic!("Expected a block, got: {:?}", block),
         };
 
@@ -111,7 +104,7 @@ mod tests {
         let block = parse_block(&tokens, 0);
 
         let block = match block {
-            ParseResult::Ok(p, _) => p,
+            ParsingResult::Ok((p, _)) => p,
             _ => {
                 panic!("Expected a block, got: {:?}\n\n{:?}", block, tokens)
             }

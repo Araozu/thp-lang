@@ -4,26 +4,26 @@ use super::{
     ast::{statement::Statement, Expression},
     binding,
     expression::function_call_expr,
-    ParseResult,
+    ParsingError, ParsingResult,
 };
 
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Statement> {
-    None.or_else(|| match binding::try_parse(tokens, pos) {
-        ParseResult::Ok(b, next) => Some(ParseResult::Ok(Statement::Binding(b), next)),
-        ParseResult::Err(err) => Some(ParseResult::Err(err)),
-        _ => None,
-    })
-    .or_else(|| match function_call_expr::try_parse(tokens, pos) {
-        ParseResult::Ok(f, next) => {
-            let Expression::FunctionCall(f) = f else {
-                return None;
-            };
-            Some(ParseResult::Ok(Statement::FunctionCall(f), next))
-        }
-        ParseResult::Err(err) => Some(ParseResult::Err(err)),
-        _ => None,
-    })
-    .unwrap_or_else(|| ParseResult::Unmatched)
+pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Statement> {
+    // Try to parse a binding
+    match binding::try_parse(tokens, pos) {
+        Ok((b, next)) => return Ok((Statement::Binding(b), next)),
+        Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+        _ => {}
+    }
+
+    // Try to parse a function call
+    match function_call_expr::try_parse(tokens, pos) {
+        Ok((Expression::FunctionCall(f), next)) => return Ok((Statement::FunctionCall(f), next)),
+        Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+        _ => {}
+    };
+
+    // Return unmatched
+    Err(ParsingError::Unmatched)
 }
 
 #[cfg(test)]
@@ -37,7 +37,7 @@ mod tests {
         let statement = try_parse(&tokens, 0);
 
         let statement = match statement {
-            ParseResult::Ok(s, _) => s,
+            Ok((s, _)) => s,
             _ => panic!("Expected a statement"),
         };
 
@@ -54,7 +54,7 @@ mod tests {
         let statement = try_parse(&tokens, 0);
 
         let statement = match statement {
-            ParseResult::Ok(s, _) => s,
+            Ok((s, _)) => s,
             _ => panic!("Expected a statement"),
         };
 

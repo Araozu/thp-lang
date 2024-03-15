@@ -4,19 +4,19 @@ use crate::{
     syntax::{
         ast::{functions::ArgumentsList, Expression},
         utils::parse_token_type,
-        ParseResult, ParsingError,
+        ParsingError, ParsingResult,
     },
 };
 
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<ArgumentsList> {
+pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<ArgumentsList> {
     let mut current_pos = pos;
 
     let (opening_paren, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::LeftParen) {
             Ok((t, next)) => (t, next),
-            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
-            Err(ParsingError::Mismatch(t)) => return ParseResult::Mismatch(t),
-            Err(ParsingError::Unmatched) => return ParseResult::Unmatched,
+            Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+            Err(ParsingError::Mismatch(t)) => return Err(ParsingError::Mismatch(t)),
+            Err(ParsingError::Unmatched) => return Err(ParsingError::Unmatched),
         };
     current_pos = next_pos;
 
@@ -24,10 +24,10 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Argument
     loop {
         let (next_expression, next_pos) =
             match super::super::expression::try_parse(tokens, current_pos) {
-                ParseResult::Ok(expression, next_pos) => (expression, next_pos),
-                ParseResult::Err(error) => {
+                Ok((expression, next_pos)) => (expression, next_pos),
+                Err(ParsingError::Err(error)) => {
                     // TODO: Write a more detailed error
-                    return ParseResult::Err(error);
+                    return Err(ParsingError::Err(error));
                 }
                 _ => break,
             };
@@ -41,7 +41,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Argument
                 current_pos = next;
             }
             // This should never happen
-            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
+            Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(_)) => {
                 // Something other than a comma was found. It must be a closing paren )
                 // Still, break the loop, assume there are no more arguments
@@ -56,25 +56,25 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Argument
     let (_closing_paren, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::RightParen) {
             Ok((t, next)) => (t, next),
-            Err(ParsingError::Err(err)) => return ParseResult::Err(err),
+            Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(t)) => {
-                return ParseResult::Err(SyntaxError {
+                return Err(ParsingError::Err(SyntaxError {
                     reason: String::from("Expected a closing paren after the function identifier."),
                     error_start: t.position,
                     error_end: t.get_end_position(),
-                });
+                }));
             }
             Err(ParsingError::Unmatched) => {
-                return ParseResult::Err(SyntaxError {
+                return Err(ParsingError::Err(SyntaxError {
                     reason: String::from("Expected a closing paren after the function identifier."),
                     error_start: opening_paren.position,
                     error_end: opening_paren.get_end_position(),
-                });
+                }));
             }
         };
     current_pos = next_pos;
 
-    ParseResult::Ok(ArgumentsList { arguments }, current_pos)
+    Ok((ArgumentsList { arguments }, current_pos))
 }
 
 #[cfg(test)]
@@ -87,7 +87,7 @@ mod tests {
         let tokens = get_tokens(&String::from("()")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
 
-        let ParseResult::Ok(list, next) = fun_decl else {
+        let Ok((list, next)) = fun_decl else {
             panic!("Expected an unmatched result: {:?}", fun_decl);
         };
 
@@ -100,7 +100,7 @@ mod tests {
         let tokens = get_tokens(&String::from("(  )   ")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
 
-        let ParseResult::Ok(list, next) = fun_decl else {
+        let Ok((list, next)) = fun_decl else {
             panic!("Expected a result, got: {:?}", fun_decl);
         };
 
@@ -113,7 +113,7 @@ mod tests {
         let tokens = get_tokens(&String::from("(\n    \n)")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
 
-        let ParseResult::Ok(list, next) = fun_decl else {
+        let Ok((list, next)) = fun_decl else {
             panic!("Expected a result, got: {:?}", fun_decl);
         };
 
@@ -126,7 +126,7 @@ mod tests {
         let tokens = get_tokens(&String::from("(0)")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
 
-        let ParseResult::Ok(arguments_list, next) = fun_decl else {
+        let Ok((arguments_list, next)) = fun_decl else {
             panic!("Expected a result, got: {:?}", fun_decl);
         };
 
@@ -145,7 +145,7 @@ mod tests {
         let tokens = get_tokens(&String::from("(0, )")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
 
-        let ParseResult::Ok(arguments_list, next) = fun_decl else {
+        let Ok((arguments_list, next)) = fun_decl else {
             panic!("Expected a result, got: {:?}", fun_decl);
         };
 
@@ -163,7 +163,7 @@ mod tests {
         let tokens = get_tokens(&String::from("(\"Hello new world\", 322, )")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
 
-        let ParseResult::Ok(arguments_list, _next) = fun_decl else {
+        let Ok((arguments_list, _next)) = fun_decl else {
             panic!("Expected a result, got: {:?}", fun_decl);
         };
 
@@ -185,7 +185,7 @@ mod tests {
         let tokens = get_tokens(&String::from("(foo(), bar())")).unwrap();
         let fun_decl = try_parse(&tokens, 0);
 
-        let ParseResult::Ok(arguments_list, _next) = fun_decl else {
+        let Ok((arguments_list, _next)) = fun_decl else {
             panic!("Expected a result, got: {:?}", fun_decl);
         };
 
