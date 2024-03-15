@@ -33,7 +33,7 @@ impl Tokenizer for Vec<Token> {
     }
 }
 
-/// Expects the token at `pos` to be of type `token_type`
+/// Expects the token at `pos` to be of type `token_type`. Doesn't ignore whitespace or newlines
 pub fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == token_type => Result3::Ok(t),
@@ -45,6 +45,7 @@ pub fn try_token_type(tokens: &Vec<Token>, pos: usize, token_type: TokenType) ->
     }
 }
 
+/// Expects the token at `pos` to be an operator of value `operator`. Doesn't ignore whitespace or newlines
 pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
     match tokens.get(pos) {
         Some(t) if t.token_type == TokenType::Operator && t.value == operator => Result3::Ok(t),
@@ -56,12 +57,12 @@ pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result
     }
 }
 
-/// Expects the token at `pos` to be of type `token_type`
+/// Expects the token at `pos` to be of type `token_type`, ignoring all whitespace & newlines
 pub fn parse_token_type(
     tokens: &Vec<Token>,
     pos: usize,
     token_type: TokenType,
-) -> ParseResult<&Token, &Token> {
+) -> ParseResult<&Token> {
     let mut current_pos = pos;
 
     // Ignore all whitespace and newlines
@@ -81,7 +82,7 @@ pub fn parse_token_type(
         Some(t) if t.token_type == TokenType::EOF || t.token_type == TokenType::NewLine => {
             ParseResult::Unmatched
         }
-        Some(t) => ParseResult::Mismatch(t),
+        Some(t) => ParseResult::Mismatch(t.clone()),
         None => ParseResult::Unmatched,
     }
 }

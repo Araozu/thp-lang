@@ -11,7 +11,7 @@ use super::function_call_expr;
 /// unary = ("!" | "-"), expression
 ///       | function call expr;
 /// ```
-pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
+pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
     match tokens.get(pos) {
         Some(token) if token.value == "!" || token.value == "-" => {
             match super::try_parse(tokens, pos + 1) {

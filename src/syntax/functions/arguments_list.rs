@@ -8,7 +8,7 @@ use crate::{
     },
 };
 
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<ArgumentsList, &Token> {
+pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<ArgumentsList> {
     let mut current_pos = pos;
 
     let (opening_paren, next_pos) =

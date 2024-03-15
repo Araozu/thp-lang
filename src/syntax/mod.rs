@@ -15,7 +15,7 @@ use ast::ModuleAST;
 use self::ast::TopLevelDeclaration;
 
 #[derive(Debug)]
-pub enum ParseResult<A, B> {
+pub enum ParseResult<A> {
     /// The parsing was a success. The first element is the parsed construct,
     /// the second element is the position of the next token to parse
     Ok(A, usize),
@@ -26,10 +26,18 @@ pub enum ParseResult<A, B> {
     Err(SyntaxError),
     /// Some special value was expected, but something else was found.
     /// The inside element is the something else found.
-    Mismatch(B),
+    Mismatch(Token),
     /// This parsing didn't succeed, but it's not a fatal error.
     Unmatched,
 }
+
+enum ParsingError {
+    Mismatch(Token),
+    Unmatch,
+    Error(SyntaxError),
+}
+
+type ParsingResult<A> = Result<(A, usize), ParsingError>;
 
 /// Constructs the Misti AST from a vector of tokens
 pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError> {
@@ -70,7 +78,7 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError
 fn next_construct<'a>(
     tokens: &'a Vec<Token>,
     current_pos: usize,
-) -> ParseResult<TopLevelDeclaration, ()> {
+) -> ParseResult<TopLevelDeclaration> {
     None.or_else(
         || match functions::function_declaration::try_parse(tokens, current_pos) {
             ParseResult::Ok(declaration, next_pos) => Some(ParseResult::Ok(
@@ -81,6 +89,15 @@ fn next_construct<'a>(
             _ => None,
         },
     )
+    .or_else(|| match expression::try_parse(tokens, current_pos) {
+        ParseResult::Ok(expression, next_pos) => Some(ParseResult::Ok(
+            TopLevelDeclaration::Expression(expression),
+            next_pos,
+        )),
+        ParseResult::Err(_) => todo!(),
+        ParseResult::Mismatch(_) => todo!(),
+        ParseResult::Unmatched => todo!(),
+    })
     .unwrap_or_else(|| ParseResult::Unmatched)
 }
 
@@ -101,6 +118,7 @@ mod tests {
             TopLevelDeclaration::FunctionDeclaration(_f) => {
                 assert!(true)
             }
+            _ => panic!("Not implemented: Expression at top level"),
         }
     }
 
@@ -117,6 +135,7 @@ mod tests {
             TopLevelDeclaration::FunctionDeclaration(_f) => {
                 assert!(true)
             }
+            _ => panic!("Not implemented: Expression at top level"),
         }
 
         match declarations.get(1).unwrap() {
@@ -124,6 +143,7 @@ mod tests {
             TopLevelDeclaration::FunctionDeclaration(_f) => {
                 assert!(true)
             }
+            _ => panic!("Not implemented: Expression at top level"),
         }
     }
 }

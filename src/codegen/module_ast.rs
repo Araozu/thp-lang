@@ -18,7 +18,10 @@ impl Transpilable for ModuleAST<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{lexic::token::{Token, TokenType}, syntax::ast::{var_binding::Binding, Expression, TopLevelDeclaration}};
+    use crate::{
+        lexic::token::{Token, TokenType},
+        syntax::ast::{var_binding::Binding, Expression, TopLevelDeclaration},
+    };
 
     #[test]
     fn module_ast_should_transpile() {

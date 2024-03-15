@@ -14,7 +14,7 @@ use super::{
     params_list::parse_params_list,
 };
 
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<FunctionDeclaration, ()> {
+pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<FunctionDeclaration> {
     let mut current_pos = pos;
 
     // `fun` keyword

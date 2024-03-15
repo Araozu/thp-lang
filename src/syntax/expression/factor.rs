@@ -8,7 +8,7 @@ use crate::{
 /// ```ebnf
 /// factor = unary, (("/" | "*"), unary)*;
 /// ```
-pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
+pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
     let (unary, next_pos) = match super::unary::try_parse(tokens, pos) {
         ParseResult::Ok(expr, next_pos) => (expr, next_pos),
         _ => return ParseResult::Unmatched,
@@ -21,7 +21,7 @@ fn parse_many<'a>(
     tokens: &'a Vec<Token>,
     pos: usize,
     prev_expr: Expression<'a>,
-) -> ParseResult<Expression<'a>, ()> {
+) -> ParseResult<Expression<'a>> {
     // (("/" | "*"), unary)*
 
     match tokens.get(pos) {

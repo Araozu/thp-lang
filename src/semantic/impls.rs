@@ -51,12 +51,15 @@ impl SemanticCheck for TopLevelDeclaration<'_> {
                                 binding_name
                             ),
                         };
-    
+
                         return Err(MistiError::Semantic(error));
                     }
                 };
 
-                scope.insert(binding_name.clone(), SymbolEntry::new_variable(datatype.value.clone()));
+                scope.insert(
+                    binding_name.clone(),
+                    SymbolEntry::new_variable(datatype.value.clone()),
+                );
 
                 Ok(())
             }
@@ -77,10 +80,14 @@ impl SemanticCheck for TopLevelDeclaration<'_> {
                     return Err(MistiError::Semantic(error));
                 }
 
-                scope.insert(function_name, SymbolEntry::new_function(vec![], "Unit".into()));
+                scope.insert(
+                    function_name,
+                    SymbolEntry::new_function(vec![], "Unit".into()),
+                );
 
                 Ok(())
             }
+            _ => panic!("Not implemented"),
         }
     }
 }

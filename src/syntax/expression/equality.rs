@@ -8,7 +8,7 @@ use crate::{
 /// ```ebnf
 /// equality = comparison, (("==" | "!="), comparison )*;
 /// ```
-pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
+pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
     let (comparison, next_pos) = match super::comparison::try_parse(tokens, pos) {
         ParseResult::Ok(expr, next_pos) => (expr, next_pos),
         _ => return ParseResult::Unmatched,
@@ -21,7 +21,7 @@ fn parse_many<'a>(
     tokens: &'a Vec<Token>,
     pos: usize,
     prev_expr: Expression<'a>,
-) -> ParseResult<Expression<'a>, ()> {
+) -> ParseResult<Expression<'a>> {
     // equality = comparison, (("==" | "!="), comparison )*;
 
     match tokens.get(pos) {

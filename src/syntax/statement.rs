@@ -7,7 +7,7 @@ use super::{
     ParseResult,
 };
 
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Statement, ()> {
+pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Statement> {
     None.or_else(|| match binding::try_parse(tokens, pos) {
         ParseResult::Ok(b, next) => Some(ParseResult::Ok(Statement::Binding(b), next)),
         ParseResult::Err(err) => Some(ParseResult::Err(err)),

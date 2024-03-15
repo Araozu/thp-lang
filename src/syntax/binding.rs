@@ -5,7 +5,7 @@ use crate::error_handling::SyntaxError;
 use crate::lexic::token::{Token, TokenType};
 use crate::utils::Result3;
 
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding, ()> {
+pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding> {
     let mut current_pos = pos;
 
     // TODO: Detect if the binding starts with a datatype

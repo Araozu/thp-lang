@@ -34,6 +34,7 @@ mod tests {
 
                 assert_eq!("function id() {\n\n}", transpiled);
             }
+            _ => panic!("Not implemented: Expression at top level"),
         }
     }
 }

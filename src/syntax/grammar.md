@@ -1,19 +1,21 @@
 # Grammar
 
 
-## Module
-
-A module is (commonly) a single source file.
+## Source file
 
 ```ebnf
-module = top level declaration*
+source file = top level statement*
 ```
 
 
-## Top level declaration
+## Top level statement
+
+Current focus: Have a mvp compiler (w lexical/syntactic/semantic analysis + codegen) for
+simple function calls, and then implement other features top down
 
 ```ebnf
-top level declaration = function declaration
+top level statement = expression
+                    | function declaration
 ```
 
 

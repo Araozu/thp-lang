@@ -14,6 +14,7 @@ pub struct ModuleAST<'a> {
 pub enum TopLevelDeclaration<'a> {
     Binding(var_binding::Binding<'a>),
     FunctionDeclaration(FunctionDeclaration<'a>),
+    Expression(Expression<'a>),
 }
 
 #[derive(Debug)]

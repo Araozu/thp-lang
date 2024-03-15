@@ -13,7 +13,10 @@ impl Transpilable for Binding<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{lexic::token::{Token, TokenType}, syntax::ast::{var_binding::Binding, Expression}};
+    use crate::{
+        lexic::token::{Token, TokenType},
+        syntax::ast::{var_binding::Binding, Expression},
+    };
 
     #[test]
     fn binding_should_transpile() {

@@ -9,10 +9,7 @@ use super::super::{
     utils, ParseResult,
 };
 
-pub fn parse_params_list<'a>(
-    tokens: &'a Vec<Token>,
-    pos: usize,
-) -> ParseResult<ParamsList, &Token> {
+pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<ParamsList> {
     let mut current_pos = pos;
 
     let (opening_paren, next_pos) =
@@ -23,6 +20,14 @@ pub fn parse_params_list<'a>(
             ParseResult::Unmatched => return ParseResult::Unmatched,
         };
     current_pos = next_pos;
+
+    /*
+    val (opening_paren, next_pos) = try parse_token_type(...)
+
+    val (next_parameter, next_pos) = try parse_param_definition(...) catch
+    case ::Err(e) { return ::Err(e) }
+    else { break }
+     */
 
     // Parse parameters definitions, separated by commas
     let mut parameters = Vec::<Parameter>::new();
@@ -79,10 +84,7 @@ pub fn parse_params_list<'a>(
     ParseResult::Ok(ParamsList {}, current_pos)
 }
 
-fn parse_param_definition<'a>(
-    tokens: &'a Vec<Token>,
-    pos: usize,
-) -> ParseResult<Parameter, &Token> {
+fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Parameter> {
     // Parse a single parameter definition of the form:
     // - Type identifier
     // There will be more constructs in the future, like:

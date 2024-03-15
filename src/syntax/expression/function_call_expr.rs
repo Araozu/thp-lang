@@ -13,7 +13,7 @@ use crate::{
 /// function call expr = primary, "(", (arguments list)?, ")"
 ///                    | primary;
 /// ```
-pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
+pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
     let (primary_expr, next_pos) = match super::primary::try_parse(tokens, pos) {
         ParseResult::Ok(expr, next_pos) => (expr, next_pos),
         _ => return ParseResult::Unmatched,

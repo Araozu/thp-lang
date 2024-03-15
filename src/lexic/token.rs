@@ -22,7 +22,7 @@ pub enum TokenType {
     FUN,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
     pub token_type: TokenType,
     // The token as a raw string

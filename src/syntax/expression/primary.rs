@@ -9,7 +9,7 @@ use crate::{
 /// ```ebnf
 /// primary = number | string | boolean | identifier | ("(", expression, ")");
 /// ```
-pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
+pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
     match tokens.get_significant(pos) {
         Some((token, token_pos)) => match token.token_type {
             TokenType::Number => ParseResult::Ok(Expression::Number(&token.value), token_pos + 1),
@@ -27,7 +27,7 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()>
     }
 }
 
-fn parse_parenthesized_expression(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression, ()> {
+fn parse_parenthesized_expression(tokens: &Vec<Token>, pos: usize) -> ParseResult<Expression> {
     let expression = super::try_parse(tokens, pos + 1);
     match expression {
         ParseResult::Ok(expression, next_pos) => match tokens.get(next_pos) {

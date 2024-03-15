@@ -6,7 +6,7 @@ use crate::{
 use super::{ast::Block, utils::parse_token_type, ParseResult};
 
 // Assumes that the token at `pos` is a {
-pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block, &Token> {
+pub fn parse_block<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Block> {
     let mut current_pos = pos;
 
     let (opening_brace, next_pos) =
