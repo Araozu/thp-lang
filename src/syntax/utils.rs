@@ -1,7 +1,4 @@
-use crate::{
-    lexic::token::{Token, TokenType},
-    utils::Result3,
-};
+use crate::lexic::token::{Token, TokenType};
 
 use super::{ParsingError, ParsingResult};
 
@@ -34,14 +31,14 @@ impl Tokenizer for Vec<Token> {
 }
 
 /// Expects the token at `pos` to be an operator of value `operator`. Doesn't ignore whitespace or newlines
-pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result3<&Token> {
+pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> ParsingResult<&Token> {
     match tokens.get(pos) {
-        Some(t) if t.token_type == TokenType::Operator && t.value == operator => Result3::Ok(t),
+        Some(t) if t.token_type == TokenType::Operator && t.value == operator => Ok((t, pos + 1)),
         Some(t) if t.token_type == TokenType::NewLine || t.token_type == TokenType::EOF => {
-            Result3::None
+            Err(ParsingError::Unmatched)
         }
-        Some(t) => Result3::Err(t),
-        None => Result3::None,
+        Some(t) => Err(ParsingError::Mismatch(t)),
+        None => Err(ParsingError::Unmatched),
     }
 }
 

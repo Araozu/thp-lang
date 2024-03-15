@@ -3,7 +3,6 @@ use super::utils::{parse_token_type, try_operator};
 use super::{expression, ParseResult, ParsingError};
 use crate::error_handling::SyntaxError;
 use crate::lexic::token::{Token, TokenType};
-use crate::utils::Result3;
 
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding> {
     let mut current_pos = pos;
@@ -64,8 +63,8 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding>
      * Equal (=) operator
      */
     let equal_operator = match try_operator(tokens, current_pos, String::from("=")) {
-        Result3::Ok(t) => t,
-        Result3::Err(t) => {
+        Ok((t, _)) => t,
+        Err(ParsingError::Mismatch(t)) => {
             // The parser found a token, but it's not the `=` operator
             return ParseResult::Err(SyntaxError {
                 reason: format!("There should be an equal sign `=` after the identifier"),
@@ -73,7 +72,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParseResult<Binding>
                 error_end: t.get_end_position(),
             });
         }
-        Result3::None => {
+        _ => {
             // The parser didn't find the `=` operator after the identifier
             return ParseResult::Err(SyntaxError {
                 reason: format!("There should be an equal sign `=` after the identifier",),
@@ -141,7 +140,7 @@ mod tests {
     #[test]
     fn should_parse_operator() {
         let tokens = get_tokens(&String::from("=")).unwrap();
-        let token = *try_operator(&tokens, 0, String::from("=")).unwrap();
+        let (token, _) = try_operator(&tokens, 0, String::from("=")).unwrap();
 
         assert_eq!("=", token.value);
     }

@@ -13,7 +13,6 @@ mod lexic;
 mod semantic;
 // Transforms an AST to JS
 mod codegen;
-mod utils;
 
 mod error_handling;
 
