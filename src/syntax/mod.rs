@@ -33,6 +33,7 @@ pub enum ParseResult<'a, A> {
 
 pub type ParsingResult<'a, A> = Result<(A, usize), ParsingError<'a>>;
 
+#[derive(Debug)]
 pub enum ParsingError<'a> {
     /// Some other token was found than the expected one
     Mismatch(&'a Token),
@@ -60,11 +61,11 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError
         }
 
         match next_construct(tokens, current_pos) {
-            ParseResult::Ok(module, next_pos) => {
+            Ok((module, next_pos)) => {
                 top_level_declarations.push(module);
                 current_pos = next_pos;
             }
-            ParseResult::Err(err) => return Err(MistiError::Syntax(err)),
+            Err(ParsingError::Err(err)) => return Err(MistiError::Syntax(err)),
             _ => {
                 return Err(MistiError::Syntax(SyntaxError {
                     reason: String::from("PARSER couldn't parse any construction"),
@@ -84,27 +85,21 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError
 fn next_construct<'a>(
     tokens: &'a Vec<Token>,
     current_pos: usize,
-) -> ParseResult<TopLevelDeclaration> {
-    None.or_else(
-        || match functions::function_declaration::try_parse(tokens, current_pos) {
-            ParseResult::Ok(declaration, next_pos) => Some(ParseResult::Ok(
+) -> ParsingResult<TopLevelDeclaration> {
+    // Try to parse a function declaration
+    match functions::function_declaration::try_parse(tokens, current_pos) {
+        Ok((declaration, next_pos)) => {
+            return Ok((
                 TopLevelDeclaration::FunctionDeclaration(declaration),
                 next_pos,
-            )),
-            ParseResult::Err(err) => Some(ParseResult::Err(err)),
-            _ => None,
-        },
-    )
-    .or_else(|| match expression::try_parse(tokens, current_pos) {
-        ParseResult::Ok(expression, next_pos) => Some(ParseResult::Ok(
-            TopLevelDeclaration::Expression(expression),
-            next_pos,
-        )),
-        ParseResult::Err(_) => todo!(),
-        ParseResult::Mismatch(_) => todo!(),
-        ParseResult::Unmatched => todo!(),
-    })
-    .unwrap_or_else(|| ParseResult::Unmatched)
+            ))
+        }
+        Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+        _ => {}
+    }
+
+    // No top level construct was found, return unmatched
+    Err(ParsingError::Unmatched)
 }
 
 #[cfg(test)]
@@ -113,7 +108,7 @@ mod tests {
 
     #[test]
     fn should_parse_top_level_construct_with_trailing_newline() {
-        let input = String::from("fun f1(){}\n");
+        let input = String::from(" fun f1(){}\n");
         let tokens = crate::lexic::get_tokens(&input).unwrap();
         let declarations = construct_ast(&tokens).unwrap().declarations;
 

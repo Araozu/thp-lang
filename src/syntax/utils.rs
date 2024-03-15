@@ -65,7 +65,9 @@ pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Result
 
 /// Expects the token at `pos` to be of type `token_type`, and returns the token and the next position.
 ///
-/// Ignores all whitespace and newlines
+/// Ignores all whitespace and newlines.
+/// 
+/// Only returns: Ok, Unmatched, Mismatched
 pub fn parse_token_type(
     tokens: &Vec<Token>,
     pos: usize,
