@@ -20,6 +20,7 @@ pub enum TopLevelDeclaration<'a> {
 #[derive(Debug)]
 pub struct FunctionDeclaration<'a> {
     pub identifier: &'a Token,
+    pub return_type: Option<&'a Token>,
     pub params_list: Box<ParamsList>,
     pub block: Box<Block<'a>>,
 }

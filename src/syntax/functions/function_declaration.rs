@@ -1,7 +1,7 @@
 use crate::{
     error_handling::SyntaxError,
     lexic::token::{Token, TokenType},
-    syntax::{ParsingError, ParsingResult},
+    syntax::{utils::try_operator, ParsingError, ParsingResult},
 };
 
 use super::{
@@ -9,6 +9,13 @@ use super::{
     params_list::parse_params_list,
 };
 
+/*
+function declaration = "fun", identifier, params list, return type?, block;
+
+params list = "(", ")";
+
+return type = ;
+ */
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<FunctionDeclaration> {
     let mut current_pos = pos;
 
@@ -19,6 +26,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Functi
     };
     current_pos = next_pos;
 
+    // identifier
     let (identifier, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Identifier)
     {
         Ok((id, next)) => (id, next),
@@ -40,19 +48,20 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Functi
     };
     current_pos = next_pos;
 
+    // Params list
     let (params_list, next_pos) = match parse_params_list(tokens, current_pos) {
         Ok((params, next_pos)) => (params, next_pos),
         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
         Err(ParsingError::Mismatch(wrong_token)) => {
             return Err(ParsingError::Err(SyntaxError {
-                reason: String::from("Expected an opening paren afted the function identifier."),
+                reason: String::from("Expected an opening paren after the function identifier."),
                 error_start: wrong_token.position,
                 error_end: wrong_token.get_end_position(),
             }));
         }
         Err(ParsingError::Unmatched) => {
             return Err(ParsingError::Err(SyntaxError {
-                reason: String::from("Expected an opening paren afted the function identifier."),
+                reason: String::from("Expected an opening paren after the function identifier."),
                 error_start: identifier.position,
                 error_end: identifier.get_end_position(),
             }));
@@ -60,6 +69,37 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Functi
     };
     current_pos = next_pos;
 
+
+    // Try to parse a return type
+    let (return_type, next_pos) = 'return_label: {
+        let (arrow_op, next_pos) = match try_operator(tokens, current_pos, "->".into()) {
+            Ok((op, next)) => (op, next),
+            _ => break 'return_label (None, current_pos),
+        };
+
+        // At this point the '->' operator was matched, so we expect a datatype
+        match parse_token_type(tokens, next_pos, TokenType::Datatype) {
+            Ok((t, next)) => (Some(t), next),
+            Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+            Err(ParsingError::Mismatch(wrong_token)) => {
+                return Err(ParsingError::Err(SyntaxError {
+                    reason: String::from("Expected a datatype after the arrow operator."),
+                    error_start: wrong_token.position,
+                    error_end: wrong_token.get_end_position(),
+                }));
+            }
+            Err(ParsingError::Unmatched) => {
+                return Err(ParsingError::Err(SyntaxError {
+                    reason: String::from("Expected a datatype after the arrow operator."),
+                    error_start: arrow_op.position,
+                    error_end: arrow_op.get_end_position(),
+                }));
+            }
+        }
+    };
+    current_pos = next_pos;
+
+    // Function body (block)
     let (block, next_pos) = match parse_block(tokens, current_pos) {
         Ok((block, next_pos)) => (block, next_pos),
         Err(ParsingError::Err(error)) => {
@@ -86,12 +126,14 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Functi
     Ok((
         FunctionDeclaration {
             identifier: &identifier,
+            return_type,
             params_list: Box::new(params_list),
             block: Box::new(block),
         },
         current_pos,
     ))
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -150,7 +192,7 @@ mod tests {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "Expected an opening paren afted the function identifier."
+                    "Expected an opening paren after the function identifier."
                 );
                 assert_eq!(err.error_start, 7);
                 assert_eq!(err.error_end, 8);
@@ -164,7 +206,7 @@ mod tests {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(
                     err.reason,
-                    "Expected an opening paren afted the function identifier."
+                    "Expected an opening paren after the function identifier."
                 );
                 assert_eq!(err.error_start, 4);
                 assert_eq!(err.error_end, 6);
@@ -304,6 +346,46 @@ mod tests {
         let (function_declaration, _) = try_parse(&tokens, 0).unwrap();
 
         assert_eq!(function_declaration.identifier.value, String::from("id"));
+        assert_eq!(function_declaration.return_type, None);
+    }
+
+    #[test]
+    fn should_parse_return_type() {
+        let tokens = get_tokens(&String::from("fun id() -> String {}")).unwrap();
+        let (function_declaration, _) = try_parse(&tokens, 0).unwrap();
+
+        assert_eq!(function_declaration.identifier.value, String::from("id"));
+        assert_eq!(function_declaration.return_type.unwrap().value, String::from("String"));
+    }
+
+    #[test]
+    fn should_throw_error_on_return_type_1() {
+        let tokens = get_tokens(&String::from("fun id() -> {}")).unwrap();
+        let fun_decl = try_parse(&tokens, 0);
+
+        match fun_decl {
+            Err(ParsingError::Err(err)) => {
+                assert_eq!(err.reason, "Expected a datatype after the arrow operator.");
+                assert_eq!(err.error_start, 12);
+                assert_eq!(err.error_end, 13);
+            }
+            _ => panic!("Expected an error: {:?}", fun_decl),
+        }
+    }
+
+    #[test]
+    fn should_throw_error_on_return_type_2() {
+        let tokens = get_tokens(&String::from("fun id() -> ")).unwrap();
+        let fun_decl = try_parse(&tokens, 0);
+
+        match fun_decl {
+            Err(ParsingError::Err(err)) => {
+                assert_eq!(err.reason, "Expected a datatype after the arrow operator.");
+                assert_eq!(err.error_start, 9);
+                assert_eq!(err.error_end, 11);
+            }
+            _ => panic!("Expected an error: {:?}", fun_decl),
+        }
     }
 }
 

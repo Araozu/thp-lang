@@ -40,7 +40,7 @@
 - [ ] Formally define the top level constructs
 - [ ] Parse bindings and function declarations as top level constructs
 - [ ] Parse function declaration arguments (`Type id`)
-- [ ] Parse function return datatype (`fun f() -> Type`)
+- [x] Parse function return datatype (`fun f() -> Type`)
 - [x] Return parsing to variables to var/val
 - [ ] Write tests
 
