@@ -179,4 +179,45 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn should_scan_non_escape_characters_preceded_by_bsls() {
+        let input = str_to_vec("\"Sample\\atext\"");
+        let start_pos = 1;
+        if let LexResult::Some(token, next) = scan(&input, start_pos) {
+            assert_eq!(14, next);
+            assert_eq!(TokenType::String, token.token_type);
+            assert_eq!("\"Sample\\atext\"", token.value);
+            assert_eq!(0, token.position);
+        } else {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn shouldnt_panic_when_encountering_eof_after_bsls() {
+        let input = str_to_vec("\"Sample\\");
+        let start_pos = 1;
+        let result = scan(&input, start_pos);
+
+        match result {
+            LexResult::Err(reason) => {
+                assert_eq!("Incomplete string found", reason.reason)
+            },
+            _ => panic!("expected an error")
+        }
+    }
+
+    #[test]
+    fn should_not_scan_an_unfinished_string() {
+        let input = str_to_vec("\"Hello, world!");
+        let result = scan(&input, 1);
+
+        match result {
+            LexResult::Err(reason) => {
+                assert_eq!("Incomplete string found", reason.reason)
+            },
+            _ => panic!("expected an error")
+        }
+    }
 }

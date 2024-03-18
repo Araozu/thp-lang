@@ -436,4 +436,36 @@ mod tests {
             panic!("Expected some value")
         };
     }
+
+    #[test]
+    fn should_not_scan_invalid_scientific_notation() {
+        let input = str_to_vec("1e");
+        let start_pos = 0;
+
+        match scan(&input, start_pos) {
+            LexResult::Err(reason) => {
+                assert_eq!(
+                    "The characters after 'e' are not + or -, or are not followed by a number",
+                    reason.reason
+                )
+            }
+            _ => panic!("Expected an error"),
+        }
+    }
+
+    #[test]
+    fn should_not_scan_invalid_scientific_notation_2() {
+        let input = str_to_vec("1e+f");
+        let start_pos = 0;
+
+        match scan(&input, start_pos) {
+            LexResult::Err(reason) => {
+                assert_eq!(
+                    "The characters after 'e' are not + or -, or are not followed by a number",
+                    reason.reason
+                )
+            }
+            _ => panic!("Expected an error"),
+        }
+    }
 }

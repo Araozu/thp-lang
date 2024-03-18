@@ -467,4 +467,12 @@ mod indentation_tests {
 
         assert_eq!(TokenType::Comment, tokens[0].token_type);
     }
+
+    #[test]
+    fn should_emit_error_on_incorrect_indentation() {
+        let input = String::from("1\n    2\n  3");
+        let tokens = get_tokens(&input);
+
+        assert!(tokens.is_err());
+    }
 }
