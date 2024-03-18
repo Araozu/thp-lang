@@ -32,7 +32,7 @@ impl SemanticCheck for TopLevelDeclaration<'_> {
                         error_start: binding.identifier.position,
                         error_end: binding.identifier.get_end_position(),
                         reason: format!(
-                            "Duplicated function: A function with name {} was already defined",
+                            "Duplicated: A symbol with name {} was already defined",
                             binding_name
                         ),
                     };
@@ -72,7 +72,7 @@ impl SemanticCheck for TopLevelDeclaration<'_> {
                         error_start: function.identifier.position,
                         error_end: function.identifier.get_end_position(),
                         reason: format!(
-                            "Duplicated function: A function with name {} was already defined",
+                            "Duplicated: A symbol with name {} was already defined",
                             function_name
                         ),
                     };

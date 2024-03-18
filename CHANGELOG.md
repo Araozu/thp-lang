@@ -41,7 +41,7 @@
 - [ ] Parse bindings and function declarations as top level constructs
 - [ ] Parse function declaration arguments (`Type id`)
 - [ ] Parse function return datatype (`fun f() -> Type`)
-- [ ] Return parsing to variables to var/val
+- [x] Return parsing to variables to var/val
 - [ ] Write tests
 
 

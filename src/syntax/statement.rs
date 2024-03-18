@@ -49,7 +49,7 @@ mod tests {
 
     #[test]
     fn should_parse_binding() {
-        let input = String::from("let identifier = 20");
+        let input = String::from("val identifier = 20");
         let tokens = crate::lexic::get_tokens(&input).unwrap();
         let statement = try_parse(&tokens, 0);
 

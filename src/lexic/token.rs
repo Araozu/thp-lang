@@ -16,8 +16,8 @@ pub enum TokenType {
     Comma,
     INDENT,
     DEDENT,
-    LET,
-    MUT,
+    VAL,
+    VAR,
     EOF,
     FUN,
 }

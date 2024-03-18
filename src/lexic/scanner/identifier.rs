@@ -4,8 +4,8 @@ use crate::lexic::{token::Token, utils, LexResult};
 /// Checks if a String is a keyword, and returns its TokenType
 fn str_is_keyword(s: &String) -> Option<TokenType> {
     match s.as_str() {
-        "let" => Some(TokenType::LET),
-        "mut" => Some(TokenType::MUT),
+        "val" => Some(TokenType::VAL),
+        "var" => Some(TokenType::VAR),
         "fun" => Some(TokenType::FUN),
         _ => None,
     }
@@ -141,23 +141,23 @@ mod tests {
     // Should scan keywords
     #[test]
     fn test_4() {
-        let input = str_to_vec("mut");
+        let input = str_to_vec("var");
         let start_pos = 0;
         if let LexResult::Some(token, next) = scan(*input.get(0).unwrap(), &input, start_pos) {
             assert_eq!(3, next);
-            assert_eq!(TokenType::MUT, token.token_type);
-            assert_eq!("mut", token.value);
+            assert_eq!(TokenType::VAR, token.token_type);
+            assert_eq!("var", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()
         }
 
-        let input = str_to_vec("let");
+        let input = str_to_vec("val");
         let start_pos = 0;
         if let LexResult::Some(token, next) = scan(*input.get(0).unwrap(), &input, start_pos) {
             assert_eq!(3, next);
-            assert_eq!(TokenType::LET, token.token_type);
-            assert_eq!("let", token.value);
+            assert_eq!(TokenType::VAL, token.token_type);
+            assert_eq!("val", token.value);
             assert_eq!(0, token.position);
         } else {
             panic!()

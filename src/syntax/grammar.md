@@ -16,6 +16,7 @@ simple function calls, and then implement other features top down
 ```ebnf
 top level statement = expression
                     | function declaration
+                    | binding
 ```
 
 

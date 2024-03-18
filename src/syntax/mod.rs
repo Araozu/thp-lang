@@ -81,6 +81,22 @@ fn next_construct<'a>(
         _ => {}
     }
 
+    // Try to parse a binding
+    match binding::try_parse(tokens, current_pos) {
+        Ok((binding, next_pos)) => return Ok((TopLevelDeclaration::Binding(binding), next_pos)),
+        Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+        _ => {}
+    }
+
+    // Try to parse an expression
+    match expression::try_parse(tokens, current_pos) {
+        Ok((expression, next_pos)) => {
+            return Ok((TopLevelDeclaration::Expression(expression), next_pos))
+        }
+        Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+        _ => {}
+    }
+
     // No top level construct was found, return unmatched
     Err(ParsingError::Unmatched)
 }
