@@ -21,7 +21,7 @@ pub enum TopLevelDeclaration<'a> {
 pub struct FunctionDeclaration<'a> {
     pub identifier: &'a Token,
     pub return_type: Option<&'a Token>,
-    pub params_list: Box<ParamsList>,
+    pub params_list: Box<ParamsList<'a>>,
     pub block: Box<Block<'a>>,
 }
 
@@ -31,8 +31,11 @@ pub struct Block<'a> {
 }
 
 #[derive(Debug)]
-pub struct ParamsList {}
+pub struct ParamsList<'a> {
+    pub parameters: Vec<Parameter<'a>>,
+}
 
+#[derive(Debug)]
 pub struct Parameter<'a> {
     pub identifier: &'a String,
     pub datatype: &'a String,

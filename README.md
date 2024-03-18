@@ -4,19 +4,41 @@ Types and a new syntax for PHP, because I'm forced to use it at work.
 
 ## Usage
 
-### Singular files
+TBD.
 
-Inside an existing PHP codebase, files are converted to THP
-one at a time, or new files are written in THP.
+Requirements: A *nix system & cargo
 
-There must be a thp.config.yaml at the root of the project,
-which configures the compiler.
+```sh
+# Clone the repo
+git clone https://github.com/Araozu/thp-lang.git
 
-Every file is compiled in place.
+# Generate an executable
+cargo build --release
 
+# The executable will be located in ./target/release/thp
 
-### Project mode
+# And then run it follow the instructions!
+```
 
-The whole project uses THP. Work in progress.
+```sh
+Usage: `thp [command] [options]`
 
+Commands
+
+  c _file_  Compiles _file_ in-place
+  f _file_  Formats _file_
+  r         Starts the REPL
+
+  init      Initializes a new project in the current directory
+  build     Builds the project
+  fmt       Formats all files in the project
+  watch, w  Starts compilation of the project in watch mode
+
+  help, h   Print this message & exit
+
+General options
+
+  -h, --help    Print command-specific usage
+  -v, --version Print version & exit
+```
 

@@ -12,9 +12,7 @@ use super::{
 /*
 function declaration = "fun", identifier, params list, return type?, block;
 
-params list = "(", ")";
-
-return type = ;
+return type = "->", datatype;
  */
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<FunctionDeclaration> {
     let mut current_pos = pos;

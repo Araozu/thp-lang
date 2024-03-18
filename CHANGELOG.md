@@ -28,6 +28,7 @@
 - [ ] Infer datatype of binary operators
 - [ ] Execute semantic analysis on the function's block
 - [ ] Write tests
+- [ ] Abstract the parsing of datatypes, such that in the future generics can be implemented in a single place
 
 
 ## v0.0.11
@@ -39,7 +40,7 @@
 - [ ] Infer datatype of a `val variable = value` in the AST: Use the infered datatype
 - [x] Formally define the top level constructs
 - [x] Parse bindings and function declarations as top level constructs
-- [ ] Parse function declaration arguments (`Type id`)
+- [x] Parse function declaration arguments (`Type id`)
 - [x] Parse function return datatype (`fun f() -> Type`)
 - [x] Return parsing to variables to var/val
 - [ ] Write tests

@@ -9,6 +9,14 @@ use super::super::{
     utils,
 };
 
+/*
+# Basically, every parameter can have a trailing comma.
+params list = "("
+            , ( datatype pair, (",", datatype pair)*, ","? )?
+            , ")";
+
+datatype pair = datatype, identifier;
+ */
 pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<ParamsList> {
     let mut current_pos = pos;
 
@@ -20,14 +28,6 @@ pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResul
             Err(ParsingError::Unmatched) => return Err(ParsingError::Unmatched),
         };
     current_pos = next_pos;
-
-    /*
-    val (opening_paren, next_pos) = try parse_token_type(...)
-
-    val (next_parameter, next_pos) = try parse_param_definition(...) catch
-    case ::Err(e) { return ::Err(e) }
-    else { break }
-     */
 
     // Parse parameters definitions, separated by commas
     let mut parameters = Vec::<Parameter>::new();
@@ -81,17 +81,17 @@ pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResul
         };
     current_pos = next_pos;
 
-    Ok((ParamsList {}, current_pos))
+    Ok((ParamsList { parameters }, current_pos))
 }
 
+/// Parse a single parameter definition of the form:
+/// - `Type identifier`
+///
+/// There will be more constructs in the future, like:
+/// - `Type identifier = default_value`
+/// - `FunctionType identifier`
+/// - `Pattern identifier` (e.g. `Some[String] value`)?
 fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Parameter> {
-    // Parse a single parameter definition of the form:
-    // - Type identifier
-    // There will be more constructs in the future, like:
-    // - Type identifier = default_value
-    // - FunctionType identifier
-    // - Pattern identifier (e.g. Some[String] value)?
-
     let mut current_pos = pos;
     let (datatype, next_pos) =
         match utils::parse_token_type(tokens, current_pos, TokenType::Datatype) {
@@ -100,9 +100,8 @@ fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResu
                 return Err(ParsingError::Err(err));
             }
             // If there is no datatype this construction doesn't apply.
-            // Return a mismatch and let the caller handle it
-            Err(ParsingError::Mismatch(t)) => return Err(ParsingError::Mismatch(t)),
-            Err(ParsingError::Unmatched) => return Err(ParsingError::Unmatched),
+            // Return an unmatch and let the caller handle it
+            _ => return Err(ParsingError::Unmatched),
         };
     current_pos = next_pos;
 
@@ -136,4 +135,107 @@ fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResu
         },
         next_pos,
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lexic::get_tokens;
+
+    #[test]
+    fn should_parse_empty_param_list() {
+        let tokens = get_tokens(&String::from("()")).unwrap();
+        let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
+
+        assert_eq!(next_pos, 2);
+        assert_eq!(result.parameters.len(), 0);
+    }
+
+    #[test]
+    fn should_parse_empty_param_list_with_whitespace() {
+        let tokens = get_tokens(&String::from("(   )")).unwrap();
+        let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
+
+        assert_eq!(next_pos, 2);
+        assert_eq!(result.parameters.len(), 0);
+    }
+
+    #[test]
+    fn should_parse_empty_param_list_with_newlines() {
+        let tokens = get_tokens(&String::from("(\n   \n)")).unwrap();
+        let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
+
+        assert_eq!(next_pos, 3);
+        assert_eq!(result.parameters.len(), 0);
+    }
+
+    #[test]
+    fn should_parse_empty_param_list_with_1_parameter() {
+        let tokens = get_tokens(&String::from("(Int x)")).unwrap();
+        let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
+
+        assert_eq!(next_pos, 4);
+        assert_eq!(result.parameters.len(), 1);
+        let first_param = &result.parameters[0];
+        assert_eq!(first_param.datatype, "Int");
+        assert_eq!(first_param.identifier, "x");
+    }
+
+
+    #[test]
+    fn should_parse_empty_param_list_with_1_parameter_with_trailing_comma() {
+        let tokens = get_tokens(&String::from("(Int x, )")).unwrap();
+        let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
+
+        assert_eq!(next_pos, 5);
+        assert_eq!(result.parameters.len(), 1);
+        let first_param = &result.parameters[0];
+        assert_eq!(first_param.datatype, "Int");
+        assert_eq!(first_param.identifier, "x");
+    }
+
+    #[test]
+    fn should_parse_empty_param_list_with_2_parameters() {
+        let tokens = get_tokens(&String::from("(Int x, String y)")).unwrap();
+        let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
+
+        assert_eq!(next_pos, 7);
+        assert_eq!(result.parameters.len(), 2);
+        let first_param = &result.parameters[0];
+        assert_eq!(first_param.datatype, "Int");
+        assert_eq!(first_param.identifier, "x");
+        let second_param = &result.parameters[1];
+        assert_eq!(second_param.datatype, "String");
+        assert_eq!(second_param.identifier, "y");
+    }
+
+    #[test]
+    fn should_parse_empty_param_list_with_2_parameters_and_trailing_comma() {
+        let tokens = get_tokens(&String::from("(Int x, String y, )")).unwrap();
+        let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
+
+        assert_eq!(next_pos, 8);
+        assert_eq!(result.parameters.len(), 2);
+        let first_param = &result.parameters[0];
+        assert_eq!(first_param.datatype, "Int");
+        assert_eq!(first_param.identifier, "x");
+        let second_param = &result.parameters[1];
+        assert_eq!(second_param.datatype, "String");
+        assert_eq!(second_param.identifier, "y");
+    }
+
+    #[test]
+    fn should_parse_multiline_params() {
+        let tokens = get_tokens(&String::from("(\n    Int x,\n    String y,\n)")).unwrap();
+        let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
+ 
+        assert_eq!(next_pos, 13);
+        assert_eq!(result.parameters.len(), 2);
+        let first_param = &result.parameters[0];
+        assert_eq!(first_param.datatype, "Int");
+        assert_eq!(first_param.identifier, "x");
+        let second_param = &result.parameters[1];
+        assert_eq!(second_param.datatype, "String");
+        assert_eq!(second_param.identifier, "y");
+    }
 }
