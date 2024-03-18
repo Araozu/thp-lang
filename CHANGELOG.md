@@ -32,13 +32,13 @@
 
 ## v0.0.11
 
-- [ ] Parse binding of form `val Type variable = value`
-- [ ] Parse binding of form `Type variable = value`
+- [x] Parse binding of form `val Type variable = value`
+- [x] Parse binding of form `Type variable = value`
 - [ ] Infer datatype of `value` in the above for a simple expression
 - [ ] Ensure that the anotated datatype matches the datatype of `value` in the above
 - [ ] Infer datatype of a `val variable = value` in the AST: Use the infered datatype
-- [ ] Formally define the top level constructs
-- [ ] Parse bindings and function declarations as top level constructs
+- [x] Formally define the top level constructs
+- [x] Parse bindings and function declarations as top level constructs
 - [ ] Parse function declaration arguments (`Type id`)
 - [x] Parse function return datatype (`fun f() -> Type`)
 - [x] Return parsing to variables to var/val

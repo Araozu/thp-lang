@@ -58,7 +58,13 @@ arguments list = "(", ")"
 ## Binding
 
 ```ebnf
-binding = ("val" | "var"), identifier, "=", expression
+binding = val binding | var binding
+val binding = "val", datatype?, binding remainder
+            | datatype, binding remainder
+
+var binding = "var", datatype?, binding remainder
+
+binding remainder = identifier, "=", expression
 ```
 
 

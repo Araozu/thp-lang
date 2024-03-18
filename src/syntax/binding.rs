@@ -4,28 +4,50 @@ use super::{expression, ParsingError, ParsingResult};
 use crate::error_handling::SyntaxError;
 use crate::lexic::token::{Token, TokenType};
 
+/*
+binding = val binding | var binding
+val binding = "val", datatype?, binding remainder
+            | datatype, binding remainder
+
+var binding = "var", datatype?, binding remainder
+
+binding remainder = identifier, "=", expression
+ */
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Binding> {
     let mut current_pos = pos;
 
-    // TODO: Detect if the binding starts with a datatype
-    // TODO: Revert to val/var
-
     /*
-     * let keyword
+     * val/var keyword
      */
-    let (is_mutable, binding_token, next_pos) = {
-        match parse_token_type(tokens, current_pos, TokenType::VAL) {
-            Ok((val_token, next_pos)) => (false, val_token, next_pos),
-            _ => {
-                // If VAL is not found, search for VAR
-                match parse_token_type(tokens, current_pos, TokenType::VAR) {
-                    Ok((var_token, next_pos)) => (true, var_token, next_pos),
-                    _ => return Err(ParsingError::Unmatched),
-                }
-            }
+    let (is_var, binding_token, next_pos) = 'token: {
+        // check for VAL
+        if let Ok((val_token, next_pos)) = parse_token_type(tokens, current_pos, TokenType::VAL) {
+            break 'token (false, Some(val_token), next_pos);
+        };
+
+        // check for VAR
+        match parse_token_type(tokens, current_pos, TokenType::VAR) {
+            Ok((var_token, next_pos)) => (true, Some(var_token), next_pos),
+            // If a VAR is not found it is still possible that the binding is an implicit VAL
+            _ => (false, None, current_pos),
         }
     };
     current_pos = next_pos;
+
+    /*
+     * datatype
+     */
+    let (datatype, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Datatype) {
+        Ok((t, next)) => (Some(t), next),
+        _ => (None, current_pos),
+    };
+    current_pos = next_pos;
+
+    // Here:
+    // If the binding is None and the datatype is None, then we didn't match a binding
+    if binding_token.is_none() && datatype.is_none() {
+        return Err(ParsingError::Unmatched);
+    }
 
     /*
      * identifier
@@ -45,15 +67,29 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Bindin
             return Err(ParsingError::Err(error));
         }
         _ => {
-            // The parser didn't find an Identifier after VAL/VAR
-            return Err(ParsingError::Err(SyntaxError {
-                reason: format!(
-                    "There should be an identifier after a `{}` token",
-                    if is_mutable { "val" } else { "var" }
-                ),
-                error_start: binding_token.position,
-                error_end: binding_token.get_end_position(),
-            }));
+            // The parser didn't find an Identifier after VAL/VAR or the Datatype
+            match (binding_token, datatype) {
+                (Some(binding_token), _) => {
+                    return Err(ParsingError::Err(SyntaxError {
+                        reason: format!(
+                            "There should be an identifier after a `{}` token",
+                            if is_var { "val" } else { "var" }
+                        ),
+                        error_start: binding_token.position,
+                        error_end: binding_token.get_end_position(),
+                    }));
+                }
+                (None, Some(datatype_token)) => {
+                    return Err(ParsingError::Err(SyntaxError {
+                        reason: "There should be an identifier after the datatype".into(),
+                        error_start: datatype_token.position,
+                        error_end: datatype_token.get_end_position(),
+                    }));
+                }
+                _ => {
+                    panic!("Illegal parser state: binding_token and datatype are both None")
+                }
+            };
         }
     };
     current_pos = next_pos;
@@ -82,6 +118,9 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Bindin
     };
     current_pos += 1;
 
+    /*
+     * Expression of the binding
+     */
     let (expression, next_pos) = match expression::try_parse(tokens, current_pos) {
         Ok((exp, next)) => (exp, next),
         _ => {
@@ -95,10 +134,10 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Bindin
     current_pos = next_pos;
 
     let binding = Binding {
-        datatype: None,
+        datatype,
         identifier: &identifier,
         expression,
-        is_mutable,
+        is_mutable: is_var,
     };
 
     Ok((binding, current_pos))
@@ -144,26 +183,51 @@ mod tests {
         assert_eq!("=", token.value);
     }
 
-    /*
     #[test]
-    fn should_parse_binding_with_datatype() {
-        let tokens = get_tokens(&String::from("Num val identifier = 20")).unwrap();
-        let ParseResult::Ok(Binding::Val(binding), _) = try_parse(&tokens, 0) else {
-            panic!()
-        };
+    fn should_parse_val_binding_with_datatype() {
+        let tokens = get_tokens(&String::from("val Int identifier = 20")).unwrap();
+        let (binding, _) = try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(Some(String::from("Num")), binding.datatype);
-        assert_eq!("identifier", format!("{}", binding.identifier));
-
-        let tokens = get_tokens(&String::from("Bool var identifier = 20")).unwrap();
-        let ParseResult::Ok(Binding::Var(binding), _) = try_parse(&tokens, 0) else {
-            panic!()
-        };
-
-        assert_eq!(Some(String::from("Bool")), binding.datatype);
-        assert_eq!("identifier", format!("{}", binding.identifier));
+        assert!(!binding.is_mutable);
+        assert_eq!("Int", binding.datatype.unwrap().value);
+        assert_eq!("identifier", binding.identifier.value);
     }
-     */
+
+    #[test]
+    fn should_parse_var_binding_with_datatype() {
+        let tokens = get_tokens(&String::from("var Int identifier = 20")).unwrap();
+        let (binding, _) = try_parse(&tokens, 0).unwrap();
+
+        assert!(binding.is_mutable);
+        assert!(binding.datatype.is_some());
+        assert_eq!("Int", binding.datatype.unwrap().value);
+        assert_eq!("identifier", binding.identifier.value);
+    }
+
+    #[test]
+    fn should_parse_implicit_val_binding() {
+        let tokens = get_tokens(&String::from("Int identifier = 20")).unwrap();
+        let (binding, _) = try_parse(&tokens, 0).unwrap();
+
+        assert!(!binding.is_mutable);
+        assert!(binding.datatype.is_some());
+        assert_eq!("Int", binding.datatype.unwrap().value);
+        assert_eq!("identifier", binding.identifier.value);
+    }
+
+    #[test]
+    fn should_return_error_on_implicit_val_binding() {
+        let tokens = get_tokens(&String::from("Int => 20")).unwrap();
+        let binding = try_parse(&tokens, 0);
+
+        match binding {
+            Err(ParsingError::Err(error)) => {
+                assert_eq!(4, error.error_start);
+                assert_eq!(6, error.error_end);
+            }
+            _ => panic!("Error expected"),
+        }
+    }
 
     #[test]
     fn should_return_correct_error() {

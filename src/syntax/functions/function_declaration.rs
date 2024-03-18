@@ -69,7 +69,6 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Functi
     };
     current_pos = next_pos;
 
-
     // Try to parse a return type
     let (return_type, next_pos) = 'return_label: {
         let (arrow_op, next_pos) = match try_operator(tokens, current_pos, "->".into()) {
@@ -133,7 +132,6 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Functi
         current_pos,
     ))
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -355,7 +353,10 @@ mod tests {
         let (function_declaration, _) = try_parse(&tokens, 0).unwrap();
 
         assert_eq!(function_declaration.identifier.value, String::from("id"));
-        assert_eq!(function_declaration.return_type.unwrap().value, String::from("String"));
+        assert_eq!(
+            function_declaration.return_type.unwrap().value,
+            String::from("String")
+        );
     }
 
     #[test]

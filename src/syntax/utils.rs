@@ -75,5 +75,3 @@ pub fn parse_token_type(
         None => Err(ParsingError::Unmatched),
     }
 }
-
-
