@@ -1,6 +1,6 @@
 use crate::{
     error_handling::{semantic_error::SemanticError, MistiError},
-    semantic::{impls::SemanticCheck, symbol_table::SymbolEntry},
+    semantic::{impls::SemanticCheck, symbol_table::SymbolEntry, types::Typed},
     syntax::ast::var_binding::Binding,
 };
 
@@ -26,8 +26,8 @@ impl SemanticCheck for Binding<'_> {
             return Err(MistiError::Semantic(error));
         }
 
-        todo!("");
-        /*
+        // This gets the datatype of the assigned expression,
+        // to compare it later with the declared datatype.
         let expression_datatype = self.expression.get_type();
 
         let datatype = match self.datatype {
@@ -53,6 +53,5 @@ impl SemanticCheck for Binding<'_> {
         scope.insert(binding_name.clone(), SymbolEntry::new_variable(datatype));
 
         Ok(())
-        */
     }
 }
