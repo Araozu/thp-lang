@@ -2,6 +2,7 @@ use crate::{error_handling::MistiError, syntax::ast::ModuleAST};
 
 mod impls;
 mod symbol_table;
+mod checks;
 
 use impls::SemanticCheck;
 
