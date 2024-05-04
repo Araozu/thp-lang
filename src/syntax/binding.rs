@@ -60,26 +60,23 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Bindin
             return Err(ParsingError::Err(SyntaxError {
                 error_start: token.position,
                 error_end: token.get_end_position(),
-                reason: "??".into(),
+                reason: "There should be an identifier after a binding".into(),
             }));
-        }
-        Err(ParsingError::Err(error)) => {
-            return Err(ParsingError::Err(error));
         }
         _ => {
             // The parser didn't find an Identifier after VAL/VAR or the Datatype
             match (binding_token, datatype) {
-                (Some(binding_token), _) => {
+                (Some(binding_token), None) => {
                     return Err(ParsingError::Err(SyntaxError {
                         reason: format!(
                             "There should be an identifier after a `{}` token",
-                            if is_var { "val" } else { "var" }
+                            if is_var { "var" } else { "val" }
                         ),
                         error_start: binding_token.position,
                         error_end: binding_token.get_end_position(),
                     }));
                 }
-                (None, Some(datatype_token)) => {
+                (_, Some(datatype_token)) => {
                     return Err(ParsingError::Err(SyntaxError {
                         reason: "There should be an identifier after the datatype".into(),
                         error_start: datatype_token.position,
@@ -87,7 +84,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Bindin
                     }));
                 }
                 _ => {
-                    panic!("Illegal parser state: binding_token and datatype are both None")
+                    unreachable!("Illegal parser state: binding_token and datatype are both None")
                 }
             };
         }
@@ -267,6 +264,7 @@ mod tests {
             Err(ParsingError::Err(error)) => {
                 assert_eq!(4, error.error_start);
                 assert_eq!(11, error.error_end);
+                assert_eq!("There should be an identifier after a binding", error.reason);
             }
             _ => panic!("Error expected"),
         }
@@ -281,6 +279,36 @@ mod tests {
             Err(ParsingError::Err(error)) => {
                 assert_eq!(7, error.error_start);
                 assert_eq!(14, error.error_end);
+            }
+            _ => panic!("Error expected"),
+        }
+    }
+
+    #[test]
+    fn should_return_error_when_identifier_is_empty() {
+        let tokens = get_tokens(&String::from("val String ")).unwrap();
+        let binding = try_parse(&tokens, 0);
+
+        match binding {
+            Err(ParsingError::Err(error)) => {
+                assert_eq!(4, error.error_start);
+                assert_eq!(10, error.error_end);
+                assert_eq!("There should be an identifier after the datatype", error.reason);
+            }
+            _ => panic!("Error expected"),
+        }
+    }
+
+    #[test]
+    fn should_return_error_when_identifier_is_empty_2() {
+        let tokens = get_tokens(&String::from("val ")).unwrap();
+        let binding = try_parse(&tokens, 0);
+
+        match binding {
+            Err(ParsingError::Err(error)) => {
+                assert_eq!(0, error.error_start);
+                assert_eq!(3, error.error_end);
+                assert_eq!("There should be an identifier after a `val` token", error.reason);
             }
             _ => panic!("Error expected"),
         }
