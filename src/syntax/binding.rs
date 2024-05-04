@@ -313,4 +313,35 @@ mod tests {
             _ => panic!("Error expected"),
         }
     }
+
+    #[test]
+    fn should_error_when_equal_op_is_missing() {
+        let tokens = get_tokens(&String::from("val identifier ")).unwrap();
+        let binding = try_parse(&tokens, 0);
+
+        match binding {
+            Err(ParsingError::Err(error)) => {
+                assert_eq!(4, error.error_start);
+                assert_eq!(14, error.error_end);
+                assert_eq!("There should be an equal sign `=` after the identifier", error.reason);
+            }
+            _ => panic!("Error expected"),
+        }
+    }
+
+    #[test]
+    fn should_error_when_exp_is_empty() {
+        let tokens = get_tokens(&String::from("val identifier = ")).unwrap();
+        let binding = try_parse(&tokens, 0);
+
+        match binding {
+            Err(ParsingError::Err(error)) => {
+                assert_eq!(15, error.error_start);
+                assert_eq!(16, error.error_end);
+                assert_eq!("Expected an expression after the equal `=` operator", error.reason);
+            }
+            _ => panic!("Error expected"),
+        }
+
+    }
 }
