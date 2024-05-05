@@ -8,6 +8,7 @@
     codegen section can focus only in codegen, not in
     translation of thp->php.
 - Parse __more__ binary operators
+- Store tokens for the semantic analysis phase, to have actual error reporting
 - Parse more complex bindings
 - Watch mode
 - Improve error messages
@@ -24,8 +25,12 @@
 
 ## v0.0.12
 
+- [x] Infer datatype of an identifier
+- [ ] Infer datatype of a binary operatior
+- [ ] Infer datatype of unary operator
 - [ ] Infer datatype of a function call expression
 - [ ] Infer datatype of binary operators
+- [ ] Infer Int & Float as different types
 - [ ] Execute semantic analysis on the function's block
 - [ ] Write tests
 - [ ] Abstract the parsing of datatypes, such that in the future generics can be implemented in a single place

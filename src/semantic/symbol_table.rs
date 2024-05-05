@@ -45,6 +45,11 @@ impl SymbolTable {
     pub fn test(&self, key: &String) -> bool {
         self.node.borrow_mut().test(key)
     }
+
+    /// Gets the datatype of a symbol, if it exists
+    pub fn get_type(&self, key: &String) -> Option<String> {
+        self.node.borrow_mut().get_type(key)
+    }
 }
 
 impl SymbolTableNode {
@@ -81,6 +86,27 @@ impl SymbolTableNode {
                 parent.test(key)
             }
             None => false,
+        }
+    }
+
+    /// Returns the symbol's datatype
+    pub fn get_type(&mut self, key: &String) -> Option<String> {
+        // Try to get the type in the current scope
+        if let Some(entry) = self.scope.get(key) {
+            // TODO: Change to allow other types of datatypes: functions, classes, maps
+            return match entry {
+                SymbolEntry::Variable(t) => Some(t.clone()),
+                SymbolEntry::Function(_, _) => None,
+            }
+        }
+
+        // Try to get the type in the parent scope
+        match &self.parent {
+            Some(parent) => {
+                let mut parent = parent.as_ref().borrow_mut();
+                parent.get_type(key)
+            }
+            None => None,
         }
     }
 }

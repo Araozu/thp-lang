@@ -28,7 +28,7 @@ impl SemanticCheck for Binding<'_> {
 
         // This gets the datatype of the assigned expression,
         // to compare it later with the declared datatype.
-        let expression_datatype = self.expression.get_type();
+        let expression_datatype = self.expression.get_type(scope)?;
 
         let datatype = match self.datatype {
             Some(t) => t.value.clone(),
