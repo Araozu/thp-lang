@@ -35,9 +35,9 @@
 
 - [x] Parse binding of form `val Type variable = value`
 - [x] Parse binding of form `Type variable = value`
-- [ ] Infer datatype of `value` in the above for a simple expression
-- [ ] Ensure that the anotated datatype matches the datatype of `value` in the above
-- [ ] Infer datatype of a `val variable = value` in the AST: Use the infered datatype
+- [x] Infer datatype of `value` in the above for a simple expression (minimal)
+- [x] Ensure that the anotated datatype matches the datatype of `value` in the above (binding)
+- [x] Infer datatype of a `val variable = value` in the AST: Use the infered datatype (binding)
 - [x] Formally define the top level constructs
 - [x] Parse bindings and function declarations as top level constructs
 - [x] Parse function declaration arguments (`Type id`)
