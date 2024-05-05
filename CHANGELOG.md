@@ -43,7 +43,7 @@
 - [x] Parse function declaration arguments (`Type id`)
 - [x] Parse function return datatype (`fun f() -> Type`)
 - [x] Return parsing to variables to var/val
-- [ ] Write tests
+- [x] Write tests
 
 
 ## v0.0.10
