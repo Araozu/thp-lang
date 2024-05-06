@@ -26,12 +26,30 @@ impl Typed for Expression<'_> {
                         }))
                     }
                 };
-                
+
                 Ok(datatype)
             }
             Expression::FunctionCall(_) => todo!(),
             Expression::UnaryOperator(_, _) => todo!(),
-            Expression::BinaryOperator(_, _, _) => todo!(),
+            Expression::BinaryOperator(exp1, exp2, operator) => {
+                let t1 = exp1.get_type(scope)?;
+                let t2 = exp2.get_type(scope)?;
+
+                // TODO: There's definitely a better way to do this
+                if *operator == "+" && t1 == "Int" && t2 == "Int" {
+                    return Ok("Int".into());
+                } else if *operator == "-" && t1 == "Int" && t2 == "Int" {
+                    return Ok("Int".into());
+                }
+
+                return Err(MistiError::Semantic(SemanticError {
+                    error_start: 0,
+                    error_end: 1,
+                    reason: format!(
+                        "Unsupported binary operator or invalid arguments to the operator."
+                    ),
+                }));
+            }
         }
     }
 }
