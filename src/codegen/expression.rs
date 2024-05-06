@@ -11,7 +11,8 @@ impl Transpilable for Expression<'_> {
     /// - Identifier
     fn transpile(&self) -> String {
         match self {
-            Expression::Number(value) => format!("{}", value),
+            Expression::Int(value) => format!("{}", value),
+            Expression::Float(value) => format!("{}", value),
             Expression::String(value) => {
                 format!("{}", *value)
             }
@@ -41,7 +42,7 @@ mod tests {
     #[test]
     fn should_transpile_number() {
         let str = String::from("42");
-        let exp = Expression::Number(&str);
+        let exp = Expression::Int(&str);
         let result = exp.transpile();
 
         assert_eq!("42", result);

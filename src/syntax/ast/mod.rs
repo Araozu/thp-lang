@@ -43,7 +43,8 @@ pub struct Parameter<'a> {
 
 #[derive(Debug)]
 pub enum Expression<'a> {
-    Number(&'a String),
+    Int(&'a String),
+    Float(&'a String),
     String(&'a String),
     Boolean(bool),
     Identifier(&'a String),

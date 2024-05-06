@@ -30,7 +30,7 @@ mod tests {
         let binding = Binding {
             datatype: None,
             identifier: &id_token,
-            expression: Expression::Number(&value),
+            expression: Expression::Int(&value),
             is_mutable: false,
         };
 

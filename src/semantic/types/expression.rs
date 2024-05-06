@@ -10,8 +10,8 @@ impl Typed for Expression<'_> {
     /// Attempts to get the datatype for an expression.
     fn get_type(&self, scope: &SymbolTable) -> Result<String, MistiError> {
         match self {
-            // TODO: Distinguish between Int & Float
-            Expression::Number(_) => Ok("Int".into()),
+            Expression::Int(_) => Ok("Int".into()),
+            Expression::Float(_) => Ok("Float".into()),
             Expression::String(_) => Ok("String".into()),
             Expression::Boolean(_) => Ok("Bool".into()),
             Expression::Identifier(identifier) => {

@@ -52,7 +52,7 @@ mod tests {
         match expression {
             Ok((Expression::UnaryOperator(operator, expression), _)) => {
                 match (operator, *expression) {
-                    (op, Expression::Number(value)) => {
+                    (op, Expression::Int(value)) => {
                         assert_eq!(*op, "-");
                         assert_eq!(*value, "10");
                     }

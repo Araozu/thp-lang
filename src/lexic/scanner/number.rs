@@ -1,7 +1,7 @@
 use crate::error_handling::LexError;
 use crate::lexic::{token::Token, utils, LexResult};
 
-/// Function to scan a number
+/// Function to scan an int/float
 ///
 /// This function assumes that the character at `start_pos` is a number [0-9],
 /// if not it will panic
@@ -36,7 +36,7 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> LexResu
             let current_len = current.len();
 
             LexResult::Some(
-                Token::new_number(current, start_pos - current_len),
+                Token::new_int(current, start_pos - current_len),
                 start_pos,
             )
         }
@@ -98,7 +98,7 @@ fn scan_double_impl(chars: &Vec<char>, start_pos: usize, current: String) -> Lex
             let current_len = current.len();
 
             LexResult::Some(
-                Token::new_number(current, start_pos - current_len),
+                Token::new_float(current, start_pos - current_len),
                 start_pos,
             )
         }
@@ -144,7 +144,7 @@ fn scan_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, 
             let current_len = current.len();
 
             (
-                Token::new_number(current, start_pos - current_len),
+                Token::new_float(current, start_pos - current_len),
                 start_pos,
             )
         }
@@ -163,7 +163,7 @@ fn scan_hex_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Tok
             let current_len = current.len();
 
             (
-                Token::new_number(current, start_pos - current_len),
+                Token::new_int(current, start_pos - current_len),
                 start_pos,
             )
         }
@@ -187,7 +187,7 @@ mod tests {
 
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(3, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Int, token.token_type);
             assert_eq!("123", token.value);
             assert_eq!(0, token.position);
         } else {
@@ -199,7 +199,7 @@ mod tests {
 
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(4, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Int, token.token_type);
             assert_eq!("0123", token.value);
             assert_eq!(0, token.position);
         } else {
@@ -211,7 +211,7 @@ mod tests {
 
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(8, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Int, token.token_type);
             assert_eq!("123456", token.value);
             assert_eq!(2, token.position);
         } else {
@@ -227,7 +227,7 @@ mod tests {
 
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(3, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Int, token.token_type);
             assert_eq!("123", token.value);
         } else {
             panic!()
@@ -241,7 +241,7 @@ mod tests {
 
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(4, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Int, token.token_type);
             assert_eq!("0x20", token.value);
             assert_eq!(0, token.position);
         } else {
@@ -253,7 +253,7 @@ mod tests {
 
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(12, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Int, token.token_type);
             assert_eq!("0xff23DA", token.value);
             assert_eq!(4, token.position);
         } else {
@@ -277,7 +277,7 @@ mod tests {
         let input = str_to_vec("0 x20 ");
         let start_pos = 0;
         if let LexResult::Some(token, _) = scan(&input, start_pos) {
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Int, token.token_type);
             assert_eq!("0", token.value);
         } else {
             panic!()
@@ -290,7 +290,7 @@ mod tests {
         let input = str_to_vec("1x20");
         let start_pos = 0;
         if let LexResult::Some(token, _) = scan(&input, start_pos) {
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Int, token.token_type);
             assert_eq!("1", token.value);
         } else {
             panic!()
@@ -304,7 +304,7 @@ mod tests {
         let start_pos = 0;
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(4, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Float, token.token_type);
             assert_eq!("3.22", token.value);
             assert_eq!(0, token.position);
         } else {
@@ -315,7 +315,7 @@ mod tests {
         let start_pos = 0;
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(11, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Float, token.token_type);
             assert_eq!("123456.7890", token.value);
             assert_eq!(0, token.position);
         } else {
@@ -356,7 +356,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!("1e+0", token.value);
             assert_eq!(4, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Float, token.token_type);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -366,7 +366,7 @@ mod tests {
         let start_pos = 0;
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(4, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Float, token.token_type);
             assert_eq!("1e-0", token.value);
             assert_eq!(0, token.position);
         } else {
@@ -377,7 +377,7 @@ mod tests {
         let start_pos = 0;
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(4, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Float, token.token_type);
             assert_eq!("0e+0", token.value);
             assert_eq!(0, token.position);
         } else {
@@ -388,7 +388,7 @@ mod tests {
         let start_pos = 0;
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(19, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Float, token.token_type);
             assert_eq!("123498790e+12349870", token.value);
             assert_eq!(0, token.position);
         } else {
@@ -404,7 +404,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!("1.24e+1", token.value);
             assert_eq!(7, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Float, token.token_type);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -415,7 +415,7 @@ mod tests {
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!("0.00000000000001e+1", token.value);
             assert_eq!(19, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Float, token.token_type);
             assert_eq!(0, token.position);
         } else {
             panic!()
@@ -429,7 +429,7 @@ mod tests {
 
         if let LexResult::Some(token, next) = scan(&input, start_pos) {
             assert_eq!(5, next);
-            assert_eq!(TokenType::Number, token.token_type);
+            assert_eq!(TokenType::Int, token.token_type);
             assert_eq!("123", token.value);
             assert_eq!(2, token.position);
         } else {

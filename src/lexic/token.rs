@@ -2,7 +2,8 @@
 pub enum TokenType {
     Identifier,
     Datatype,
-    Number,
+    Int,
+    Float,
     String,
     Operator,
     LeftParen,
@@ -47,9 +48,17 @@ impl Token {
         }
     }
 
-    pub fn new_number(value: String, position: usize) -> Token {
+    pub fn new_int(value: String, position: usize) -> Token {
         Token {
-            token_type: TokenType::Number,
+            token_type: TokenType::Int,
+            value,
+            position,
+        }
+    }
+
+    pub fn new_float(value: String, position: usize) -> Token {
+        Token {
+            token_type: TokenType::Float,
             value,
             position,
         }

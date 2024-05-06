@@ -256,15 +256,15 @@ mod tests {
         let tokens = get_tokens(&input).unwrap();
 
         let t1 = tokens.get(0).unwrap();
-        assert_eq!(TokenType::Number, t1.token_type);
+        assert_eq!(TokenType::Int, t1.token_type);
         assert_eq!("126", t1.value);
 
         let t2 = tokens.get(1).unwrap();
-        assert_eq!(TokenType::Number, t2.token_type);
+        assert_eq!(TokenType::Float, t2.token_type);
         assert_eq!("278.98", t2.value);
 
         let t3 = tokens.get(2).unwrap();
-        assert_eq!(TokenType::Number, t3.token_type);
+        assert_eq!(TokenType::Float, t3.token_type);
         assert_eq!("0.282398", t3.value);
 
         assert_eq!("1789e+1", tokens.get(3).unwrap().value);
@@ -324,7 +324,7 @@ mod tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::Number, tokens[2].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
     }
 
     #[test]
@@ -333,7 +333,7 @@ mod tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::Number, tokens[2].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
     }
 
     #[test]
@@ -341,10 +341,10 @@ mod tests {
         let input = String::from("3\n \n   22");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::Int, tokens[0].token_type);
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[3].token_type);
     }
 
     #[test]
@@ -352,13 +352,13 @@ mod tests {
         let input = String::from("3\n \n    22\n        111");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::Int, tokens[0].token_type);
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[3].token_type);
         assert_eq!(TokenType::NewLine, tokens[4].token_type);
         assert_eq!(TokenType::INDENT, tokens[5].token_type);
-        assert_eq!(TokenType::Number, tokens[6].token_type);
+        assert_eq!(TokenType::Int, tokens[6].token_type);
     }
 
     #[test]
@@ -366,12 +366,12 @@ mod tests {
         let input = String::from("3\n \n    22\n    111");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::Int, tokens[0].token_type);
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[3].token_type);
         assert_eq!(TokenType::NewLine, tokens[4].token_type);
-        assert_eq!(TokenType::Number, tokens[5].token_type);
+        assert_eq!(TokenType::Int, tokens[5].token_type);
     }
 
     #[test]
@@ -379,13 +379,13 @@ mod tests {
         let input = String::from("3\n \n    22\n111");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::Int, tokens[0].token_type);
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[3].token_type);
         assert_eq!(TokenType::NewLine, tokens[4].token_type);
         assert_eq!(TokenType::DEDENT, tokens[5].token_type);
-        assert_eq!(TokenType::Number, tokens[6].token_type);
+        assert_eq!(TokenType::Int, tokens[6].token_type);
     }
 
     #[test]
@@ -393,16 +393,16 @@ mod tests {
         let input = String::from("1\n  2\n    3\n  4\n5");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::Int, tokens[0].token_type);
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[3].token_type);
         assert_eq!(TokenType::NewLine, tokens[4].token_type);
         assert_eq!(TokenType::INDENT, tokens[5].token_type);
-        assert_eq!(TokenType::Number, tokens[6].token_type);
+        assert_eq!(TokenType::Int, tokens[6].token_type);
         assert_eq!(TokenType::NewLine, tokens[7].token_type);
         assert_eq!(TokenType::DEDENT, tokens[8].token_type);
-        assert_eq!(TokenType::Number, tokens[9].token_type);
+        assert_eq!(TokenType::Int, tokens[9].token_type);
         assert_eq!(TokenType::NewLine, tokens[10].token_type);
         assert_eq!(TokenType::DEDENT, tokens[11].token_type);
     }
@@ -412,13 +412,13 @@ mod tests {
         let input = String::from("1\n  2\n    3\n4");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::Int, tokens[0].token_type);
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[3].token_type);
         assert_eq!(TokenType::NewLine, tokens[4].token_type);
         assert_eq!(TokenType::INDENT, tokens[5].token_type);
-        assert_eq!(TokenType::Number, tokens[6].token_type);
+        assert_eq!(TokenType::Int, tokens[6].token_type);
         assert_eq!(TokenType::NewLine, tokens[7].token_type);
         assert_eq!(TokenType::DEDENT, tokens[8].token_type);
         assert_eq!(TokenType::DEDENT, tokens[9].token_type);
@@ -435,10 +435,10 @@ mod indentation_tests {
         let input = String::from("1\n  2");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::Int, tokens[0].token_type);
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[3].token_type);
         assert_eq!(TokenType::DEDENT, tokens[4].token_type);
         assert_eq!(TokenType::EOF, tokens[5].token_type);
     }
@@ -448,13 +448,13 @@ mod indentation_tests {
         let input = String::from("1\n  2\n    3");
         let tokens = get_tokens(&input).unwrap();
 
-        assert_eq!(TokenType::Number, tokens[0].token_type);
+        assert_eq!(TokenType::Int, tokens[0].token_type);
         assert_eq!(TokenType::NewLine, tokens[1].token_type);
         assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Number, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[3].token_type);
         assert_eq!(TokenType::NewLine, tokens[4].token_type);
         assert_eq!(TokenType::INDENT, tokens[5].token_type);
-        assert_eq!(TokenType::Number, tokens[6].token_type);
+        assert_eq!(TokenType::Int, tokens[6].token_type);
         assert_eq!(TokenType::DEDENT, tokens[7].token_type);
         assert_eq!(TokenType::DEDENT, tokens[8].token_type);
         assert_eq!(TokenType::EOF, tokens[9].token_type);

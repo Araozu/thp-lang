@@ -135,7 +135,7 @@ mod tests {
 
         let first_argument = arguments_list.arguments.get(0).unwrap();
 
-        let Expression::Number(_) = first_argument else {
+        let Expression::Int(_) = first_argument else {
             panic!("Expected a number")
         };
     }
@@ -153,7 +153,7 @@ mod tests {
         assert_eq!(arguments_list.arguments.len(), 1);
 
         let first_argument = arguments_list.arguments.get(0).unwrap();
-        let Expression::Number(_) = first_argument else {
+        let Expression::Int(_) = first_argument else {
             panic!("Expected a number")
         };
     }
@@ -175,7 +175,7 @@ mod tests {
         };
 
         let second_argument = arguments_list.arguments.get(1).unwrap();
-        let Expression::Number(_) = second_argument else {
+        let Expression::Int(_) = second_argument else {
             panic!("Expected a number")
         };
     }

@@ -12,7 +12,8 @@ use crate::{
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     match tokens.get_significant(pos) {
         Some((token, token_pos)) => match token.token_type {
-            TokenType::Number => Ok((Expression::Number(&token.value), token_pos + 1)),
+            TokenType::Int => Ok((Expression::Int(&token.value), token_pos + 1)),
+            TokenType::Float => Ok((Expression::Float(&token.value), token_pos + 1)),
             TokenType::String => Ok((Expression::String(&token.value), token_pos + 1)),
             TokenType::Identifier if token.value == "true" || token.value == "false" => {
                 Ok((Expression::Boolean(token.value == "true"), token_pos + 1))
@@ -50,7 +51,7 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            Ok((Expression::Number(value), _)) => {
+            Ok((Expression::Int(value), _)) => {
                 assert_eq!("40", format!("{}", value))
             }
             _ => panic!(),
