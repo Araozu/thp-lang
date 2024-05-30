@@ -30,7 +30,46 @@ impl Typed for Expression<'_> {
                 Ok(datatype)
             }
             Expression::FunctionCall(_) => todo!(),
-            Expression::UnaryOperator(_, _) => todo!(),
+            Expression::UnaryOperator(op, exp) => {
+                let expr_type = match exp.get_type(scope) {
+                    Ok(t) => t,
+                    Err(_reason) => {
+                        return Err(MistiError::Semantic(SemanticError {
+                            error_start: 0,
+                            error_end: 1,
+                            reason: format!("Error getting type of expression"),
+                        }))
+                    }
+                };
+
+                // Only supported unary operator: - & !
+                if *op == "-" {
+                    if expr_type != "Int" && expr_type != "Float" {
+                        return Err(MistiError::Semantic(SemanticError {
+                            error_start: 0,
+                            error_end: 1,
+                            reason: format!(
+                                "Expected a Int or Float after unary `-`, got {}",
+                                expr_type
+                            ),
+                        }));
+                    } else {
+                        return Ok("Int".into());
+                    }
+                } else if *op == "!" {
+                    if expr_type != "Bool" {
+                        return Err(MistiError::Semantic(SemanticError {
+                            error_start: 0,
+                            error_end: 1,
+                            reason: format!("Expected a Bool after unary `!`, got {}", expr_type),
+                        }));
+                    } else {
+                        return Ok("Bool".into());
+                    }
+                }
+
+                panic!("Illegal state: Found an unexpected unary operator during semantic analysis: {}", *op);
+            }
             Expression::BinaryOperator(exp1, exp2, operator) => {
                 let t1 = exp1.get_type(scope)?;
                 let t2 = exp2.get_type(scope)?;

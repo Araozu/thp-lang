@@ -11,6 +11,8 @@ mod syntax;
 mod lexic;
 // Module to handle semantic analysis
 mod semantic;
+// Defines the PHP AST
+mod php_ast;
 // Transforms an AST to JS
 mod codegen;
 

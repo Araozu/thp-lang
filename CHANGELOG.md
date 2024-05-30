@@ -22,12 +22,13 @@
 - Formatter
 - Simple language server
 - Decide how to handle comments in the syntax (?)(should comments mean something like in rust?)
+- Not ignore comments & whitespace, for code formatting
 
 ## v0.0.12
 
 - [x] Infer datatype of an identifier
 - [x] Infer datatype of a binary operatior
-- [ ] Infer datatype of unary operator
+- [x] Infer datatype of unary operator
 - [ ] Infer datatype of a function call expression
 - [ ] Infer datatype of binary operators
 - [x] Infer Int & Float as different types
