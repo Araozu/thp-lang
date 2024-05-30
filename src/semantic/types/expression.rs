@@ -29,7 +29,13 @@ impl Typed for Expression<'_> {
 
                 Ok(datatype)
             }
-            Expression::FunctionCall(_) => todo!(),
+            Expression::FunctionCall(_f) => {
+                // TODO: Must implement functions as first class citizens
+                // for this to work
+
+                // TODO: check the parameter types
+                panic!("Not implemented: Get datatype of function call")
+            }
             Expression::UnaryOperator(op, exp) => {
                 let expr_type = match exp.get_type(scope) {
                     Ok(t) => t,

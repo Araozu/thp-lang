@@ -10,6 +10,7 @@ pub struct ModuleAST<'a> {
     pub declarations: Vec<TopLevelDeclaration<'a>>,
 }
 
+// TODO: this and Statement should merge
 #[derive(Debug)]
 pub enum TopLevelDeclaration<'a> {
     Binding(var_binding::Binding<'a>),
@@ -27,6 +28,7 @@ pub struct FunctionDeclaration<'a> {
 
 #[derive(Debug)]
 pub struct Block<'a> {
+    // TODO: this should be a Vec of Statement|Expression
     pub statements: Vec<statement::Statement<'a>>,
 }
 

@@ -2,6 +2,7 @@
 
 ## TODO
 
+- Implement functions as first class citizens
 - Implement AST transformation before codegen:
     Create a new AST to represent PHP source code
     and a THP ast -> PHP ast process, so that the
@@ -23,18 +24,25 @@
 - Simple language server
 - Decide how to handle comments in the syntax (?)(should comments mean something like in rust?)
 - Not ignore comments & whitespace, for code formatting
+- Abstract the parsing of datatypes, such that in the future generics can be implemented in a single place
+
+## v0.0.13
+
+- [ ] Define a formal grammar
+- [ ] Define the top level constructs
+- [ ] Implement a hello world until semantic analysis
+- [ ] Refactor code
+
 
 ## v0.0.12
 
 - [x] Infer datatype of an identifier
 - [x] Infer datatype of a binary operatior
 - [x] Infer datatype of unary operator
-- [ ] Infer datatype of a function call expression
-- [ ] Infer datatype of binary operators
+- [x] Infer datatype of binary operators
 - [x] Infer Int & Float as different types
-- [ ] Execute semantic analysis on the function's block
-- [ ] Write tests
-- [ ] Abstract the parsing of datatypes, such that in the future generics can be implemented in a single place
+- [x] Execute semantic analysis on the function's block
+- [x] Write tests
 
 
 ## v0.0.11

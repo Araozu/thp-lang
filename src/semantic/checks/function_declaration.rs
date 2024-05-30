@@ -1,7 +1,7 @@
 use crate::{
     error_handling::{semantic_error::SemanticError, MistiError},
-    semantic::{impls::SemanticCheck, symbol_table::SymbolEntry},
-    syntax::ast::FunctionDeclaration,
+    semantic::{impls::SemanticCheck, symbol_table::{SymbolEntry, SymbolTable}},
+    syntax::ast::{statement::Statement, FunctionDeclaration},
 };
 
 impl SemanticCheck for FunctionDeclaration<'_> {
@@ -25,8 +25,23 @@ impl SemanticCheck for FunctionDeclaration<'_> {
             return Err(MistiError::Semantic(error));
         }
 
-        // TODO: Check the return type of the function
+        // Create a new scope and use it in the function block
+        let function_scope = SymbolTable::new_from_parent(scope);
+
         // TODO: Check the return type of the function body
+        // This should be the last expression in the block
+        for stmt in self.block.statements.iter() {
+            match stmt {
+                Statement::Binding(b) => {
+                    if let Err(err) = b.check_semantics(&function_scope) {
+                        return Err(err)
+                    }
+                }
+                Statement::FunctionCall(_) => panic!("FunctionCall semantic check not implemented")
+            }
+        }
+
+        // TODO: Check the return type of the function
 
         scope.insert(
             function_name,
