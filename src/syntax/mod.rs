@@ -12,7 +12,7 @@ pub mod ast;
 use crate::lexic::token::{Token, TokenType};
 use ast::ModuleAST;
 
-use self::ast::TopLevelDeclaration;
+use self::ast::ModuleMembers;
 
 pub type ParsingResult<'a, A> = Result<(A, usize), ParsingError<'a>>;
 
@@ -30,7 +30,7 @@ pub enum ParsingError<'a> {
 }
 
 /// Constructs the Misti AST from a vector of tokens
-pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError> {
+pub fn build_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError> {
     let mut top_level_declarations = Vec::new();
     let token_amount = tokens.len();
     let mut current_pos = 0;
@@ -61,21 +61,15 @@ pub fn construct_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError
     }
 
     Ok(ModuleAST {
-        declarations: top_level_declarations,
+        productions: top_level_declarations,
     })
 }
 
-fn next_construct<'a>(
-    tokens: &'a Vec<Token>,
-    current_pos: usize,
-) -> ParsingResult<TopLevelDeclaration> {
+fn next_construct<'a>(tokens: &'a Vec<Token>, current_pos: usize) -> ParsingResult<ModuleMembers> {
     // Try to parse a function declaration
     match functions::function_declaration::try_parse(tokens, current_pos) {
         Ok((declaration, next_pos)) => {
-            return Ok((
-                TopLevelDeclaration::FunctionDeclaration(declaration),
-                next_pos,
-            ))
+            return Ok((ModuleMembers::FunctionDeclaration(declaration), next_pos))
         }
         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
         _ => {}
@@ -83,16 +77,14 @@ fn next_construct<'a>(
 
     // Try to parse a binding
     match binding::try_parse(tokens, current_pos) {
-        Ok((binding, next_pos)) => return Ok((TopLevelDeclaration::Binding(binding), next_pos)),
+        Ok((binding, next_pos)) => return Ok((ModuleMembers::Binding(binding), next_pos)),
         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
         _ => {}
     }
 
     // Try to parse an expression
     match expression::try_parse(tokens, current_pos) {
-        Ok((expression, next_pos)) => {
-            return Ok((TopLevelDeclaration::Expression(expression), next_pos))
-        }
+        Ok((expression, next_pos)) => return Ok((ModuleMembers::Expression(expression), next_pos)),
         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
         _ => {}
     }
@@ -109,13 +101,13 @@ mod tests {
     fn should_parse_top_level_construct_with_trailing_newline() {
         let input = String::from(" fun f1(){}\n");
         let tokens = crate::lexic::get_tokens(&input).unwrap();
-        let declarations = construct_ast(&tokens).unwrap().declarations;
+        let declarations = build_ast(&tokens).unwrap().productions;
 
         assert_eq!(declarations.len(), 1);
 
         match declarations.get(0).unwrap() {
-            TopLevelDeclaration::Binding(_) => panic!("Expected a function declaration"),
-            TopLevelDeclaration::FunctionDeclaration(_f) => {
+            ModuleMembers::Binding(_) => panic!("Expected a function declaration"),
+            ModuleMembers::FunctionDeclaration(_f) => {
                 assert!(true)
             }
             _ => panic!("Not implemented: Expression at top level"),
@@ -126,21 +118,21 @@ mod tests {
     fn should_parse_2_top_level_construct() {
         let input = String::from("fun f1(){} fun f2() {}");
         let tokens = crate::lexic::get_tokens(&input).unwrap();
-        let declarations = construct_ast(&tokens).unwrap().declarations;
+        let declarations = build_ast(&tokens).unwrap().productions;
 
         assert_eq!(declarations.len(), 2);
 
         match declarations.get(0).unwrap() {
-            TopLevelDeclaration::Binding(_) => panic!("Expected a function declaration"),
-            TopLevelDeclaration::FunctionDeclaration(_f) => {
+            ModuleMembers::Binding(_) => panic!("Expected a function declaration"),
+            ModuleMembers::FunctionDeclaration(_f) => {
                 assert!(true)
             }
             _ => panic!("Not implemented: Expression at top level"),
         }
 
         match declarations.get(1).unwrap() {
-            TopLevelDeclaration::Binding(_) => panic!("Expected a function declaration"),
-            TopLevelDeclaration::FunctionDeclaration(_f) => {
+            ModuleMembers::Binding(_) => panic!("Expected a function declaration"),
+            ModuleMembers::FunctionDeclaration(_f) => {
                 assert!(true)
             }
             _ => panic!("Not implemented: Expression at top level"),

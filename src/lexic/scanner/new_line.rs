@@ -16,8 +16,8 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
                 LexResult::Some(token, start_pos)
             }
         },
-        Some(_) | None => {
-            let token = Token::new(String::from(";"), start_pos, TokenType::NewLine);
+        _ => {
+            let token = Token::new(String::from(""), start_pos, TokenType::NewLine);
             LexResult::Some(token, start_pos)
         }
     }

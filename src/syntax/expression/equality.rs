@@ -72,7 +72,7 @@ mod tests {
             }
         }
     }
-    
+
     #[test]
     fn should_not_parse_unfinished_comparison() {
         let tokens = get_tokens(&String::from("a ==")).unwrap();
@@ -80,7 +80,7 @@ mod tests {
 
         match result {
             Err(ParsingError::Unmatched) => assert!(true),
-            _ => panic!("Expected an Unmatched error")
+            _ => panic!("Expected an Unmatched error"),
         }
     }
 }

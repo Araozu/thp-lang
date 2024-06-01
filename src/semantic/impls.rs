@@ -10,7 +10,7 @@ pub trait SemanticCheck {
 impl SemanticCheck for ModuleAST<'_> {
     /// Checks that this AST is semantically correct, given a symbol table
     fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError> {
-        for declaration in &self.declarations {
+        for declaration in &self.productions {
             declaration.check_semantics(scope)?;
         }
 

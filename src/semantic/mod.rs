@@ -1,8 +1,8 @@
 use crate::{error_handling::MistiError, syntax::ast::ModuleAST};
 
+mod checks;
 mod impls;
 mod symbol_table;
-mod checks;
 mod types;
 
 use impls::SemanticCheck;

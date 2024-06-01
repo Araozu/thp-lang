@@ -26,11 +26,11 @@ impl PrintableError for SyntaxError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{error_handling::MistiError, lexic::get_tokens, syntax::construct_ast};
+    use crate::{error_handling::MistiError, lexic::get_tokens, syntax::build_ast};
 
     fn _get_error_data(input: String) -> (Vec<char>, MistiError) {
         let tokens = get_tokens(&input).unwrap();
-        let error_holder = construct_ast(&tokens);
+        let error_holder = build_ast(&tokens);
 
         match error_holder {
             Ok(_) => panic!(

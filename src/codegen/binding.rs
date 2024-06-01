@@ -1,7 +1,7 @@
 use super::Transpilable;
-use crate::syntax::ast::var_binding::Binding;
+use crate::syntax::ast::var_binding::VariableBinding;
 
-impl Transpilable for Binding<'_> {
+impl Transpilable for VariableBinding<'_> {
     /// Transpiles val and var bindings into PHP.
     fn transpile(&self) -> String {
         let expression_str = self.expression.transpile();
@@ -15,7 +15,7 @@ mod tests {
     use super::*;
     use crate::{
         lexic::token::{Token, TokenType},
-        syntax::ast::{var_binding::Binding, Expression},
+        syntax::ast::{var_binding::VariableBinding, Expression},
     };
 
     #[test]
@@ -27,7 +27,7 @@ mod tests {
             position: 0,
         };
         let value = String::from("322");
-        let binding = Binding {
+        let binding = VariableBinding {
             datatype: None,
             identifier: &id_token,
             expression: Expression::Int(&value),

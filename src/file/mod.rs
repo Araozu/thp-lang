@@ -81,7 +81,7 @@ fn compile(input: &String) -> Result<String, String> {
 ///
 /// Prints the generated code in stdin
 fn build_ast(input: &String, tokens: Vec<Token>) -> Result<String, String> {
-    let ast = syntax::construct_ast(&tokens);
+    let ast = syntax::build_ast(&tokens);
 
     let ast = match ast {
         Ok(ast) => ast,

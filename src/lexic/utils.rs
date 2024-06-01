@@ -20,6 +20,7 @@ pub fn is_operator(c: char) -> bool {
         || c == '='
         || c == '*'
         || c == '!'
+        // TODO: ??? where is this used??
         || c == '\\'
         || c == '/'
         || c == '|'

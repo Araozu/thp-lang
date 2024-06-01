@@ -203,8 +203,8 @@ mod tests {
         match result {
             LexResult::Err(reason) => {
                 assert_eq!("Incomplete string found", reason.reason)
-            },
-            _ => panic!("expected an error")
+            }
+            _ => panic!("expected an error"),
         }
     }
 
@@ -216,8 +216,8 @@ mod tests {
         match result {
             LexResult::Err(reason) => {
                 assert_eq!("Incomplete string found", reason.reason)
-            },
-            _ => panic!("expected an error")
+            }
+            _ => panic!("expected an error"),
         }
     }
 }

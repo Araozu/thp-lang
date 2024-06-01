@@ -181,7 +181,6 @@ mod tests {
         assert_eq!(first_param.identifier, "x");
     }
 
-
     #[test]
     fn should_parse_empty_param_list_with_1_parameter_with_trailing_comma() {
         let tokens = get_tokens(&String::from("(Int x, )")).unwrap();
@@ -228,7 +227,7 @@ mod tests {
     fn should_parse_multiline_params() {
         let tokens = get_tokens(&String::from("(\n    Int x,\n    String y,\n)")).unwrap();
         let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
- 
+
         assert_eq!(next_pos, 13);
         assert_eq!(result.parameters.len(), 2);
         let first_param = &result.parameters[0];

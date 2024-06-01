@@ -35,10 +35,7 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> LexResu
             // so this is used to retrieve the original START position of the token
             let current_len = current.len();
 
-            LexResult::Some(
-                Token::new_int(current, start_pos - current_len),
-                start_pos,
-            )
+            LexResult::Some(Token::new_int(current, start_pos - current_len), start_pos)
         }
     }
 }
@@ -162,10 +159,7 @@ fn scan_hex_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Tok
             // so this is used to retrieve the original START position of the token
             let current_len = current.len();
 
-            (
-                Token::new_int(current, start_pos - current_len),
-                start_pos,
-            )
+            (Token::new_int(current, start_pos - current_len), start_pos)
         }
     }
 }

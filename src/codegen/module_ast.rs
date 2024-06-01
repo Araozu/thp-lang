@@ -6,7 +6,7 @@ impl Transpilable for ModuleAST<'_> {
     /// nodes and leaves of the AST
     fn transpile(&self) -> String {
         let bindings_str: Vec<String> = self
-            .declarations
+            .productions
             .iter()
             .map(|binding| binding.transpile())
             .collect();
@@ -20,7 +20,7 @@ mod tests {
     use super::*;
     use crate::{
         lexic::token::{Token, TokenType},
-        syntax::ast::{var_binding::Binding, Expression, TopLevelDeclaration},
+        syntax::ast::{var_binding::VariableBinding, Expression, ModuleMembers},
     };
 
     #[test]
@@ -32,7 +32,7 @@ mod tests {
             position: 0,
         };
         let value = String::from("322");
-        let binding = Binding {
+        let binding = VariableBinding {
             datatype: None,
             identifier: &id_token,
             expression: Expression::Int(&value),
@@ -40,7 +40,7 @@ mod tests {
         };
 
         let module = ModuleAST {
-            declarations: vec![TopLevelDeclaration::Binding(binding)],
+            productions: vec![ModuleMembers::Binding(binding)],
         };
 
         let result = module.transpile();

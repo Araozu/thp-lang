@@ -97,7 +97,7 @@ impl SymbolTableNode {
             return match entry {
                 SymbolEntry::Variable(t) => Some(t.clone()),
                 SymbolEntry::Function(_, _) => None,
-            }
+            };
         }
 
         // Try to get the type in the parent scope

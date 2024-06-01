@@ -1,4 +1,4 @@
-use super::ast::var_binding::Binding;
+use super::ast::var_binding::VariableBinding;
 use super::utils::{parse_token_type, try_operator};
 use super::{expression, ParsingError, ParsingResult};
 use crate::error_handling::SyntaxError;
@@ -13,7 +13,7 @@ var binding = "var", datatype?, binding remainder
 
 binding remainder = identifier, "=", expression
  */
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Binding> {
+pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<VariableBinding> {
     let mut current_pos = pos;
 
     /*
@@ -130,7 +130,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Bindin
     };
     current_pos = next_pos;
 
-    let binding = Binding {
+    let binding = VariableBinding {
         datatype,
         identifier: &identifier,
         expression,
@@ -264,7 +264,10 @@ mod tests {
             Err(ParsingError::Err(error)) => {
                 assert_eq!(4, error.error_start);
                 assert_eq!(11, error.error_end);
-                assert_eq!("There should be an identifier after a binding", error.reason);
+                assert_eq!(
+                    "There should be an identifier after a binding",
+                    error.reason
+                );
             }
             _ => panic!("Error expected"),
         }
@@ -293,7 +296,10 @@ mod tests {
             Err(ParsingError::Err(error)) => {
                 assert_eq!(4, error.error_start);
                 assert_eq!(10, error.error_end);
-                assert_eq!("There should be an identifier after the datatype", error.reason);
+                assert_eq!(
+                    "There should be an identifier after the datatype",
+                    error.reason
+                );
             }
             _ => panic!("Error expected"),
         }
@@ -308,7 +314,10 @@ mod tests {
             Err(ParsingError::Err(error)) => {
                 assert_eq!(0, error.error_start);
                 assert_eq!(3, error.error_end);
-                assert_eq!("There should be an identifier after a `val` token", error.reason);
+                assert_eq!(
+                    "There should be an identifier after a `val` token",
+                    error.reason
+                );
             }
             _ => panic!("Error expected"),
         }
@@ -323,7 +332,10 @@ mod tests {
             Err(ParsingError::Err(error)) => {
                 assert_eq!(4, error.error_start);
                 assert_eq!(14, error.error_end);
-                assert_eq!("There should be an equal sign `=` after the identifier", error.reason);
+                assert_eq!(
+                    "There should be an equal sign `=` after the identifier",
+                    error.reason
+                );
             }
             _ => panic!("Error expected"),
         }
@@ -338,10 +350,12 @@ mod tests {
             Err(ParsingError::Err(error)) => {
                 assert_eq!(15, error.error_start);
                 assert_eq!(16, error.error_end);
-                assert_eq!("Expected an expression after the equal `=` operator", error.reason);
+                assert_eq!(
+                    "Expected an expression after the equal `=` operator",
+                    error.reason
+                );
             }
             _ => panic!("Error expected"),
         }
-
     }
 }

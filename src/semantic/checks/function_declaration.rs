@@ -1,7 +1,10 @@
 use crate::{
     error_handling::{semantic_error::SemanticError, MistiError},
-    semantic::{impls::SemanticCheck, symbol_table::{SymbolEntry, SymbolTable}},
-    syntax::ast::{statement::Statement, FunctionDeclaration},
+    semantic::{
+        impls::SemanticCheck,
+        symbol_table::{SymbolEntry, SymbolTable},
+    },
+    syntax::ast::{FunctionDeclaration, Statement},
 };
 
 impl SemanticCheck for FunctionDeclaration<'_> {
@@ -34,10 +37,10 @@ impl SemanticCheck for FunctionDeclaration<'_> {
             match stmt {
                 Statement::Binding(b) => {
                     if let Err(err) = b.check_semantics(&function_scope) {
-                        return Err(err)
+                        return Err(err);
                     }
                 }
-                Statement::FunctionCall(_) => panic!("FunctionCall semantic check not implemented")
+                Statement::FunctionCall(_) => panic!("FunctionCall semantic check not implemented"),
             }
         }
 

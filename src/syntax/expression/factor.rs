@@ -43,7 +43,6 @@ fn parse_many<'a>(
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -85,4 +84,3 @@ mod tests {
         }
     }
 }
-

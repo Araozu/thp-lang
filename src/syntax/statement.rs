@@ -1,7 +1,7 @@
 use crate::lexic::token::Token;
 
 use super::{
-    ast::{statement::Statement, Expression},
+    ast::{Expression, Statement},
     binding,
     expression::function_call_expr,
     ParsingError, ParsingResult,

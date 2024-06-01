@@ -28,10 +28,13 @@
 
 ## v0.0.13
 
-- [ ] Define a formal grammar
+- [ ] Begin work on a formal grammar
+- [ ] Simplify AST
 - [ ] Define the top level constructs
+- [ ] Include the original tokens in the AST
 - [ ] Implement a hello world until semantic analysis
 - [ ] Refactor code
+- [ ] Remove `PARSER couldn't parse any construction` error & replace with an actual error message
 
 
 ## v0.0.12

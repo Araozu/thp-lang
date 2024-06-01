@@ -1,12 +1,12 @@
-use crate::syntax::ast::TopLevelDeclaration;
+use crate::syntax::ast::ModuleMembers;
 
 use super::Transpilable;
 
-impl Transpilable for TopLevelDeclaration<'_> {
+impl Transpilable for ModuleMembers<'_> {
     fn transpile(&self) -> String {
         match self {
-            TopLevelDeclaration::Binding(binding) => binding.transpile(),
-            TopLevelDeclaration::FunctionDeclaration(fun) => fun.transpile(),
+            ModuleMembers::Binding(binding) => binding.transpile(),
+            ModuleMembers::FunctionDeclaration(fun) => fun.transpile(),
             _ => panic!("Not implemented: Expression at top level"),
         }
     }

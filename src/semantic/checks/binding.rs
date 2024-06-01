@@ -1,10 +1,10 @@
 use crate::{
     error_handling::{semantic_error::SemanticError, MistiError},
     semantic::{impls::SemanticCheck, symbol_table::SymbolEntry, types::Typed},
-    syntax::ast::var_binding::Binding,
+    syntax::ast::var_binding::VariableBinding,
 };
 
-impl SemanticCheck for Binding<'_> {
+impl SemanticCheck for VariableBinding<'_> {
     fn check_semantics(
         &self,
         scope: &crate::semantic::symbol_table::SymbolTable,

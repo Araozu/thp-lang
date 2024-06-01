@@ -1,21 +1,30 @@
 use crate::lexic::token::Token;
 
 use self::functions::FunctionCall;
+use var_binding::VariableBinding;
 
 pub mod functions;
-pub mod statement;
 pub mod var_binding;
 
+/// The AST for a whole THP file
+#[derive(Debug)]
 pub struct ModuleAST<'a> {
-    pub declarations: Vec<TopLevelDeclaration<'a>>,
+    /// All the productions in the file
+    pub productions: Vec<ModuleMembers<'a>>,
 }
 
-// TODO: this and Statement should merge
+/// Enum for productions available at the top level of a file
 #[derive(Debug)]
-pub enum TopLevelDeclaration<'a> {
-    Binding(var_binding::Binding<'a>),
-    FunctionDeclaration(FunctionDeclaration<'a>),
+pub enum ModuleMembers<'a> {
+    // TODO: In the future implement module import
+    Stmt(Statement<'a>),
     Expression(Expression<'a>),
+}
+
+#[derive(Debug)]
+pub enum Statement<'a> {
+    VarBinding(VariableBinding<'a>),
+    FnDecl(FunctionDeclaration<'a>),
 }
 
 #[derive(Debug)]
@@ -29,7 +38,7 @@ pub struct FunctionDeclaration<'a> {
 #[derive(Debug)]
 pub struct Block<'a> {
     // TODO: this should be a Vec of Statement|Expression
-    pub statements: Vec<statement::Statement<'a>>,
+    pub statements: Vec<Statement<'a>>,
 }
 
 #[derive(Debug)]
