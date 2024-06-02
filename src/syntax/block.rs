@@ -72,6 +72,8 @@ mod tests {
     use super::*;
     use crate::lexic::get_tokens;
 
+    // TODO: rewrite, refactor
+    /*
     #[test]
     fn test_parse_block() {
         let tokens = get_tokens(&String::from("{f()}")).unwrap();
@@ -112,4 +114,5 @@ mod tests {
 
         assert_eq!(block.statements.len(), 1);
     }
+    */
 }

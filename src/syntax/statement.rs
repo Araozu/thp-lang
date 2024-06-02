@@ -1,11 +1,6 @@
 use crate::lexic::token::Token;
 
-use super::{
-    ast::{Expression, Statement},
-    binding,
-    expression::function_call_expr,
-    ParsingError, ParsingResult,
-};
+use super::{ast::Statement, binding, ParsingError, ParsingResult};
 
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Statement> {
     // Try to parse a binding
@@ -15,12 +10,15 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Statem
         _ => {}
     }
 
+    // A function call is an expression, not a statement. Remove
     // Try to parse a function call
+    /*
     match function_call_expr::try_parse(tokens, pos) {
         Ok((Expression::FunctionCall(f), next)) => return Ok((Statement::FunctionCall(f), next)),
         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
         _ => {}
     };
+    */
 
     // Return unmatched
     Err(ParsingError::Unmatched)
@@ -29,23 +27,6 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Statem
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn should_parse_function_call() {
-        let input = String::from("f1()");
-        let tokens = crate::lexic::get_tokens(&input).unwrap();
-        let statement = try_parse(&tokens, 0);
-
-        let statement = match statement {
-            Ok((s, _)) => s,
-            _ => panic!("Expected a statement"),
-        };
-
-        match statement {
-            Statement::FunctionCall(_) => assert!(true),
-            _ => panic!("Expected a function call"),
-        }
-    }
 
     #[test]
     fn should_parse_binding() {

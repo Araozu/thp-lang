@@ -17,7 +17,10 @@ mod tests {
     use super::*;
     use crate::{
         lexic::get_tokens,
-        syntax::{ast::ModuleMembers, build_ast},
+        syntax::{
+            ast::{ModuleMembers, Statement},
+            build_ast,
+        },
     };
 
     #[test]
@@ -28,13 +31,12 @@ mod tests {
         let fun_dec = result.productions.get(0).unwrap();
 
         match fun_dec {
-            ModuleMembers::Binding(_) => panic!("Expected function declaration"),
-            ModuleMembers::FunctionDeclaration(fun_decl) => {
+            ModuleMembers::Stmt(Statement::FnDecl(fun_decl)) => {
                 let transpiled = fun_decl.transpile();
 
                 assert_eq!("function id() {\n\n}", transpiled);
             }
-            _ => panic!("Not implemented: Expression at top level"),
+            _ => panic!("Expected a function declaration"),
         }
     }
 }

@@ -39,7 +39,6 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
             };
 
             // Attempt to parse an expression
-            // If this fails the whole thing fails
             match Expression::try_parse(tokens, current_pos) {
                 Ok((prod, next_pos)) => {
                     productions.push(ModuleMembers::Expr(prod));
@@ -53,7 +52,7 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
             }
 
             // If we reached this point we didn't match any productions and fail
-            let t = tokens[current_pos];
+            let t = &tokens[current_pos];
 
             return Err(ParsingError::Err(SyntaxError {
                 error_start: t.position,

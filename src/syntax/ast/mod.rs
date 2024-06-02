@@ -23,7 +23,7 @@ pub enum ModuleMembers<'a> {
 
 #[derive(Debug)]
 pub enum Statement<'a> {
-    VarBinding(VariableBinding<'a>),
+    Binding(VariableBinding<'a>),
     FnDecl(FunctionDeclaration<'a>),
 }
 

@@ -40,7 +40,9 @@ impl SemanticCheck for FunctionDeclaration<'_> {
                         return Err(err);
                     }
                 }
-                Statement::FunctionCall(_) => panic!("FunctionCall semantic check not implemented"),
+                Statement::FnDecl(_) => {
+                    todo!("Function declaration: semantic check not implemented")
+                }
             }
         }
 

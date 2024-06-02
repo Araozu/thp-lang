@@ -1,4 +1,8 @@
-use crate::{semantic::impls::SemanticCheck, syntax::ast::ModuleMembers};
+use crate::{
+    error_handling::MistiError,
+    semantic::{impls::SemanticCheck, symbol_table::SymbolTable},
+    syntax::ast::{Expression, ModuleMembers, Statement},
+};
 
 impl SemanticCheck for ModuleMembers<'_> {
     fn check_semantics(
@@ -6,9 +10,25 @@ impl SemanticCheck for ModuleMembers<'_> {
         scope: &crate::semantic::symbol_table::SymbolTable,
     ) -> Result<(), crate::error_handling::MistiError> {
         match self {
-            ModuleMembers::Binding(binding) => binding.check_semantics(scope),
-            ModuleMembers::FunctionDeclaration(function) => function.check_semantics(scope),
-            _ => panic!("Not implemented"),
+            ModuleMembers::Stmt(statement) => statement.check_semantics(scope),
+            ModuleMembers::Expr(expression) => expression.check_semantics(scope),
         }
+    }
+}
+
+// TODO: Move to its own file
+impl SemanticCheck for Statement<'_> {
+    fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError> {
+        match self {
+            Statement::Binding(b) => b.check_semantics(scope),
+            Statement::FnDecl(f) => f.check_semantics(scope),
+        }
+    }
+}
+
+// TODO: Move to its own file
+impl SemanticCheck for Expression<'_> {
+    fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError> {
+        todo!("Check semantics for expression")
     }
 }

@@ -20,7 +20,7 @@ mod tests {
     use super::*;
     use crate::{
         lexic::token::{Token, TokenType},
-        syntax::ast::{var_binding::VariableBinding, Expression, ModuleMembers},
+        syntax::ast::{var_binding::VariableBinding, Expression, ModuleMembers, Statement},
     };
 
     #[test]
@@ -40,7 +40,7 @@ mod tests {
         };
 
         let module = ModuleAST {
-            productions: vec![ModuleMembers::Binding(binding)],
+            productions: vec![ModuleMembers::Stmt(Statement::Binding(binding))],
         };
 
         let result = module.transpile();
