@@ -56,7 +56,11 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
                 current_pos = next_pos;
             }
             LexResult::Multiple(tokens, next_pos) => {
-                at_new_line = tokens.last().unwrap().token_type == TokenType::NewLine;
+                at_new_line = match tokens.last() {
+                    Some(t) if t.token_type == TokenType::NewLine => true,
+                    // This may be None if there are newlines followed by EOF.
+                    _ => false,
+                };
 
                 results.extend(tokens);
                 current_pos = next_pos;
@@ -422,6 +426,16 @@ mod tests {
         assert_eq!(TokenType::NewLine, tokens[7].token_type);
         assert_eq!(TokenType::DEDENT, tokens[8].token_type);
         assert_eq!(TokenType::DEDENT, tokens[9].token_type);
+    }
+
+    #[test]
+    fn shouldnt_emit_trailing_newlines() {
+        let input = String::from("token\n");
+        let tokens = get_tokens(&input).unwrap();
+
+        assert_eq!(2, tokens.len());
+        assert_eq!(TokenType::Identifier, tokens[0].token_type);
+        assert_eq!(TokenType::EOF, tokens[1].token_type);
     }
 }
 

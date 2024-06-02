@@ -16,7 +16,7 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
     /// always starts from token 0.
     ///
     /// Its grammar is defined it the spec, at the webpage
-    fn try_parse(tokens: &'a Vec<Token>, current_pos: usize) -> ParsingResult<'a, Self::Item> {
+    fn try_parse(tokens: &'a Vec<Token>, _current_pos: usize) -> ParsingResult<'a, Self::Item> {
         let mut productions = Vec::<ModuleMembers>::new();
         let tokens_len = tokens.len();
         let mut current_pos = 0;
@@ -24,6 +24,10 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
         // Minus one because last token is EOF
         // TODO: Does that EOF do anything?
         while current_pos < tokens_len - 1 {
+            println!(
+                "len: {} pos: {}, value: `{}`, type: {:?}",
+                tokens_len, current_pos, tokens[current_pos].value, tokens[current_pos].token_type
+            );
             // Attempt to parse an statement
             match Statement::try_parse(tokens, current_pos) {
                 Ok((prod, next_pos)) => {
@@ -62,5 +66,35 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
         }
 
         Ok((ModuleAST { productions }, current_pos))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::lexic::get_tokens;
+
+    use super::*;
+
+    #[test]
+    fn should_parse_fn_decl_1() {
+        let tokens = get_tokens(&String::from("fun id() {}")).unwrap();
+
+        match ModuleAST::try_parse(&tokens, 0) {
+            Ok((prods, next)) => {
+                assert_eq!(6, next);
+                assert_eq!(1, prods.productions.len());
+
+                let prod = &prods.productions[0];
+                match prod {
+                    ModuleMembers::Stmt(Statement::FnDecl(fn_decl)) => {
+                        assert_eq!("id", fn_decl.identifier.value)
+                    }
+                    _ => panic!("Expected a function declaration"),
+                }
+            }
+            _ => {
+                panic!("Expected a function declaration");
+            }
+        }
     }
 }

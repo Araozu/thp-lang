@@ -16,6 +16,11 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
                 LexResult::Some(token, start_pos)
             }
         },
+        None => {
+            // Here EOF is found. Don't emit a newline, but consume the tokens.
+            // To consume the tokens without returning a newline, we use LexResult::Multiple
+            LexResult::Multiple(vec![], start_pos)
+        }
         _ => {
             let token = Token::new(String::from(""), start_pos, TokenType::NewLine);
             LexResult::Some(token, start_pos)
@@ -43,8 +48,8 @@ mod tests {
     }
 
     #[test]
-    fn should_emit_semicolon_instead_of_new_line() {
-        let input = str_to_vec("\n");
+    fn should_emit_newline() {
+        let input = str_to_vec("\n_");
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
@@ -56,8 +61,8 @@ mod tests {
     }
 
     #[test]
-    fn should_emit_a_single_semicolon_with_multiple_new_lines() {
-        let input = str_to_vec("\n\n\n");
+    fn should_emit_a_single_newline_with_multiple_new_lines() {
+        let input = str_to_vec("\n\n\n_");
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
@@ -80,7 +85,7 @@ mod tests {
 
     #[test]
     fn should_emit_a_single_semicolon_with_multiple_new_lines_and_whitespace() {
-        let input = str_to_vec("\n \n  \n");
+        let input = str_to_vec("\n \n  \n_");
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
@@ -100,7 +105,7 @@ mod tests {
             panic!()
         }
 
-        let input = str_to_vec("\n \n  \n    ");
+        let input = str_to_vec("\n \n  \n    _");
         let start_pos = 0;
 
         if let LexResult::Some(token, next_pos) = scan(&input, start_pos) {
@@ -108,6 +113,21 @@ mod tests {
             assert_eq!(6, next_pos);
         } else {
             panic!()
+        }
+    }
+
+    #[test]
+    fn shouldnt_emit_newline_if_eof_is_found() {
+        let input = str_to_vec("\n\n");
+
+        match scan(&input, 0) {
+            LexResult::Multiple(vec, next_pos) => {
+                assert_eq!(vec.len(), 0);
+                assert_eq!(next_pos, 2);
+            }
+            _ => {
+                panic!("Expected a multiple result")
+            }
         }
     }
 }
