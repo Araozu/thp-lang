@@ -18,7 +18,7 @@ pub struct ModuleAST<'a> {
 pub enum ModuleMembers<'a> {
     // TODO: In the future implement module import
     Stmt(Statement<'a>),
-    Expression(Expression<'a>),
+    Expr(Expression<'a>),
 }
 
 #[derive(Debug)]

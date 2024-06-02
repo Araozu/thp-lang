@@ -4,6 +4,8 @@ mod binding;
 mod block;
 mod expression;
 mod functions;
+mod parseable;
+mod parsers;
 mod statement;
 mod utils;
 
@@ -13,21 +15,7 @@ use crate::lexic::token::{Token, TokenType};
 use ast::ModuleAST;
 
 use self::ast::ModuleMembers;
-
-pub type ParsingResult<'a, A> = Result<(A, usize), ParsingError<'a>>;
-
-#[derive(Debug)]
-pub enum ParsingError<'a> {
-    /// Some other token was found than the expected one
-    Mismatch(&'a Token),
-    /// The parsing didn't succeed, but it's not a fatal error
-    Unmatched,
-    /// The parsing failed past a point of no return.
-    ///
-    /// For example, when parsing a function declaration
-    /// the `fun` token is found, but then no identifier
-    Err(SyntaxError),
-}
+use self::parseable::{ParsingError, ParsingResult};
 
 /// Constructs the Misti AST from a vector of tokens
 pub fn build_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError> {
@@ -66,10 +54,11 @@ pub fn build_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError> {
 }
 
 fn next_construct<'a>(tokens: &'a Vec<Token>, current_pos: usize) -> ParsingResult<ModuleMembers> {
+    todo!();
     // Try to parse a function declaration
     match functions::function_declaration::try_parse(tokens, current_pos) {
         Ok((declaration, next_pos)) => {
-            return Ok((ModuleMembers::FunctionDeclaration(declaration), next_pos))
+            return Ok((ModuleMembers::Stmt(FnDecl(declaration), next_pos)))
         }
         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
         _ => {}
@@ -84,7 +73,7 @@ fn next_construct<'a>(tokens: &'a Vec<Token>, current_pos: usize) -> ParsingResu
 
     // Try to parse an expression
     match expression::try_parse(tokens, current_pos) {
-        Ok((expression, next_pos)) => return Ok((ModuleMembers::Expression(expression), next_pos)),
+        Ok((expression, next_pos)) => return Ok((ModuleMembers::Expr(expression), next_pos)),
         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
         _ => {}
     }
