@@ -1,6 +1,5 @@
 use crate::error_handling::MistiError;
 
-mod binding;
 mod block;
 mod expression;
 mod functions;
@@ -36,7 +35,6 @@ mod tests {
     use tests::ast::Statement;
 
     // TODO: Reenable when statement parsing is rewritten
-    /*
     #[test]
     fn should_parse_top_level_construct_with_trailing_newline() {
         let input = String::from(" fun f1(){}\n");
@@ -52,7 +50,6 @@ mod tests {
             _ => panic!("Expected a function declaration"),
         }
     }
-    */
 
     #[test]
     fn should_parse_2_top_level_construct() {

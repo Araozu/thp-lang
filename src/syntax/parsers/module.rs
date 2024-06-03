@@ -24,10 +24,6 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
         // Minus one because last token is EOF
         // TODO: Does that EOF do anything?
         while current_pos < tokens_len - 1 {
-            println!(
-                "len: {} pos: {}, value: `{}`, type: {:?}",
-                tokens_len, current_pos, tokens[current_pos].value, tokens[current_pos].token_type
-            );
             // Attempt to parse an statement
             match Statement::try_parse(tokens, current_pos) {
                 Ok((prod, next_pos)) => {

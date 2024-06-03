@@ -1,143 +1,142 @@
-use super::ast::var_binding::VariableBinding;
-use super::utils::{parse_token_type, try_operator};
-use super::{expression, ParsingError, ParsingResult};
-use crate::error_handling::SyntaxError;
-use crate::lexic::token::{Token, TokenType};
+use crate::{
+    error_handling::SyntaxError,
+    lexic::token::{Token, TokenType},
+    syntax::{
+        ast::{var_binding::VariableBinding, Expression},
+        parseable::{Parseable, ParsingError, ParsingResult},
+        utils::{parse_token_type, try_operator},
+    },
+};
 
-/*
-binding = val binding | var binding
-val binding = "val", datatype?, binding remainder
-            | datatype, binding remainder
+impl<'a> Parseable<'a> for VariableBinding<'a> {
+    type Item = VariableBinding<'a>;
 
-var binding = "var", datatype?, binding remainder
+    fn try_parse(tokens: &'a Vec<Token>, current_pos: usize) -> ParsingResult<'a, Self::Item> {
+        let current_pos = current_pos;
 
-binding remainder = identifier, "=", expression
- */
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<VariableBinding> {
-    let mut current_pos = pos;
+        /*
+         * val/var keyword
+         */
+        let (is_var, binding_token, next_pos) = 'token: {
+            // check for VAL
+            if let Ok((val_token, next_pos)) = parse_token_type(tokens, current_pos, TokenType::VAL)
+            {
+                break 'token (false, Some(val_token), next_pos);
+            };
 
-    /*
-     * val/var keyword
-     */
-    let (is_var, binding_token, next_pos) = 'token: {
-        // check for VAL
-        if let Ok((val_token, next_pos)) = parse_token_type(tokens, current_pos, TokenType::VAL) {
-            break 'token (false, Some(val_token), next_pos);
+            // check for VAR
+            match parse_token_type(tokens, current_pos, TokenType::VAR) {
+                Ok((var_token, next_pos)) => (true, Some(var_token), next_pos),
+                // If a VAR is not found it is still possible that the binding is an implicit VAL
+                _ => (false, None, current_pos),
+            }
         };
 
-        // check for VAR
-        match parse_token_type(tokens, current_pos, TokenType::VAR) {
-            Ok((var_token, next_pos)) => (true, Some(var_token), next_pos),
-            // If a VAR is not found it is still possible that the binding is an implicit VAL
-            _ => (false, None, current_pos),
+        /*
+         * datatype
+         */
+        let (datatype, next_pos) = match parse_token_type(tokens, next_pos, TokenType::Datatype)
+        {
+            Ok((t, next)) => (Some(t), next),
+            _ => (None, next_pos),
+        };
+
+        // Here:
+        // If the binding is None and the datatype is None, then we didn't match a binding
+        if binding_token.is_none() && datatype.is_none() {
+            return Err(ParsingError::Unmatched);
         }
-    };
-    current_pos = next_pos;
 
-    /*
-     * datatype
-     */
-    let (datatype, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Datatype) {
-        Ok((t, next)) => (Some(t), next),
-        _ => (None, current_pos),
-    };
-    current_pos = next_pos;
-
-    // Here:
-    // If the binding is None and the datatype is None, then we didn't match a binding
-    if binding_token.is_none() && datatype.is_none() {
-        return Err(ParsingError::Unmatched);
-    }
-
-    /*
-     * identifier
-     */
-    let (identifier, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Identifier)
-    {
-        Ok((t, n)) => (t, n),
-        Err(ParsingError::Mismatch(token)) => {
-            // The parser found a token, but it's not an identifier
-            return Err(ParsingError::Err(SyntaxError {
-                error_start: token.position,
-                error_end: token.get_end_position(),
-                reason: "There should be an identifier after a binding".into(),
-            }));
-        }
-        _ => {
-            // The parser didn't find an Identifier after VAL/VAR or the Datatype
-            match (binding_token, datatype) {
-                (Some(binding_token), None) => {
+        /*
+         * identifier
+         */
+        let (identifier, next_pos) =
+            match parse_token_type(tokens, next_pos, TokenType::Identifier) {
+                Ok((t, n)) => (t, n),
+                Err(ParsingError::Mismatch(token)) => {
+                    // The parser found a token, but it's not an identifier
                     return Err(ParsingError::Err(SyntaxError {
-                        reason: format!(
-                            "There should be an identifier after a `{}` token",
-                            if is_var { "var" } else { "val" }
-                        ),
-                        error_start: binding_token.position,
-                        error_end: binding_token.get_end_position(),
-                    }));
-                }
-                (_, Some(datatype_token)) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: "There should be an identifier after the datatype".into(),
-                        error_start: datatype_token.position,
-                        error_end: datatype_token.get_end_position(),
+                        error_start: token.position,
+                        error_end: token.get_end_position(),
+                        reason: "There should be an identifier after a binding".into(),
                     }));
                 }
                 _ => {
-                    unreachable!("Illegal parser state: binding_token and datatype are both None")
+                    // The parser didn't find an Identifier after VAL/VAR or the Datatype
+                    match (binding_token, datatype) {
+                        (Some(binding_token), None) => {
+                            return Err(ParsingError::Err(SyntaxError {
+                                reason: format!(
+                                    "There should be an identifier after a `{}` token",
+                                    if is_var { "var" } else { "val" }
+                                ),
+                                error_start: binding_token.position,
+                                error_end: binding_token.get_end_position(),
+                            }));
+                        }
+                        (_, Some(datatype_token)) => {
+                            return Err(ParsingError::Err(SyntaxError {
+                                reason: "There should be an identifier after the datatype".into(),
+                                error_start: datatype_token.position,
+                                error_end: datatype_token.get_end_position(),
+                            }));
+                        }
+                        _ => {
+                            unreachable!(
+                                "Illegal parser state: binding_token and datatype are both None"
+                            )
+                        }
+                    };
                 }
             };
-        }
-    };
-    current_pos = next_pos;
 
-    /*
-     * Equal (=) operator
-     */
-    let equal_operator = match try_operator(tokens, current_pos, String::from("=")) {
-        Ok((t, _)) => t,
-        Err(ParsingError::Mismatch(t)) => {
-            // The parser found a token, but it's not the `=` operator
-            return Err(ParsingError::Err(SyntaxError {
-                reason: format!("There should be an equal sign `=` after the identifier"),
-                error_start: t.position,
-                error_end: t.get_end_position(),
-            }));
-        }
-        _ => {
-            // The parser didn't find the `=` operator after the identifier
-            return Err(ParsingError::Err(SyntaxError {
-                reason: format!("There should be an equal sign `=` after the identifier",),
-                error_start: identifier.position,
-                error_end: identifier.get_end_position(),
-            }));
-        }
-    };
-    current_pos += 1;
+        /*
+         * Equal (=) operator
+         */
+        let equal_operator = match try_operator(tokens, next_pos, String::from("=")) {
+            Ok((t, _)) => t,
+            Err(ParsingError::Mismatch(t)) => {
+                // The parser found a token, but it's not the `=` operator
+                return Err(ParsingError::Err(SyntaxError {
+                    reason: format!("There should be an equal sign `=` after the identifier"),
+                    error_start: t.position,
+                    error_end: t.get_end_position(),
+                }));
+            }
+            _ => {
+                // The parser didn't find the `=` operator after the identifier
+                return Err(ParsingError::Err(SyntaxError {
+                    reason: format!("There should be an equal sign `=` after the identifier",),
+                    error_start: identifier.position,
+                    error_end: identifier.get_end_position(),
+                }));
+            }
+        };
+        let next_pos = next_pos + 1;
 
-    /*
-     * Expression of the binding
-     */
-    let (expression, next_pos) = match expression::try_parse(tokens, current_pos) {
-        Ok((exp, next)) => (exp, next),
-        _ => {
-            return Err(ParsingError::Err(SyntaxError {
-                reason: String::from("Expected an expression after the equal `=` operator"),
-                error_start: equal_operator.position,
-                error_end: equal_operator.get_end_position(),
-            }));
-        }
-    };
-    current_pos = next_pos;
+        /*
+         * Expression of the binding
+         */
+        let (expression, next_pos) = match Expression::try_parse(tokens, next_pos) {
+            Ok((exp, next)) => (exp, next),
+            _ => {
+                return Err(ParsingError::Err(SyntaxError {
+                    reason: String::from("Expected an expression after the equal `=` operator"),
+                    error_start: equal_operator.position,
+                    error_end: equal_operator.get_end_position(),
+                }));
+            }
+        };
 
-    let binding = VariableBinding {
-        datatype,
-        identifier: &identifier,
-        expression,
-        is_mutable: is_var,
-    };
+        let binding = VariableBinding {
+            datatype,
+            identifier: &identifier,
+            expression,
+            is_mutable: is_var,
+        };
 
-    Ok((binding, current_pos))
+        Ok((binding, next_pos))
+    }
 }
 
 #[cfg(test)]
@@ -148,7 +147,7 @@ mod tests {
     #[test]
     fn should_parse_val_binding() {
         let tokens = get_tokens(&String::from("val identifier = 20")).unwrap();
-        let Ok((binding, _)) = try_parse(&tokens, 0) else {
+        let Ok((binding, _)) = VariableBinding::try_parse(&tokens, 0) else {
             panic!()
         };
 
@@ -183,7 +182,7 @@ mod tests {
     #[test]
     fn should_parse_val_binding_with_datatype() {
         let tokens = get_tokens(&String::from("val Int identifier = 20")).unwrap();
-        let (binding, _) = try_parse(&tokens, 0).unwrap();
+        let (binding, _) = VariableBinding::try_parse(&tokens, 0).unwrap();
 
         assert!(!binding.is_mutable);
         assert_eq!("Int", binding.datatype.unwrap().value);
@@ -193,7 +192,7 @@ mod tests {
     #[test]
     fn should_parse_var_binding_with_datatype() {
         let tokens = get_tokens(&String::from("var Int identifier = 20")).unwrap();
-        let (binding, _) = try_parse(&tokens, 0).unwrap();
+        let (binding, _) = VariableBinding::try_parse(&tokens, 0).unwrap();
 
         assert!(binding.is_mutable);
         assert!(binding.datatype.is_some());
@@ -204,7 +203,7 @@ mod tests {
     #[test]
     fn should_parse_implicit_val_binding() {
         let tokens = get_tokens(&String::from("Int identifier = 20")).unwrap();
-        let (binding, _) = try_parse(&tokens, 0).unwrap();
+        let (binding, _) = VariableBinding::try_parse(&tokens, 0).unwrap();
 
         assert!(!binding.is_mutable);
         assert!(binding.datatype.is_some());
@@ -215,7 +214,7 @@ mod tests {
     #[test]
     fn should_return_error_on_implicit_val_binding() {
         let tokens = get_tokens(&String::from("Int => 20")).unwrap();
-        let binding = try_parse(&tokens, 0);
+        let binding = VariableBinding::try_parse(&tokens, 0);
 
         match binding {
             Err(ParsingError::Err(error)) => {
@@ -231,7 +230,7 @@ mod tests {
         let tokens = get_tokens(&String::from("val")).unwrap();
         assert_eq!(TokenType::VAL, tokens[0].token_type);
         assert_eq!(0, tokens[0].position);
-        let binding = try_parse(&tokens, 0);
+        let binding = VariableBinding::try_parse(&tokens, 0);
 
         match binding {
             Err(ParsingError::Err(error)) => {
@@ -247,7 +246,7 @@ mod tests {
         let tokens = get_tokens(&String::from("val 322")).unwrap();
         assert_eq!(TokenType::VAL, tokens[0].token_type);
         assert_eq!(0, tokens[0].position);
-        let binding = try_parse(&tokens, 0);
+        let binding = VariableBinding::try_parse(&tokens, 0);
 
         match binding {
             Err(ParsingError::Err(error)) => {
@@ -258,7 +257,7 @@ mod tests {
         }
 
         let tokens = get_tokens(&String::from("val \"hello\"")).unwrap();
-        let binding = try_parse(&tokens, 0);
+        let binding = VariableBinding::try_parse(&tokens, 0);
 
         match binding {
             Err(ParsingError::Err(error)) => {
@@ -276,7 +275,7 @@ mod tests {
     #[test]
     fn should_return_error_when_equal_op_is_wrong() {
         let tokens = get_tokens(&String::from("val id \"error\"")).unwrap();
-        let binding = try_parse(&tokens, 0);
+        let binding = VariableBinding::try_parse(&tokens, 0);
 
         match binding {
             Err(ParsingError::Err(error)) => {
@@ -290,7 +289,7 @@ mod tests {
     #[test]
     fn should_return_error_when_identifier_is_empty() {
         let tokens = get_tokens(&String::from("val String ")).unwrap();
-        let binding = try_parse(&tokens, 0);
+        let binding = VariableBinding::try_parse(&tokens, 0);
 
         match binding {
             Err(ParsingError::Err(error)) => {
@@ -308,7 +307,7 @@ mod tests {
     #[test]
     fn should_return_error_when_identifier_is_empty_2() {
         let tokens = get_tokens(&String::from("val ")).unwrap();
-        let binding = try_parse(&tokens, 0);
+        let binding = VariableBinding::try_parse(&tokens, 0);
 
         match binding {
             Err(ParsingError::Err(error)) => {
@@ -326,7 +325,7 @@ mod tests {
     #[test]
     fn should_error_when_equal_op_is_missing() {
         let tokens = get_tokens(&String::from("val identifier ")).unwrap();
-        let binding = try_parse(&tokens, 0);
+        let binding = VariableBinding::try_parse(&tokens, 0);
 
         match binding {
             Err(ParsingError::Err(error)) => {
@@ -344,7 +343,7 @@ mod tests {
     #[test]
     fn should_error_when_exp_is_empty() {
         let tokens = get_tokens(&String::from("val identifier = ")).unwrap();
-        let binding = try_parse(&tokens, 0);
+        let binding = VariableBinding::try_parse(&tokens, 0);
 
         match binding {
             Err(ParsingError::Err(error)) => {

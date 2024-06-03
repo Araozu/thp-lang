@@ -1,10 +1,14 @@
 use crate::lexic::token::Token;
 
-use super::{ast::Statement, binding, ParsingError, ParsingResult};
+use super::{
+    ast::{var_binding::VariableBinding, Statement},
+    parseable::Parseable,
+    ParsingError, ParsingResult,
+};
 
 pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Statement> {
     // Try to parse a binding
-    match binding::try_parse(tokens, pos) {
+    match VariableBinding::try_parse(tokens, pos) {
         Ok((b, next)) => return Ok((Statement::Binding(b), next)),
         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
         _ => {}

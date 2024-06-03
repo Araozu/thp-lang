@@ -1,6 +1,5 @@
 use crate::syntax::{
-    ast::Statement,
-    binding,
+    ast::{var_binding::VariableBinding, Statement},
     functions::function_declaration,
     parseable::{Parseable, ParsingError},
 };
@@ -13,8 +12,7 @@ impl<'a> Parseable<'a> for Statement<'a> {
         current_pos: usize,
     ) -> crate::syntax::parseable::ParsingResult<'a, Self::Item> {
         // Try to parse a variable binding
-        // TODO: Rewrite function_declaration to use Parseable
-        match binding::try_parse(tokens, current_pos) {
+        match VariableBinding::try_parse(tokens, current_pos) {
             Ok((prod, next)) => {
                 return Ok((Statement::Binding(prod), next));
             }
