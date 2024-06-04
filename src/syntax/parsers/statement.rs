@@ -1,6 +1,5 @@
 use crate::syntax::{
-    ast::{var_binding::VariableBinding, Statement},
-    functions::function_declaration,
+    ast::{var_binding::VariableBinding, FunctionDeclaration, Statement},
     parseable::{Parseable, ParsingError},
 };
 
@@ -24,8 +23,7 @@ impl<'a> Parseable<'a> for Statement<'a> {
         }
 
         // Try to parse a function declaration
-        // TODO: Rewrite function_declaration to use Parseable
-        match function_declaration::try_parse(tokens, current_pos) {
+        match FunctionDeclaration::try_parse(tokens, current_pos) {
             Ok((prod, next)) => {
                 return Ok((Statement::FnDecl(prod), next));
             }

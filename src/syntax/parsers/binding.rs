@@ -35,8 +35,7 @@ impl<'a> Parseable<'a> for VariableBinding<'a> {
         /*
          * datatype
          */
-        let (datatype, next_pos) = match parse_token_type(tokens, next_pos, TokenType::Datatype)
-        {
+        let (datatype, next_pos) = match parse_token_type(tokens, next_pos, TokenType::Datatype) {
             Ok((t, next)) => (Some(t), next),
             _ => (None, next_pos),
         };
@@ -50,45 +49,45 @@ impl<'a> Parseable<'a> for VariableBinding<'a> {
         /*
          * identifier
          */
-        let (identifier, next_pos) =
-            match parse_token_type(tokens, next_pos, TokenType::Identifier) {
-                Ok((t, n)) => (t, n),
-                Err(ParsingError::Mismatch(token)) => {
-                    // The parser found a token, but it's not an identifier
-                    return Err(ParsingError::Err(SyntaxError {
-                        error_start: token.position,
-                        error_end: token.get_end_position(),
-                        reason: "There should be an identifier after a binding".into(),
-                    }));
-                }
-                _ => {
-                    // The parser didn't find an Identifier after VAL/VAR or the Datatype
-                    match (binding_token, datatype) {
-                        (Some(binding_token), None) => {
-                            return Err(ParsingError::Err(SyntaxError {
-                                reason: format!(
-                                    "There should be an identifier after a `{}` token",
-                                    if is_var { "var" } else { "val" }
-                                ),
-                                error_start: binding_token.position,
-                                error_end: binding_token.get_end_position(),
-                            }));
-                        }
-                        (_, Some(datatype_token)) => {
-                            return Err(ParsingError::Err(SyntaxError {
-                                reason: "There should be an identifier after the datatype".into(),
-                                error_start: datatype_token.position,
-                                error_end: datatype_token.get_end_position(),
-                            }));
-                        }
-                        _ => {
-                            unreachable!(
-                                "Illegal parser state: binding_token and datatype are both None"
-                            )
-                        }
-                    };
-                }
-            };
+        let (identifier, next_pos) = match parse_token_type(tokens, next_pos, TokenType::Identifier)
+        {
+            Ok((t, n)) => (t, n),
+            Err(ParsingError::Mismatch(token)) => {
+                // The parser found a token, but it's not an identifier
+                return Err(ParsingError::Err(SyntaxError {
+                    error_start: token.position,
+                    error_end: token.get_end_position(),
+                    reason: "There should be an identifier after a binding".into(),
+                }));
+            }
+            _ => {
+                // The parser didn't find an Identifier after VAL/VAR or the Datatype
+                match (binding_token, datatype) {
+                    (Some(binding_token), None) => {
+                        return Err(ParsingError::Err(SyntaxError {
+                            reason: format!(
+                                "There should be an identifier after a `{}` token",
+                                if is_var { "var" } else { "val" }
+                            ),
+                            error_start: binding_token.position,
+                            error_end: binding_token.get_end_position(),
+                        }));
+                    }
+                    (_, Some(datatype_token)) => {
+                        return Err(ParsingError::Err(SyntaxError {
+                            reason: "There should be an identifier after the datatype".into(),
+                            error_start: datatype_token.position,
+                            error_end: datatype_token.get_end_position(),
+                        }));
+                    }
+                    _ => {
+                        unreachable!(
+                            "Illegal parser state: binding_token and datatype are both None"
+                        )
+                    }
+                };
+            }
+        };
 
         /*
          * Equal (=) operator

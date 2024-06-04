@@ -1,134 +1,139 @@
 use crate::{
     error_handling::SyntaxError,
     lexic::token::{Token, TokenType},
-    syntax::{utils::try_operator, ParsingError, ParsingResult},
+    syntax::{
+        ast::FunctionDeclaration,
+        block::parse_block,
+        functions::params_list::parse_params_list,
+        parseable::{Parseable, ParsingError, ParsingResult},
+        utils::{parse_token_type, try_operator},
+    },
 };
 
-use super::{
-    super::{ast::FunctionDeclaration, block::parse_block, utils::parse_token_type},
-    params_list::parse_params_list,
-};
+impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
+    type Item = FunctionDeclaration<'a>;
 
-/*
-function declaration = "fun", identifier, params list, return type?, block;
+    fn try_parse(tokens: &'a Vec<Token>, current_pos: usize) -> ParsingResult<'a, Self::Item> {
+        let mut current_pos = current_pos;
 
-return type = "->", datatype;
- */
-pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<FunctionDeclaration> {
-    let mut current_pos = pos;
-
-    // `fun` keyword
-    let (fun_keyword, next_pos) = match parse_token_type(tokens, current_pos, TokenType::FUN) {
-        Ok((t, next)) => (t, next),
-        _ => return Err(ParsingError::Unmatched),
-    };
-    current_pos = next_pos;
-
-    // identifier
-    let (identifier, next_pos) = match parse_token_type(tokens, current_pos, TokenType::Identifier)
-    {
-        Ok((id, next)) => (id, next),
-        Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
-        Err(ParsingError::Mismatch(wrong_token)) => {
-            return Err(ParsingError::Err(SyntaxError {
-                reason: String::from("Expected an identifier after the `fun` keyword."),
-                error_start: wrong_token.position,
-                error_end: wrong_token.get_end_position(),
-            }));
-        }
-        Err(ParsingError::Unmatched) => {
-            return Err(ParsingError::Err(SyntaxError {
-                reason: String::from("Expected an identifier after the `fun` keyword."),
-                error_start: fun_keyword.position,
-                error_end: fun_keyword.get_end_position(),
-            }));
-        }
-    };
-    current_pos = next_pos;
-
-    // Params list
-    let (params_list, next_pos) = match parse_params_list(tokens, current_pos) {
-        Ok((params, next_pos)) => (params, next_pos),
-        Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
-        Err(ParsingError::Mismatch(wrong_token)) => {
-            return Err(ParsingError::Err(SyntaxError {
-                reason: String::from("Expected an opening paren after the function identifier."),
-                error_start: wrong_token.position,
-                error_end: wrong_token.get_end_position(),
-            }));
-        }
-        Err(ParsingError::Unmatched) => {
-            return Err(ParsingError::Err(SyntaxError {
-                reason: String::from("Expected an opening paren after the function identifier."),
-                error_start: identifier.position,
-                error_end: identifier.get_end_position(),
-            }));
-        }
-    };
-    current_pos = next_pos;
-
-    // Try to parse a return type
-    let (return_type, next_pos) = 'return_label: {
-        let (arrow_op, next_pos) = match try_operator(tokens, current_pos, "->".into()) {
-            Ok((op, next)) => (op, next),
-            _ => break 'return_label (None, current_pos),
+        // `fun` keyword
+        let (fun_keyword, next_pos) = match parse_token_type(tokens, current_pos, TokenType::FUN) {
+            Ok((t, next)) => (t, next),
+            _ => return Err(ParsingError::Unmatched),
         };
+        current_pos = next_pos;
 
-        // At this point the '->' operator was matched, so we expect a datatype
-        match parse_token_type(tokens, next_pos, TokenType::Datatype) {
-            Ok((t, next)) => (Some(t), next),
+        // identifier
+        let (identifier, next_pos) =
+            match parse_token_type(tokens, current_pos, TokenType::Identifier) {
+                Ok((id, next)) => (id, next),
+                Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+                Err(ParsingError::Mismatch(wrong_token)) => {
+                    return Err(ParsingError::Err(SyntaxError {
+                        reason: String::from("Expected an identifier after the `fun` keyword."),
+                        error_start: wrong_token.position,
+                        error_end: wrong_token.get_end_position(),
+                    }));
+                }
+                Err(ParsingError::Unmatched) => {
+                    return Err(ParsingError::Err(SyntaxError {
+                        reason: String::from("Expected an identifier after the `fun` keyword."),
+                        error_start: fun_keyword.position,
+                        error_end: fun_keyword.get_end_position(),
+                    }));
+                }
+            };
+        current_pos = next_pos;
+
+        // Params list
+        // TODO: impl Parseable
+        let (params_list, next_pos) = match parse_params_list(tokens, current_pos) {
+            Ok((params, next_pos)) => (params, next_pos),
             Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(wrong_token)) => {
                 return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a datatype after the arrow operator."),
+                    reason: String::from(
+                        "Expected an opening paren after the function identifier.",
+                    ),
                     error_start: wrong_token.position,
                     error_end: wrong_token.get_end_position(),
                 }));
             }
             Err(ParsingError::Unmatched) => {
                 return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a datatype after the arrow operator."),
-                    error_start: arrow_op.position,
-                    error_end: arrow_op.get_end_position(),
+                    reason: String::from(
+                        "Expected an opening paren after the function identifier.",
+                    ),
+                    error_start: identifier.position,
+                    error_end: identifier.get_end_position(),
                 }));
             }
-        }
-    };
-    current_pos = next_pos;
+        };
+        current_pos = next_pos;
 
-    // Function body (block)
-    let (block, next_pos) = match parse_block(tokens, current_pos) {
-        Ok((block, next_pos)) => (block, next_pos),
-        Err(ParsingError::Err(error)) => {
-            return Err(ParsingError::Err(error));
-        }
-        Err(ParsingError::Mismatch(wrong_token)) => {
-            return Err(ParsingError::Err(SyntaxError {
-                reason: String::from("Expected a block after the function declaration."),
-                error_start: wrong_token.position,
-                error_end: wrong_token.get_end_position(),
-            }));
-        }
-        Err(ParsingError::Unmatched) => {
-            return Err(ParsingError::Err(SyntaxError {
-                reason: String::from("Expected a block after the function declaration."),
-                error_start: identifier.position,
-                error_end: identifier.get_end_position(),
-            }));
-        }
-    };
-    current_pos = next_pos;
+        // Try to parse a return type
+        let (return_type, next_pos) = 'return_label: {
+            let (arrow_op, next_pos) = match try_operator(tokens, current_pos, "->".into()) {
+                Ok((op, next)) => (op, next),
+                _ => break 'return_label (None, current_pos),
+            };
 
-    // Construct and return the function declaration
-    Ok((
-        FunctionDeclaration {
-            identifier: &identifier,
-            return_type,
-            params_list: Box::new(params_list),
-            block: Box::new(block),
-        },
-        current_pos,
-    ))
+            // At this point the '->' operator was matched, so we expect a datatype
+            match parse_token_type(tokens, next_pos, TokenType::Datatype) {
+                Ok((t, next)) => (Some(t), next),
+                Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
+                Err(ParsingError::Mismatch(wrong_token)) => {
+                    return Err(ParsingError::Err(SyntaxError {
+                        reason: String::from("Expected a datatype after the arrow operator."),
+                        error_start: wrong_token.position,
+                        error_end: wrong_token.get_end_position(),
+                    }));
+                }
+                Err(ParsingError::Unmatched) => {
+                    return Err(ParsingError::Err(SyntaxError {
+                        reason: String::from("Expected a datatype after the arrow operator."),
+                        error_start: arrow_op.position,
+                        error_end: arrow_op.get_end_position(),
+                    }));
+                }
+            }
+        };
+        current_pos = next_pos;
+
+        // Function body (block)
+        let (block, next_pos) = match parse_block(tokens, current_pos) {
+            Ok((block, next_pos)) => (block, next_pos),
+            Err(ParsingError::Err(error)) => {
+                return Err(ParsingError::Err(error));
+            }
+            Err(ParsingError::Mismatch(wrong_token)) => {
+                return Err(ParsingError::Err(SyntaxError {
+                    reason: String::from("Expected a block after the function declaration."),
+                    error_start: wrong_token.position,
+                    error_end: wrong_token.get_end_position(),
+                }));
+            }
+            Err(ParsingError::Unmatched) => {
+                return Err(ParsingError::Err(SyntaxError {
+                    reason: String::from("Expected a block after the function declaration."),
+                    error_start: identifier.position,
+                    error_end: identifier.get_end_position(),
+                }));
+            }
+        };
+        current_pos = next_pos;
+
+        // Construct and return the function declaration
+        Ok((
+            FunctionDeclaration {
+                identifier: &identifier,
+                return_type,
+                params_list: Box::new(params_list),
+                block: Box::new(block),
+            },
+            current_pos,
+        ))
+    }
 }
 
 #[cfg(test)]
@@ -140,7 +145,7 @@ mod tests {
     #[test]
     fn should_return_none_on_wrong_initial_token() {
         let tokens = get_tokens(&String::from("val identifier = 20")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         let Err(ParsingError::Unmatched) = fun_decl else {
             panic!("Expected an unmatched result: {:?}", fun_decl);
@@ -150,7 +155,7 @@ mod tests {
     #[test]
     fn should_not_parse_fun_without_identifier() {
         let tokens = get_tokens(&String::from("fun = 20")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -165,7 +170,7 @@ mod tests {
         }
 
         let tokens = get_tokens(&String::from("fun")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
         match fun_decl {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(
@@ -182,7 +187,7 @@ mod tests {
     #[test]
     fn should_not_parse_fun_without_parens() {
         let tokens = get_tokens(&String::from("fun id =")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -197,7 +202,7 @@ mod tests {
         }
 
         let tokens = get_tokens(&String::from("fun id")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
         match fun_decl {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(
@@ -214,7 +219,7 @@ mod tests {
     #[test]
     fn should_not_parse_fun_without_closing_paren() {
         let tokens = get_tokens(&String::from("fun id(=")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -229,7 +234,7 @@ mod tests {
         }
 
         let tokens = get_tokens(&String::from("fun id(")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
         match fun_decl {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(
@@ -246,7 +251,7 @@ mod tests {
     #[test]
     fn should_not_parse_fun_when_missing_id() {
         let tokens = get_tokens(&String::from("fun")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -262,7 +267,7 @@ mod tests {
 
         let tokens = get_tokens(&String::from("fun\n")).unwrap();
         println!("{:?}", tokens);
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -280,7 +285,7 @@ mod tests {
     #[test]
     fn should_not_parse_fun_without_opening_brace() {
         let tokens = get_tokens(&String::from("fun id() =")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -295,7 +300,7 @@ mod tests {
         }
 
         let tokens = get_tokens(&String::from("fun id()")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
         match fun_decl {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(
@@ -312,7 +317,7 @@ mod tests {
     #[test]
     fn should_not_parse_fun_without_closing_brace() {
         let tokens = get_tokens(&String::from("fun id() { 20")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -324,7 +329,7 @@ mod tests {
         }
 
         let tokens = get_tokens(&String::from("fun id() {")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -339,7 +344,7 @@ mod tests {
     #[test]
     fn should_parse_simple_function_declaration() {
         let tokens = get_tokens(&String::from("fun id() {}")).unwrap();
-        let (function_declaration, _) = try_parse(&tokens, 0).unwrap();
+        let (function_declaration, _) = FunctionDeclaration::try_parse(&tokens, 0).unwrap();
 
         assert_eq!(function_declaration.identifier.value, String::from("id"));
         assert_eq!(function_declaration.return_type, None);
@@ -348,7 +353,7 @@ mod tests {
     #[test]
     fn should_parse_return_type() {
         let tokens = get_tokens(&String::from("fun id() -> String {}")).unwrap();
-        let (function_declaration, _) = try_parse(&tokens, 0).unwrap();
+        let (function_declaration, _) = FunctionDeclaration::try_parse(&tokens, 0).unwrap();
 
         assert_eq!(function_declaration.identifier.value, String::from("id"));
         assert_eq!(
@@ -360,7 +365,7 @@ mod tests {
     #[test]
     fn should_throw_error_on_return_type_1() {
         let tokens = get_tokens(&String::from("fun id() -> {}")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -375,7 +380,7 @@ mod tests {
     #[test]
     fn should_throw_error_on_return_type_2() {
         let tokens = get_tokens(&String::from("fun id() -> ")).unwrap();
-        let fun_decl = try_parse(&tokens, 0);
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
@@ -397,7 +402,7 @@ mod whitespace_test {
     #[test]
     fn should_ignore_whitespace_1() {
         let tokens = get_tokens(&String::from("fun\nid() {}")).unwrap();
-        let (declaration, _) = try_parse(&tokens, 0).unwrap();
+        let (declaration, _) = FunctionDeclaration::try_parse(&tokens, 0).unwrap();
 
         assert_eq!(declaration.identifier.value, (String::from("id")));
     }
@@ -405,7 +410,7 @@ mod whitespace_test {
     #[test]
     fn should_ignore_whitespace_2() {
         let tokens = get_tokens(&String::from("fun\nid\n() {}")).unwrap();
-        let (declaration, _) = try_parse(&tokens, 0).unwrap();
+        let (declaration, _) = FunctionDeclaration::try_parse(&tokens, 0).unwrap();
 
         assert_eq!(declaration.identifier.value, (String::from("id")));
     }
@@ -413,7 +418,7 @@ mod whitespace_test {
     #[test]
     fn should_ignore_whitespace_3() {
         let tokens = get_tokens(&String::from("fun\nid\n(\n) {}")).unwrap();
-        let (declaration, _) = try_parse(&tokens, 0).unwrap();
+        let (declaration, _) = FunctionDeclaration::try_parse(&tokens, 0).unwrap();
 
         assert_eq!(declaration.identifier.value, (String::from("id")));
     }
@@ -421,14 +426,14 @@ mod whitespace_test {
     #[test]
     fn should_ignore_whitespace_4() {
         let tokens = get_tokens(&String::from("fun id\n(\n)\n{}")).unwrap();
-        let (declaration, _) = try_parse(&tokens, 0).unwrap();
+        let (declaration, _) = FunctionDeclaration::try_parse(&tokens, 0).unwrap();
         assert_eq!(declaration.identifier.value, (String::from("id")));
     }
 
     #[test]
     fn should_ignore_whitespace_5() {
         let tokens = get_tokens(&String::from("fun\nid() \n{\n}")).unwrap();
-        let (declaration, _) = try_parse(&tokens, 0).unwrap();
+        let (declaration, _) = FunctionDeclaration::try_parse(&tokens, 0).unwrap();
         assert_eq!(declaration.identifier.value, (String::from("id")));
     }
 }

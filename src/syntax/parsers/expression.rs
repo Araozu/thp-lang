@@ -1,7 +1,9 @@
 use crate::{
     lexic::token::Token,
     syntax::{
-        ast::Expression, expression, parseable::{Parseable, ParsingResult}
+        ast::Expression,
+        expression,
+        parseable::{Parseable, ParsingResult},
     },
 };
 
