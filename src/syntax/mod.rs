@@ -1,6 +1,5 @@
 use crate::error_handling::MistiError;
 
-mod expression;
 mod functions;
 mod parseable;
 mod parsers;

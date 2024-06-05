@@ -96,7 +96,7 @@ mod tests {
     fn should_parse_empty_block() {
         let tokens = get_tokens(&String::from("{}")).unwrap();
         let (block, next_pos) = Block::try_parse(&tokens, 0).unwrap();
-        
+
         assert_eq!(2, next_pos);
         assert_eq!(0, block.members.len())
     }
@@ -114,7 +114,7 @@ mod tests {
             BlockMember::Stmt(Statement::FnDecl(f)) => {
                 assert_eq!(f.identifier.value, "f");
             }
-            _ => panic!("Expected a function declaration, got {:?}", member)
+            _ => panic!("Expected a function declaration, got {:?}", member),
         }
     }
 
@@ -131,7 +131,7 @@ mod tests {
             BlockMember::Stmt(Statement::FnDecl(f)) => {
                 assert_eq!(f.identifier.value, "f");
             }
-            _ => panic!("Expected a function declaration, got {:?}", member)
+            _ => panic!("Expected a function declaration, got {:?}", member),
         }
 
         let member = &block.members[1];
@@ -139,7 +139,7 @@ mod tests {
             BlockMember::Stmt(Statement::FnDecl(f)) => {
                 assert_eq!(f.identifier.value, "g");
             }
-            _ => panic!("Expected a function declaration, got {:?}", member)
+            _ => panic!("Expected a function declaration, got {:?}", member),
         }
     }
 

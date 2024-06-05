@@ -3,6 +3,7 @@ use crate::{
     lexic::token::{Token, TokenType},
     syntax::{
         ast::{functions::ArgumentsList, Expression},
+        parseable::Parseable,
         utils::parse_token_type,
         ParsingError, ParsingResult,
     },
@@ -22,15 +23,14 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Argume
 
     let mut arguments = Vec::<Expression>::new();
     loop {
-        let (next_expression, next_pos) =
-            match super::super::expression::try_parse(tokens, current_pos) {
-                Ok((expression, next_pos)) => (expression, next_pos),
-                Err(ParsingError::Err(error)) => {
-                    // TODO: Write a more detailed error
-                    return Err(ParsingError::Err(error));
-                }
-                _ => break,
-            };
+        let (next_expression, next_pos) = match Expression::try_parse(tokens, current_pos) {
+            Ok((expression, next_pos)) => (expression, next_pos),
+            Err(ParsingError::Err(error)) => {
+                // TODO: Write a more detailed error
+                return Err(ParsingError::Err(error));
+            }
+            _ => break,
+        };
         current_pos = next_pos;
 
         arguments.push(next_expression);

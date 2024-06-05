@@ -1,7 +1,8 @@
-use super::super::utils::Tokenizer;
 use crate::{
     lexic::token::{Token, TokenType},
-    syntax::{ast::Expression, ParsingError, ParsingResult},
+    syntax::{
+        ast::Expression, parseable::Parseable, utils::Tokenizer, ParsingError, ParsingResult,
+    },
 };
 
 /// This grammar may not be up to date. Refer to the spec for the latest grammar.
@@ -27,7 +28,7 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
 }
 
 fn parse_parenthesized_expression(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
-    let expression = super::try_parse(tokens, pos + 1);
+    let expression = Expression::try_parse(tokens, pos + 1);
     match expression {
         Ok((expression, next_pos)) => match tokens.get(next_pos) {
             Some(token) => match token.token_type {

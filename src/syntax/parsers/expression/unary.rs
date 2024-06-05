@@ -1,6 +1,6 @@
 use crate::{
     lexic::token::Token,
-    syntax::{ast::Expression, ParsingError, ParsingResult},
+    syntax::{ast::Expression, parseable::Parseable, ParsingError, ParsingResult},
 };
 
 use super::function_call_expr;
@@ -14,7 +14,7 @@ use super::function_call_expr;
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     match tokens.get(pos) {
         Some(token) if token.value == "!" || token.value == "-" => {
-            match super::try_parse(tokens, pos + 1) {
+            match Expression::try_parse(tokens, pos + 1) {
                 Ok((expression, next_pos)) => Ok((
                     Expression::UnaryOperator(&token.value, Box::new(expression)),
                     next_pos,
