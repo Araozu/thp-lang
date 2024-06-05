@@ -28,12 +28,12 @@
 
 ## v0.0.13
 
-- [ ] Begin work on a formal grammar
-- [ ] Simplify/rewrite AST
-- [ ] Define the top level constructs
+- [x] Begin work on a formal grammar
+- [x] Simplify/rewrite AST
+- [x] Define the top level constructs
 - [ ] Include the original tokens in the AST
 - [ ] Finish the workflow for a hello world
-- [ ] Refactor code
+- [x] Refactor code
 - [x] Remove `PARSER couldn't parse any construction` error & replace with an actual error message
 
 

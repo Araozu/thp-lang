@@ -19,4 +19,18 @@ impl<'a> Parseable<'a> for Expression<'a> {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use crate::lexic::get_tokens;
+
+    use super::*;
+
+    #[test]
+    fn should_parse_expression_w_indentation_1() {
+        let tokens = get_tokens(&String::from("a\n  == b")).unwrap();
+        let (expr, _) = Expression::try_parse(&tokens, 0).unwrap();
+        match expr {
+            Expression::BinaryOperator(_e1, _e2, op) => {}
+            _ => panic!("Expected a binary operation"),
+        }
+    }
+}

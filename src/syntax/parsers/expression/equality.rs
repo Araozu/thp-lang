@@ -1,5 +1,5 @@
 use crate::{
-    lexic::token::Token,
+    lexic::token::{Token, TokenType},
     syntax::{ast::Expression, ParsingError, ParsingResult},
 };
 
@@ -9,6 +9,7 @@ use crate::{
 /// equality = comparison, (("==" | "!="), comparison )*;
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
+    // TODO: This must be newline/indentation aware
     let (comparison, next_pos) = match super::comparison::try_parse(tokens, pos) {
         Ok((expr, next_pos)) => (expr, next_pos),
         _ => return Err(ParsingError::Unmatched),
@@ -37,6 +38,33 @@ fn parse_many<'a>(
                     parse_many(tokens, next_pos, expr)
                 }
                 _ => Err(ParsingError::Unmatched),
+            }
+        }
+        // If token is a newline: check if the following token is INDENT.
+        // If so, ignore those 2 and continue parsing
+        // Then, we should find a DEDENT token to finish this expression?
+        Some(token) if token.token_type == TokenType::NewLine => {
+            match tokens.get(pos + 1) {
+                Some(t) if t.token_type == TokenType::INDENT => {
+                    // Ignore indentation and continue parsing
+                    let result = parse_many(tokens, pos + 2, prev_expr);
+                    // Expect a DEDENT token
+                    match result {
+                        Ok((expr, next)) => {
+                            match tokens.get(next) {
+                                Some(t) if t.token_type == TokenType::DEDENT => {
+                                    Ok((expr, next + 1))
+                                }
+                                _ => unreachable!("Invalid parser state: expected a DEDENT after parsing an indented expression")
+                            }
+                        }
+                        _ => result
+                    }
+                }
+                _ => {
+                    // Return current parsed value
+                    return Ok((prev_expr, pos));
+                }
             }
         }
         _ => Ok((prev_expr, pos)),
@@ -83,4 +111,54 @@ mod tests {
             _ => panic!("Expected an Unmatched error"),
         }
     }
+
+    #[test]
+    fn should_parse_indented_1() {
+        let tokens = get_tokens(&String::from("a\n  == b")).unwrap();
+        let (result, next) = try_parse(&tokens, 0).unwrap();
+
+        assert_eq!(tokens[5].token_type, TokenType::DEDENT);
+        assert_eq!(next, 6);
+
+        match result {
+            Expression::BinaryOperator(_, _, op) => {
+                assert_eq!(op, "==")
+            },
+            _ => panic!("Expected a binary operator")
+        }
+    }
+
+    #[test]
+    fn should_parse_indented_2() {
+        let tokens = get_tokens(&String::from("a\n  == b\n    == c")).unwrap();
+        let (result, next) = try_parse(&tokens, 0).unwrap();
+
+        assert_eq!(tokens[9].token_type, TokenType::DEDENT);
+        assert_eq!(tokens[10].token_type, TokenType::DEDENT);
+        assert_eq!(next, 11);
+
+        match result {
+            Expression::BinaryOperator(_, _, op) => {
+                assert_eq!(op, "==")
+            },
+            _ => panic!("Expected a binary operator")
+        }
+    }
+
+    #[test]
+    fn should_parse_indented_3() {
+        let tokens = get_tokens(&String::from("a\n  == b == c")).unwrap();
+        let (result, next) = try_parse(&tokens, 0).unwrap();
+
+        assert_eq!(tokens[7].token_type, TokenType::DEDENT);
+        assert_eq!(next, 8);
+
+        match result {
+            Expression::BinaryOperator(_, _, op) => {
+                assert_eq!(op, "==")
+            },
+            _ => panic!("Expected a binary operator")
+        }
+    }
+
 }
