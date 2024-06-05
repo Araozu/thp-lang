@@ -12,7 +12,7 @@
 - Store tokens for the semantic analysis phase, to have actual error reporting
 - Parse more complex bindings
 - Watch mode
-- Improve error messages
+- Rework error messages
 - Parse other language constructions
 - Type checking
 - Check for conflicting identifiers

@@ -101,7 +101,6 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
         current_pos = next_pos;
 
         // Function body (block)
-        // TODO: impl Parseable
         let (block, next_pos) = match Block::try_parse(tokens, current_pos) {
             Ok((block, next_pos)) => (block, next_pos),
             Err(ParsingError::Err(error)) => {

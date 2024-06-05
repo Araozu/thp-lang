@@ -100,22 +100,59 @@ mod tests {
         assert_eq!(2, next_pos);
         assert_eq!(0, block.members.len())
     }
-    
-    // TODO: rewrite, refactor
-    /*
+
     #[test]
-    fn test_parse_block() {
-        let tokens = get_tokens(&String::from("{f()}")).unwrap();
-        let block = parse_block(&tokens, 0);
+    fn should_parse_block_with_fn() {
+        let tokens = get_tokens(&String::from("{\n    fun f(){}\n}")).unwrap();
+        let (block, next_pos) = Block::try_parse(&tokens, 0).unwrap();
 
-        let block = match block {
-            ParsingResult::Ok((p, _)) => p,
-            _ => panic!("Expected a block, got: {:?}", block),
-        };
+        assert_eq!(12, next_pos);
+        assert_eq!(1, block.members.len());
 
-        assert_eq!(block.statements.len(), 1);
+        let member = &block.members[0];
+        match member {
+            BlockMember::Stmt(Statement::FnDecl(f)) => {
+                assert_eq!(f.identifier.value, "f");
+            }
+            _ => panic!("Expected a function declaration, got {:?}", member)
+        }
     }
 
+    #[test]
+    fn should_parse_block_with_fn_2() {
+        let tokens = get_tokens(&String::from("{\n    fun f(){}\nfun g(){}\n}")).unwrap();
+        let (block, next_pos) = Block::try_parse(&tokens, 0).unwrap();
+
+        assert_eq!(19, next_pos);
+        assert_eq!(2, block.members.len());
+
+        let member = &block.members[0];
+        match member {
+            BlockMember::Stmt(Statement::FnDecl(f)) => {
+                assert_eq!(f.identifier.value, "f");
+            }
+            _ => panic!("Expected a function declaration, got {:?}", member)
+        }
+
+        let member = &block.members[1];
+        match member {
+            BlockMember::Stmt(Statement::FnDecl(f)) => {
+                assert_eq!(f.identifier.value, "g");
+            }
+            _ => panic!("Expected a function declaration, got {:?}", member)
+        }
+    }
+
+    // TODO: rewrite, refactor
+    #[test]
+    fn should_parse_simple_expression() {
+        let tokens = get_tokens(&String::from("{f()}")).unwrap();
+        let (block, _) = Block::try_parse(&tokens, 0).unwrap();
+
+        assert_eq!(block.members.len(), 1);
+    }
+
+    /*
     #[test]
     fn test_parse_block_2() {
         let tokens = get_tokens(&String::from("{f()\ng()}")).unwrap();
