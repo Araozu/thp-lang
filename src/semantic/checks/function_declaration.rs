@@ -4,7 +4,7 @@ use crate::{
         impls::SemanticCheck,
         symbol_table::{SymbolEntry, SymbolTable},
     },
-    syntax::ast::{FunctionDeclaration, Statement},
+    syntax::ast::{BlockMember, FunctionDeclaration, Statement},
 };
 
 impl SemanticCheck for FunctionDeclaration<'_> {
@@ -33,16 +33,17 @@ impl SemanticCheck for FunctionDeclaration<'_> {
 
         // TODO: Check the return type of the function body
         // This should be the last expression in the block
-        for stmt in self.block.statements.iter() {
+        for stmt in self.block.members.iter() {
             match stmt {
-                Statement::Binding(b) => {
+                BlockMember::Stmt(Statement::Binding(b)) => {
                     if let Err(err) = b.check_semantics(&function_scope) {
                         return Err(err);
                     }
                 }
-                Statement::FnDecl(_) => {
+                BlockMember::Stmt(Statement::FnDecl(_)) => {
                     todo!("Function declaration: semantic check not implemented")
                 }
+                _ => todo!("Expression: semantic check not implemented"),
             }
         }
 

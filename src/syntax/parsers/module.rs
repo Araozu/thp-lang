@@ -22,7 +22,6 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
         let mut current_pos = 0;
 
         // Minus one because last token is EOF
-        // TODO: Does that EOF do anything?
         while current_pos < tokens_len - 1 {
             // Attempt to parse an statement
             match Statement::try_parse(tokens, current_pos) {

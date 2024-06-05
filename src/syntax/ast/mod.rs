@@ -37,8 +37,14 @@ pub struct FunctionDeclaration<'a> {
 
 #[derive(Debug)]
 pub struct Block<'a> {
-    // TODO: this should be a Vec of Statement|Expression
-    pub statements: Vec<Statement<'a>>,
+    pub members: Vec<BlockMember<'a>>,
+}
+
+/// Enum for productions available at the block level
+#[derive(Debug)]
+pub enum BlockMember<'a> {
+    Stmt(Statement<'a>),
+    Expr(Expression<'a>),
 }
 
 #[derive(Debug)]

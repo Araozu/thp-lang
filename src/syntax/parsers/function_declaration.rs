@@ -2,8 +2,7 @@ use crate::{
     error_handling::SyntaxError,
     lexic::token::{Token, TokenType},
     syntax::{
-        ast::FunctionDeclaration,
-        block::parse_block,
+        ast::{Block, FunctionDeclaration},
         functions::params_list::parse_params_list,
         parseable::{Parseable, ParsingError, ParsingResult},
         utils::{parse_token_type, try_operator},
@@ -72,6 +71,7 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
         current_pos = next_pos;
 
         // Try to parse a return type
+        // TODO: abstract parsing of Datatype to parse generics
         let (return_type, next_pos) = 'return_label: {
             let (arrow_op, next_pos) = match try_operator(tokens, current_pos, "->".into()) {
                 Ok((op, next)) => (op, next),
@@ -101,7 +101,8 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
         current_pos = next_pos;
 
         // Function body (block)
-        let (block, next_pos) = match parse_block(tokens, current_pos) {
+        // TODO: impl Parseable
+        let (block, next_pos) = match Block::try_parse(tokens, current_pos) {
             Ok((block, next_pos)) => (block, next_pos),
             Err(ParsingError::Err(error)) => {
                 return Err(ParsingError::Err(error));
@@ -316,14 +317,14 @@ mod tests {
 
     #[test]
     fn should_not_parse_fun_without_closing_brace() {
-        let tokens = get_tokens(&String::from("fun id() { 20")).unwrap();
+        let tokens = get_tokens(&String::from("fun id() { ")).unwrap();
         let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(err.reason, "Expected a closing brace after the block body.");
-                assert_eq!(err.error_start, 11);
-                assert_eq!(err.error_end, 13);
+                assert_eq!(err.error_start, 9);
+                assert_eq!(err.error_end, 10);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }

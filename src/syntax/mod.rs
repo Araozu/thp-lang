@@ -1,11 +1,9 @@
 use crate::error_handling::MistiError;
 
-mod block;
 mod expression;
 mod functions;
 mod parseable;
 mod parsers;
-mod statement;
 mod utils;
 
 pub mod ast;

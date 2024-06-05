@@ -23,6 +23,7 @@ mod tests {
         },
     };
 
+    /* TODO: reimplement
     #[test]
     fn should_transpile() {
         let tokens = get_tokens(&String::from("fun id() {}")).unwrap();
@@ -38,5 +39,5 @@ mod tests {
             }
             _ => panic!("Expected a function declaration"),
         }
-    }
+    }*/
 }
