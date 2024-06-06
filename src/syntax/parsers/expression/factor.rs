@@ -25,7 +25,6 @@ fn parse_many<'a>(
     // (("/" | "*"), unary)*
 
     let mut indent_count: u32 = 0;
-
     let mut next_pos = pos;
 
     // Handle possible indentation before binary operator

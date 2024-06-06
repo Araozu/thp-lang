@@ -1,6 +1,5 @@
 use crate::{
-    lexic::token::{Token, TokenType},
-    syntax::{ast::Expression, ParsingError, ParsingResult},
+    handle_dedentation, handle_indentation, lexic::token::{Token, TokenType}, syntax::{ast::Expression, ParsingError, ParsingResult}
 };
 
 /// Parses a factor expression.
@@ -25,16 +24,20 @@ fn parse_many<'a>(
 ) -> ParsingResult<'a, Expression<'a>> {
     // equality = comparison, (("==" | "!="), comparison )*;
 
-    let mut indented = false;
-    let result = match tokens.get(pos) {
-        Some(token) if token.value == "==" || token.value == "!=" => {
-            // here handle indentation, again, for:
-            // ```
-            // value
-            //     == value
-            // ```
+    let mut indent_count: u32 = 0;
+    let mut next_pos = pos;
 
-            match super::comparison::try_parse(tokens, pos + 1) {
+    // Handle possible indentation before binary operator
+    handle_indentation!(tokens, next_pos, indent_count, indentation_level);
+
+    let result = match tokens.get(next_pos) {
+        Some(token) if token.value == "==" || token.value == "!=" => {
+            next_pos += 1;
+            
+            // Handle possible indentation after binary operator
+            handle_indentation!(tokens, next_pos, indent_count, indentation_level);
+
+            match super::comparison::try_parse(tokens, next_pos) {
                 Ok((expr, next_pos)) => {
                     let expr = Expression::BinaryOperator(
                         Box::new(prev_expr),
@@ -42,45 +45,20 @@ fn parse_many<'a>(
                         &token.value,
                     );
 
-                    parse_many(tokens, next_pos, expr, indentation_level)
+                    parse_many(tokens, next_pos, expr, indentation_level + indent_count)
                 }
                 _ => return Err(ParsingError::Unmatched),
             }
         }
-        // Handle indentation
-        Some(token) if token.token_type == TokenType::NewLine => {
-            let next_tok = match tokens.get(pos + 1) {
-                Some(t) => t,
-                None => return Ok((prev_expr, pos)),
-            };
-            let next_is_indent = next_tok.token_type == TokenType::INDENT;
-
-            if next_is_indent {
-                // increase indentation level and continue parsing
-                indented = true;
-                parse_many(tokens, pos + 2, prev_expr, indentation_level + 1)
-            } else if indentation_level > 0 {
-                // ignore the newline, as we are indented
-                parse_many(tokens, pos + 1, prev_expr, indentation_level)
-            } else {
-                Ok((prev_expr, pos))
-            }
-        }
-        _ => Ok((prev_expr, pos)),
+        _ => return Ok((prev_expr, pos)),
     };
-
-    let (new_expr, next_pos) = match result {
+   
+    let (new_expr, mut next_pos) = match result {
         Ok((e, n)) => (e, n),
         _ => return result,
     };
 
-    // Here expect dedents if there are any
-    if indented {
-        match tokens.get(next_pos) {
-            Some(t) if t.token_type == TokenType::DEDENT => return Ok((new_expr, next_pos + 1)),
-            _ => panic!("Expected DEDENT"),
-        }
-    }
+    handle_dedentation!(tokens, next_pos, indent_count);
 
     Ok((new_expr, next_pos))
 }
@@ -190,7 +168,6 @@ mod tests {
         }
     }
 
-    /*
     #[test]
     fn should_parse_indented_5() {
         let tokens = get_tokens(&String::from("a ==\n  b")).unwrap();
@@ -205,5 +182,4 @@ mod tests {
             _ => panic!("Expected a binary operator"),
         }
     }
-    */
 }
