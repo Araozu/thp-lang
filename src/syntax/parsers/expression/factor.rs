@@ -1,6 +1,5 @@
 use crate::{
-    lexic::token::{Token, TokenType},
-    syntax::{ast::Expression, utils::Tokenizer, ParsingError, ParsingResult},
+    handle_dedentation, handle_indentation, lexic::token::{Token, TokenType}, syntax::{ast::Expression, ParsingError, ParsingResult}
 };
 
 /// Parses a factor expression.
@@ -27,47 +26,17 @@ fn parse_many<'a>(
 
     let mut indent_count: u32 = 0;
 
-    // Handle possible indentation before binary operator
     let mut next_pos = pos;
-    match (tokens.get(next_pos), tokens.get(next_pos + 1)) {
-        // New indentation level
-        (Some(t1), Some(t2))
-            if t1.token_type == TokenType::NewLine && t2.token_type == TokenType::INDENT =>
-        {
-            // set indentation
-            next_pos += 2;
-            indent_count += 1;
-        }
-        // we are indented, ignore newlines
-        (Some(t), _) if t.token_type == TokenType::NewLine && indentation_level > 0 => {
-            next_pos += 1;
-        }
-        // let other handlers handle this
-        _ => {}
-    };
+
+    // Handle possible indentation before binary operator
+    handle_indentation!(tokens, next_pos, indent_count, indentation_level);
 
     let result = match tokens.get(next_pos) {
         Some(token) if token.value == "/" || token.value == "*" => {
             next_pos += 1;
 
             // Handle possible indentation after binary operator
-            match (tokens.get(next_pos), tokens.get(next_pos + 1)) {
-                // New indentation level
-                (Some(t1), Some(t2))
-                    if t1.token_type == TokenType::NewLine
-                        && t2.token_type == TokenType::INDENT =>
-                {
-                    // set indentation
-                    next_pos += 2;
-                    indent_count += 1;
-                }
-                // we are indented, ignore newlines
-                (Some(t), _) if t.token_type == TokenType::NewLine && indentation_level > 0 => {
-                    next_pos += 1;
-                }
-                // let other handlers handle this
-                _ => {}
-            };
+            handle_indentation!(tokens, next_pos, indent_count, indentation_level);
 
             match super::unary::try_parse(tokens, next_pos) {
                 Ok((expr, next_pos)) => {
@@ -90,17 +59,7 @@ fn parse_many<'a>(
         _ => return result,
     };
 
-    for _ in 0..indent_count {
-        // Expect a DEDENT for each indentation matched
-        match tokens.get(next_pos) {
-            // continue
-            Some(t) if t.token_type == TokenType::DEDENT => {}
-            // This should be unreachable, as the lexer always emits a DEDENT for each INDENT
-            _ => unreachable!("Illegal parser state: Expected DEDENT (count: {})", indent_count),
-        };
-
-        next_pos += 1;
-    }
+    handle_dedentation!(tokens, next_pos, indent_count);
 
     Ok((new_expr, next_pos))
 }
