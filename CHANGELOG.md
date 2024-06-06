@@ -2,6 +2,7 @@
 
 ## TODO
 
+- Test correct operator precedence
 - Implement functions as first class citizens
 - Implement AST transformation before codegen:
     Create a new AST to represent PHP source code

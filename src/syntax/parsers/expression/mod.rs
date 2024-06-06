@@ -29,7 +29,7 @@ mod tests {
         let tokens = get_tokens(&String::from("a\n  == b")).unwrap();
         let (expr, _) = Expression::try_parse(&tokens, 0).unwrap();
         match expr {
-            Expression::BinaryOperator(_e1, _e2, op) => {}
+            Expression::BinaryOperator(_e1, _e2, _op) => {}
             _ => panic!("Expected a binary operation"),
         }
     }

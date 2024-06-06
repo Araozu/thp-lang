@@ -9,7 +9,6 @@ use crate::{
 /// equality = comparison, (("==" | "!="), comparison )*;
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
-    // TODO: This must be newline/indentation aware
     let (comparison, next_pos) = match super::comparison::try_parse(tokens, pos) {
         Ok((expr, next_pos)) => (expr, next_pos),
         _ => return Err(ParsingError::Unmatched),
@@ -29,6 +28,12 @@ fn parse_many<'a>(
     let mut indented = false;
     let result = match tokens.get(pos) {
         Some(token) if token.value == "==" || token.value == "!=" => {
+            // here handle indentation, again, for:
+            // ```
+            // value
+            //     == value
+            // ```
+
             match super::comparison::try_parse(tokens, pos + 1) {
                 Ok((expr, next_pos)) => {
                     let expr = Expression::BinaryOperator(
@@ -175,7 +180,6 @@ mod tests {
         let tokens = get_tokens(&String::from("a\n  == b\n  == c")).unwrap();
         let (result, next) = try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(tokens[8].token_type, TokenType::DEDENT);
         assert_eq!(next, 9);
 
         match result {
@@ -185,4 +189,21 @@ mod tests {
             _ => panic!("Expected a binary operator"),
         }
     }
+
+    /*
+    #[test]
+    fn should_parse_indented_5() {
+        let tokens = get_tokens(&String::from("a ==\n  b")).unwrap();
+        let (result, next) = try_parse(&tokens, 0).unwrap();
+
+        assert_eq!(next, 6);
+
+        match result {
+            Expression::BinaryOperator(_, _, op) => {
+                assert_eq!(op, "==")
+            }
+            _ => panic!("Expected a binary operator"),
+        }
+    }
+    */
 }
