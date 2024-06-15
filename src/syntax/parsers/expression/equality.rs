@@ -1,5 +1,7 @@
 use crate::{
-    handle_dedentation, handle_indentation, lexic::token::{Token, TokenType}, syntax::{ast::Expression, ParsingError, ParsingResult}
+    handle_dedentation, handle_indentation,
+    lexic::token::{Token, TokenType},
+    syntax::{ast::Expression, ParsingError, ParsingResult},
 };
 
 /// Parses a factor expression.
@@ -33,7 +35,7 @@ fn parse_many<'a>(
     let result = match tokens.get(next_pos) {
         Some(token) if token.value == "==" || token.value == "!=" => {
             next_pos += 1;
-            
+
             // Handle possible indentation after binary operator
             handle_indentation!(tokens, next_pos, indent_count, indentation_level);
 
@@ -52,7 +54,7 @@ fn parse_many<'a>(
         }
         _ => return Ok((prev_expr, pos)),
     };
-   
+
     let (new_expr, mut next_pos) = match result {
         Ok((e, n)) => (e, n),
         _ => return result,

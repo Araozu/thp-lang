@@ -1,5 +1,7 @@
 use crate::{
-    handle_dedentation, handle_indentation, lexic::token::{Token, TokenType}, syntax::{ast::Expression, ParsingError, ParsingResult}
+    handle_dedentation, handle_indentation,
+    lexic::token::{Token, TokenType},
+    syntax::{ast::Expression, ParsingError, ParsingResult},
 };
 
 /// Parses a factor expression.

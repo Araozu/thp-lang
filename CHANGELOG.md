@@ -31,6 +31,7 @@
 
 - [x] Begin work on a formal grammar
 - [x] Simplify/rewrite AST
+- [ ] Properly parse expression indentation/dedentation
 - [x] Define the top level constructs
 - [ ] Include the original tokens in the AST
 - [ ] Finish the workflow for a hello world
