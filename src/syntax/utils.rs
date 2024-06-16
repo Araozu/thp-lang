@@ -31,6 +31,7 @@ impl Tokenizer for Vec<Token> {
         }
     }
 
+    // unused? remove?
     fn get_indented<'a>(&'a self, index: usize, indented: bool) -> (Option<&'a Token>, usize) {
         if !indented {
             return (self.get(index), index + 1);

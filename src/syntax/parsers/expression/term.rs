@@ -1,4 +1,5 @@
 use crate::lexic::token::TokenType;
+use crate::syntax::parsers::expression::utils::try_binary_op;
 use crate::{
     handle_dedentation, handle_indentation,
     lexic::token::Token,
@@ -27,33 +28,21 @@ fn parse_many<'a>(
 ) -> ParsingResult<'a, Expression<'a>> {
     // term = factor, (("-" | "+"), factor)*;
 
-    let mut indent_count: u32 = 0;
-    let mut next_pos = pos;
+    let (token, next_pos, indent_count) =
+        match try_binary_op(tokens, pos, vec!["+", "-"], indentation_level) {
+            Some(t) => t,
+            None => return Ok((prev_expr, pos)),
+        };
 
-    // Handle possible indentation before binary operator
-    handle_indentation!(tokens, next_pos, indent_count, indentation_level);
+    // Parse the next factor
+    let result = match super::factor::try_parse(tokens, next_pos) {
+        Ok((expr, next_pos)) => {
+            let expr =
+                Expression::BinaryOperator(Box::new(prev_expr), Box::new(expr), &token.value);
 
-    let result = match tokens.get(next_pos) {
-        Some(token) if token.value == "+" || token.value == "-" => {
-            next_pos += 1;
-
-            // Handle possible indentation after binary operator
-            handle_indentation!(tokens, next_pos, indent_count, indentation_level);
-
-            match super::factor::try_parse(tokens, next_pos) {
-                Ok((expr, next_pos)) => {
-                    let expr = Expression::BinaryOperator(
-                        Box::new(prev_expr),
-                        Box::new(expr),
-                        &token.value,
-                    );
-
-                    parse_many(tokens, next_pos, expr, indentation_level + indent_count)
-                }
-                _ => return Err(ParsingError::Unmatched),
-            }
+            parse_many(tokens, next_pos, expr, indentation_level + indent_count)
         }
-        _ => return Ok((prev_expr, pos)),
+        _ => return Err(ParsingError::Unmatched),
     };
 
     let (new_expr, mut next_pos) = match result {
