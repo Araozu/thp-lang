@@ -4,8 +4,6 @@ use super::{ParsingError, ParsingResult};
 
 pub trait Tokenizer {
     fn get_significant<'a>(&'a self, index: usize) -> Option<(&'a Token, usize)>;
-
-    fn get_indented<'a>(&'a self, index: usize, indented: bool) -> (Option<&'a Token>, usize);
 }
 
 impl Tokenizer for Vec<Token> {
@@ -27,32 +25,6 @@ impl Tokenizer for Vec<Token> {
                     }
                 }
                 None => return None,
-            }
-        }
-    }
-
-    // unused? remove?
-    fn get_indented<'a>(&'a self, index: usize, indented: bool) -> (Option<&'a Token>, usize) {
-        if !indented {
-            return (self.get(index), index + 1);
-        }
-
-        let mut current_pos = index;
-
-        // Ignore all whitespace and newlines
-        loop {
-            match self.get(current_pos) {
-                Some(token) => {
-                    if token.token_type == TokenType::INDENT
-                        || token.token_type == TokenType::DEDENT
-                        || token.token_type == TokenType::NewLine
-                    {
-                        current_pos += 1;
-                    } else {
-                        return (Some(token), current_pos);
-                    }
-                }
-                None => return (None, index + 1),
             }
         }
     }

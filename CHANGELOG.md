@@ -9,6 +9,7 @@
     and a THP ast -> PHP ast process, so that the
     codegen section can focus only in codegen, not in
     translation of thp->php.
+- Ignore indentation where it doesn't matter
 - Parse __more__ binary operators
 - Store tokens for the semantic analysis phase, to have actual error reporting
 - Parse more complex bindings
@@ -31,7 +32,7 @@
 
 - [x] Begin work on a formal grammar
 - [x] Simplify/rewrite AST
-- [ ] Properly parse expression indentation/dedentation
+- [x] Properly parse expression indentation/dedentation
 - [x] Define the top level constructs
 - [ ] Include the original tokens in the AST
 - [ ] Finish the workflow for a hello world

@@ -1,7 +1,8 @@
 use crate::{
-    handle_dedentation, handle_indentation,
-    lexic::token::{Token, TokenType},
-    syntax::{ast::Expression, ParsingError, ParsingResult},
+    lexic::token::Token,
+    syntax::{
+        ast::Expression, parsers::expression::utils::try_binary_op, ParsingError, ParsingResult,
+    },
 };
 
 /// Parses a factor expression.
@@ -25,20 +26,14 @@ fn parse_many<'a>(
     indentation_level: u32,
 ) -> ParsingResult<'a, Expression<'a>> {
     // (("/" | "*"), unary)*
-
-    let mut indent_count: u32 = 0;
-    let mut next_pos = pos;
-
-    // Handle possible indentation before binary operator
-    handle_indentation!(tokens, next_pos, indent_count, indentation_level);
-
-    let result = match tokens.get(next_pos) {
-        Some(token) if token.value == "/" || token.value == "*" => {
-            next_pos += 1;
-
-            // Handle possible indentation after binary operator
-            handle_indentation!(tokens, next_pos, indent_count, indentation_level);
-
+    try_binary_op(
+        tokens,
+        pos,
+        prev_expr,
+        vec!["/", "*"],
+        indentation_level,
+        |tokens, next_pos, prev_expr, token, indent_count: u32| {
+            // match next
             match super::unary::try_parse(tokens, next_pos) {
                 Ok((expr, next_pos)) => {
                     let expr = Expression::BinaryOperator(
@@ -51,24 +46,14 @@ fn parse_many<'a>(
                 }
                 _ => return Err(ParsingError::Unmatched),
             }
-        }
-        _ => return Ok((prev_expr, pos)),
-    };
-
-    let (new_expr, mut next_pos) = match result {
-        Ok((e, n)) => (e, n),
-        _ => return result,
-    };
-
-    handle_dedentation!(tokens, next_pos, indent_count);
-
-    Ok((new_expr, next_pos))
+        },
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::lexic::get_tokens;
+    use crate::lexic::{get_tokens, token::TokenType};
 
     #[test]
     fn should_parse_comparison() {

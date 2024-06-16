@@ -1,9 +1,9 @@
-use crate::lexic::token::TokenType;
 use crate::{
-    handle_dedentation, handle_indentation,
     lexic::token::Token,
     syntax::{ast::Expression, ParsingError, ParsingResult},
 };
+
+use super::utils::try_binary_op;
 
 /// Parses a factor expression.
 ///
@@ -26,55 +26,31 @@ fn parse_many<'a>(
     indentation_level: u32,
 ) -> ParsingResult<'a, Expression<'a>> {
     // comparison = term, ((">" | ">=" | "<" | "<="), term)*;
+    try_binary_op(
+        tokens,
+        pos,
+        prev_expr,
+        vec![">", ">=", "<", "<="],
+        indentation_level,
+        |tokens, next_pos, prev_expr, token, indent_count: u32| match super::term::try_parse(
+            tokens, next_pos,
+        ) {
+            Ok((expr, next_pos)) => {
+                let expr =
+                    Expression::BinaryOperator(Box::new(prev_expr), Box::new(expr), &token.value);
 
-    let mut indent_count: u32 = 0;
-    let mut next_pos = pos;
-
-    // Handle possible indentation before binary operator
-    handle_indentation!(tokens, next_pos, indent_count, indentation_level);
-
-    let result = match tokens.get(next_pos) {
-        Some(token)
-            if token.value == "<"
-                || token.value == "<="
-                || token.value == ">"
-                || token.value == ">=" =>
-        {
-            next_pos += 1;
-
-            // Handle possible indentation after binary operator
-            handle_indentation!(tokens, next_pos, indent_count, indentation_level);
-
-            match super::term::try_parse(tokens, next_pos) {
-                Ok((expr, next_pos)) => {
-                    let expr = Expression::BinaryOperator(
-                        Box::new(prev_expr),
-                        Box::new(expr),
-                        &token.value,
-                    );
-
-                    parse_many(tokens, next_pos, expr, indentation_level + indent_count)
-                }
-                _ => return Err(ParsingError::Unmatched),
+                parse_many(tokens, next_pos, expr, indentation_level + indent_count)
             }
-        }
-        _ => return Ok((prev_expr, pos)),
-    };
-
-    let (new_expr, mut next_pos) = match result {
-        Ok((e, n)) => (e, n),
-        _ => return result,
-    };
-
-    handle_dedentation!(tokens, next_pos, indent_count);
-
-    Ok((new_expr, next_pos))
+            _ => return Err(ParsingError::Unmatched),
+        },
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::lexic::get_tokens;
+    use crate::lexic::token::TokenType;
 
     #[test]
     fn should_parse_comparison() {

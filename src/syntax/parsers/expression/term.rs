@@ -1,7 +1,5 @@
-use crate::lexic::token::TokenType;
-use crate::syntax::parsers::expression::utils::{try_binary_op, try_binary_op_2};
+use crate::syntax::parsers::expression::utils::try_binary_op;
 use crate::{
-    handle_dedentation, handle_indentation,
     lexic::token::Token,
     syntax::{ast::Expression, ParsingError, ParsingResult},
 };
@@ -28,7 +26,7 @@ fn parse_many<'a>(
 ) -> ParsingResult<'a, Expression<'a>> {
     // term = factor, (("-" | "+"), factor)*;
 
-    try_binary_op_2(
+    try_binary_op(
         tokens,
         pos,
         prev_expr,
@@ -56,6 +54,7 @@ fn parse_many<'a>(
 mod tests {
     use super::*;
     use crate::lexic::get_tokens;
+    use crate::lexic::token::TokenType;
 
     #[test]
     fn should_parse_comparison() {
