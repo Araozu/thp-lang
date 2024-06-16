@@ -1,5 +1,5 @@
 use crate::lexic::token::TokenType;
-use crate::syntax::parsers::expression::utils::try_binary_op;
+use crate::syntax::parsers::expression::utils::{try_binary_op, try_binary_op_2};
 use crate::{
     handle_dedentation, handle_indentation,
     lexic::token::Token,
@@ -28,31 +28,28 @@ fn parse_many<'a>(
 ) -> ParsingResult<'a, Expression<'a>> {
     // term = factor, (("-" | "+"), factor)*;
 
-    let (token, next_pos, indent_count) =
-        match try_binary_op(tokens, pos, vec!["+", "-"], indentation_level) {
-            Some(t) => t,
-            None => return Ok((prev_expr, pos)),
-        };
+    try_binary_op_2(
+        tokens,
+        pos,
+        prev_expr,
+        vec!["+", "-"],
+        indentation_level,
+        |tokens, pos, prev_expr, token, indent_count: u32| {
+            // Parse the next factor
+            match super::factor::try_parse(tokens, pos) {
+                Ok((expr, next_pos)) => {
+                    let expr = Expression::BinaryOperator(
+                        Box::new(prev_expr),
+                        Box::new(expr),
+                        &token.value,
+                    );
 
-    // Parse the next factor
-    let result = match super::factor::try_parse(tokens, next_pos) {
-        Ok((expr, next_pos)) => {
-            let expr =
-                Expression::BinaryOperator(Box::new(prev_expr), Box::new(expr), &token.value);
-
-            parse_many(tokens, next_pos, expr, indentation_level + indent_count)
-        }
-        _ => return Err(ParsingError::Unmatched),
-    };
-
-    let (new_expr, mut next_pos) = match result {
-        Ok((e, n)) => (e, n),
-        _ => return result,
-    };
-
-    handle_dedentation!(tokens, next_pos, indent_count);
-
-    Ok((new_expr, next_pos))
+                    parse_many(tokens, next_pos, expr, indentation_level + indent_count)
+                }
+                _ => return Err(ParsingError::Unmatched),
+            }
+        },
+    )
 }
 
 #[cfg(test)]
