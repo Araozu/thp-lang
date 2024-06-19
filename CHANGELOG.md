@@ -27,6 +27,8 @@
 - Decide how to handle comments in the syntax (?)(should comments mean something like in rust?)
 - Not ignore comments & whitespace, for code formatting
 - Abstract the parsing of datatypes, such that in the future generics can be implemented in a single place
+- Include the original tokens in the AST
+- Finish the workflow for a hello world
 
 ## v0.0.13
 
@@ -34,8 +36,7 @@
 - [x] Simplify/rewrite AST
 - [x] Properly parse expression indentation/dedentation
 - [x] Define the top level constructs
-- [ ] Include the original tokens in the AST
-- [ ] Finish the workflow for a hello world
+- [x] Emit INDENT/DEDENT alone instead of NewLine+INDENT/DEDENT
 - [x] Refactor code
 - [x] Remove `PARSER couldn't parse any construction` error & replace with an actual error message
 

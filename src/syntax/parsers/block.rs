@@ -106,7 +106,7 @@ mod tests {
         let tokens = get_tokens(&String::from("{\n    fun f(){}\n}")).unwrap();
         let (block, next_pos) = Block::try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(12, next_pos);
+        assert_eq!(10, next_pos);
         assert_eq!(1, block.members.len());
 
         let member = &block.members[0];
@@ -123,7 +123,7 @@ mod tests {
         let tokens = get_tokens(&String::from("{\n    fun f(){}\nfun g(){}\n}")).unwrap();
         let (block, next_pos) = Block::try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(19, next_pos);
+        assert_eq!(17, next_pos);
         assert_eq!(2, block.members.len());
 
         let member = &block.members[0];

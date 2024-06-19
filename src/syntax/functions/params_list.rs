@@ -228,7 +228,7 @@ mod tests {
         let tokens = get_tokens(&String::from("(\n    Int x,\n    String y,\n)")).unwrap();
         let (result, next_pos) = parse_params_list(&tokens, 0).unwrap();
 
-        assert_eq!(next_pos, 13);
+        assert_eq!(next_pos, 11);
         assert_eq!(result.parameters.len(), 2);
         let first_param = &result.parameters[0];
         assert_eq!(first_param.datatype, "Int");

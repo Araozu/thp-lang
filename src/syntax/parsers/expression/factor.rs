@@ -96,8 +96,8 @@ mod tests {
         let tokens = get_tokens(&String::from("a\n  * b")).unwrap();
         let (result, next) = try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(tokens[5].token_type, TokenType::DEDENT);
-        assert_eq!(next, 6);
+        assert_eq!(tokens[4].token_type, TokenType::DEDENT);
+        assert_eq!(next, 5);
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
@@ -112,9 +112,9 @@ mod tests {
         let tokens = get_tokens(&String::from("a\n  * b\n    * c")).unwrap();
         let (result, next) = try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(tokens[9].token_type, TokenType::DEDENT);
-        assert_eq!(tokens[10].token_type, TokenType::DEDENT);
-        assert_eq!(next, 11);
+        assert_eq!(tokens[7].token_type, TokenType::DEDENT);
+        assert_eq!(tokens[8].token_type, TokenType::DEDENT);
+        assert_eq!(next, 9);
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
@@ -129,8 +129,8 @@ mod tests {
         let tokens = get_tokens(&String::from("a\n  * b * c")).unwrap();
         let (result, next) = try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(tokens[7].token_type, TokenType::DEDENT);
-        assert_eq!(next, 8);
+        assert_eq!(tokens[6].token_type, TokenType::DEDENT);
+        assert_eq!(next, 7);
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
@@ -145,7 +145,7 @@ mod tests {
         let tokens = get_tokens(&String::from("a\n  * b\n  * c")).unwrap();
         let (result, next) = try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(next, 9);
+        assert_eq!(next, 8);
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
@@ -160,7 +160,7 @@ mod tests {
         let tokens = get_tokens(&String::from("a /\n  b")).unwrap();
         let (result, next) = try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(next, 6);
+        assert_eq!(next, 5);
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
@@ -175,7 +175,7 @@ mod tests {
         let tokens = get_tokens(&String::from("a\n  /\n    b")).unwrap();
         let (result, next) = try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(next, 9);
+        assert_eq!(next, 7);
 
         match result {
             Expression::BinaryOperator(_, _, op) => {

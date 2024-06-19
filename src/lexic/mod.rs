@@ -50,12 +50,30 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
     while has_input(&chars, current_pos) {
         match next_token(&chars, current_pos, &mut indentation_stack, at_new_line) {
             LexResult::Some(token, next_pos) => {
+                // When a INDENT/DEDENT is returned it is because there is a NewLine.
+                // Remove that NewLine token and then insert the corresponding INDENT/DEDENT
+                if token.token_type == TokenType::INDENT || token.token_type == TokenType::DEDENT {
+                    results.pop();
+                }
+
                 at_new_line = token.token_type == TokenType::NewLine;
 
                 results.push(token);
                 current_pos = next_pos;
             }
             LexResult::Multiple(tokens, next_pos) => {
+                // When a INDENT/DEDENT is returned it is because there is a NewLine.
+                // Remove that NewLine token and then insert the corresponding INDENT/DEDENT
+                match tokens.get(0) {
+                    Some(t)
+                        if t.token_type == TokenType::INDENT
+                            || t.token_type == TokenType::DEDENT =>
+                    {
+                        results.pop();
+                    }
+                    _ => {}
+                }
+
                 at_new_line = match tokens.last() {
                     Some(t) if t.token_type == TokenType::NewLine => true,
                     // This may be None if there are newlines followed by EOF.
@@ -346,9 +364,8 @@ mod tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::Int, tokens[0].token_type);
-        assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Int, tokens[3].token_type);
+        assert_eq!(TokenType::INDENT, tokens[1].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
     }
 
     #[test]
@@ -357,12 +374,10 @@ mod tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::Int, tokens[0].token_type);
-        assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Int, tokens[3].token_type);
-        assert_eq!(TokenType::NewLine, tokens[4].token_type);
-        assert_eq!(TokenType::INDENT, tokens[5].token_type);
-        assert_eq!(TokenType::Int, tokens[6].token_type);
+        assert_eq!(TokenType::INDENT, tokens[1].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
+        assert_eq!(TokenType::INDENT, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[4].token_type);
     }
 
     #[test]
@@ -371,11 +386,10 @@ mod tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::Int, tokens[0].token_type);
-        assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Int, tokens[3].token_type);
-        assert_eq!(TokenType::NewLine, tokens[4].token_type);
-        assert_eq!(TokenType::Int, tokens[5].token_type);
+        assert_eq!(TokenType::INDENT, tokens[1].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
+        assert_eq!(TokenType::NewLine, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[4].token_type);
     }
 
     #[test]
@@ -384,12 +398,10 @@ mod tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::Int, tokens[0].token_type);
-        assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Int, tokens[3].token_type);
-        assert_eq!(TokenType::NewLine, tokens[4].token_type);
-        assert_eq!(TokenType::DEDENT, tokens[5].token_type);
-        assert_eq!(TokenType::Int, tokens[6].token_type);
+        assert_eq!(TokenType::INDENT, tokens[1].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[4].token_type);
     }
 
     #[test]
@@ -398,17 +410,13 @@ mod tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::Int, tokens[0].token_type);
-        assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Int, tokens[3].token_type);
-        assert_eq!(TokenType::NewLine, tokens[4].token_type);
-        assert_eq!(TokenType::INDENT, tokens[5].token_type);
+        assert_eq!(TokenType::INDENT, tokens[1].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
+        assert_eq!(TokenType::INDENT, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[4].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[5].token_type);
         assert_eq!(TokenType::Int, tokens[6].token_type);
-        assert_eq!(TokenType::NewLine, tokens[7].token_type);
-        assert_eq!(TokenType::DEDENT, tokens[8].token_type);
-        assert_eq!(TokenType::Int, tokens[9].token_type);
-        assert_eq!(TokenType::NewLine, tokens[10].token_type);
-        assert_eq!(TokenType::DEDENT, tokens[11].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[7].token_type);
     }
 
     #[test]
@@ -417,15 +425,13 @@ mod tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::Int, tokens[0].token_type);
-        assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Int, tokens[3].token_type);
-        assert_eq!(TokenType::NewLine, tokens[4].token_type);
-        assert_eq!(TokenType::INDENT, tokens[5].token_type);
-        assert_eq!(TokenType::Int, tokens[6].token_type);
-        assert_eq!(TokenType::NewLine, tokens[7].token_type);
-        assert_eq!(TokenType::DEDENT, tokens[8].token_type);
-        assert_eq!(TokenType::DEDENT, tokens[9].token_type);
+        assert_eq!(TokenType::INDENT, tokens[1].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
+        assert_eq!(TokenType::INDENT, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[4].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[5].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[6].token_type);
+        assert_eq!(TokenType::Int, tokens[7].token_type);
     }
 
     #[test]
@@ -450,11 +456,10 @@ mod indentation_tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::Int, tokens[0].token_type);
-        assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Int, tokens[3].token_type);
-        assert_eq!(TokenType::DEDENT, tokens[4].token_type);
-        assert_eq!(TokenType::EOF, tokens[5].token_type);
+        assert_eq!(TokenType::INDENT, tokens[1].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[3].token_type);
+        assert_eq!(TokenType::EOF, tokens[4].token_type);
     }
 
     #[test]
@@ -463,15 +468,13 @@ mod indentation_tests {
         let tokens = get_tokens(&input).unwrap();
 
         assert_eq!(TokenType::Int, tokens[0].token_type);
-        assert_eq!(TokenType::NewLine, tokens[1].token_type);
-        assert_eq!(TokenType::INDENT, tokens[2].token_type);
-        assert_eq!(TokenType::Int, tokens[3].token_type);
-        assert_eq!(TokenType::NewLine, tokens[4].token_type);
-        assert_eq!(TokenType::INDENT, tokens[5].token_type);
-        assert_eq!(TokenType::Int, tokens[6].token_type);
-        assert_eq!(TokenType::DEDENT, tokens[7].token_type);
-        assert_eq!(TokenType::DEDENT, tokens[8].token_type);
-        assert_eq!(TokenType::EOF, tokens[9].token_type);
+        assert_eq!(TokenType::INDENT, tokens[1].token_type);
+        assert_eq!(TokenType::Int, tokens[2].token_type);
+        assert_eq!(TokenType::INDENT, tokens[3].token_type);
+        assert_eq!(TokenType::Int, tokens[4].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[5].token_type);
+        assert_eq!(TokenType::DEDENT, tokens[6].token_type);
+        assert_eq!(TokenType::EOF, tokens[7].token_type);
     }
 
     #[test]

@@ -32,14 +32,14 @@ where
     let pos = original_pos;
 
     // handle possible opening indentation
-    let pos = match (tokens.get(pos), tokens.get(pos + 1)) {
+    let pos = match tokens.get(pos) {
         // New indentation level
-        (Some(t1), Some(t2)) if t1.token_type == NewLine && t2.token_type == INDENT => {
+        Some(t2) if t2.token_type == INDENT => {
             indent_count += 1;
-            pos + 2
+            pos + 1
         }
         // when indented, ignore newlines
-        (Some(t), _) if t.token_type == NewLine && indentation_level > 0 => pos + 1,
+        Some(t) if t.token_type == NewLine && indentation_level > 0 => pos + 1,
         // let other handlers handle this
         _ => pos,
     };
@@ -52,14 +52,14 @@ where
     };
 
     // handle possible closing indentation
-    let pos = match (tokens.get(pos), tokens.get(pos + 1)) {
+    let pos = match tokens.get(pos) {
         // New indentation level
-        (Some(t1), Some(t2)) if t1.token_type == NewLine && t2.token_type == INDENT => {
+        Some(t2) if t2.token_type == INDENT => {
             indent_count += 1;
-            pos + 2
+            pos + 1
         }
         // when indented, ignore newlines
-        (Some(t), _) if t.token_type == NewLine && indentation_level > 0 => pos + 1,
+        Some(t) if t.token_type == NewLine && indentation_level > 0 => pos + 1,
         // let other handlers handle this
         _ => pos,
     };
@@ -70,7 +70,7 @@ where
         x => return x,
     };
 
-    // handle the possible dedentation before/after the operator
+    // handle dedentation before/after the operator
     for _ in 0..indent_count {
         // expect a DEDENT for each INDENT matched
         match tokens.get(next_pos) {
