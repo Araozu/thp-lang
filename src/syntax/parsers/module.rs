@@ -42,6 +42,7 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
                 Ok((prod, next_pos)) => {
                     productions.push(ModuleMembers::Expr(prod));
                     current_pos = next_pos;
+                    continue;
                 }
                 Err(ParsingError::Err(error)) => {
                     // TODO: Better error handling, write a better error message
@@ -91,5 +92,14 @@ mod test {
                 panic!("Expected a function declaration");
             }
         }
+    }
+
+    #[test]
+    fn should_parse_expression() {
+        let tokens = get_tokens(&String::from("1")).unwrap();
+
+        let (module, next) = ModuleAST::try_parse(&tokens, 0).unwrap();
+
+        assert_eq!(next, 1);
     }
 }

@@ -14,7 +14,6 @@ impl<'a> Parseable<'a> for Expression<'a> {
     type Item = Expression<'a>;
 
     fn try_parse(tokens: &'a Vec<Token>, current_pos: usize) -> ParsingResult<'a, Self::Item> {
-        // TODO: This must be newline/indentation aware
         equality::try_parse(tokens, current_pos)
     }
 }

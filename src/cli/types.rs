@@ -8,6 +8,7 @@ pub enum CommandType {
     Fmt,
     Watch,
     Help,
+    Tokenize,
     None,
 }
 
@@ -18,6 +19,7 @@ impl CommandType {
             CommandType::Compile => super::compile::compile_command(options),
             CommandType::Repl => super::repl::repl_command(options),
             CommandType::None => super::empty::empty_command(options),
+            CommandType::Tokenize => super::tokenize::tokenize_command(options),
             _ => {
                 eprintln!("Not implemented yet! {:?} {:?}", self, options);
                 Err(())

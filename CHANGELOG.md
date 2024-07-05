@@ -4,16 +4,9 @@
 
 - Test correct operator precedence
 - Implement functions as first class citizens
-- Implement AST transformation before codegen:
-    Create a new AST to represent PHP source code
-    and a THP ast -> PHP ast process, so that the
-    codegen section can focus only in codegen, not in
-    translation of thp->php.
-- Ignore indentation where it doesn't matter
 - Parse __more__ binary operators
 - Store tokens for the semantic analysis phase, to have actual error reporting
 - Parse more complex bindings
-- Watch mode
 - Rework error messages
 - Parse other language constructions
 - Type checking
@@ -28,7 +21,16 @@
 - Not ignore comments & whitespace, for code formatting
 - Abstract the parsing of datatypes, such that in the future generics can be implemented in a single place
 - Include the original tokens in the AST
-- Finish the workflow for a hello world
+
+
+## v0.0.14
+
+- [ ] Define a minimal PHP AST
+- [ ] Transform THP AST into PHP AST
+- [ ] Implement minimal codegen for the PHP AST
+- [ ] Remove old codegen
+- [ ] Finish the workflow for a hello world
+
 
 ## v0.0.13
 

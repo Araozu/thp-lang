@@ -1,4 +1,6 @@
-#[derive(PartialEq, Debug, Clone)]
+use serde::Serialize;
+
+#[derive(Serialize, PartialEq, Debug, Clone)]
 pub enum TokenType {
     Identifier,
     Datatype,
@@ -23,7 +25,7 @@ pub enum TokenType {
     FUN,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Token {
     pub token_type: TokenType,
     // The token as a raw string

@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use self::semantic_error::SemanticError;
 
 mod lex_error;
@@ -9,20 +11,20 @@ pub trait PrintableError {
     fn get_error_str(&self, chars: &Vec<char>) -> String;
 }
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub enum MistiError {
     Lex(LexError),
     Syntax(SyntaxError),
     Semantic(SemanticError),
 }
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct LexError {
     pub position: usize,
     pub reason: String,
 }
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct SyntaxError {
     pub error_start: usize,
     pub error_end: usize,

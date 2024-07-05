@@ -2,6 +2,7 @@ mod compile;
 mod empty;
 mod help;
 mod repl;
+mod tokenize;
 mod types;
 
 use types::CommandType;
@@ -23,6 +24,7 @@ Commands
   build     Builds the project
   fmt       Formats all files in the project
   watch, w  Starts compilation of the project in watch mode
+  tokenize  Tokenize code from STDIN and output tokens as JSON to STDOUT
 
   help, h   Print this message & exit
 
@@ -67,6 +69,7 @@ fn parse_args() -> Result<(CommandType, Vec<String>), String> {
             "init" => CommandType::Init,
             "build" => CommandType::Build,
             "fmt" => CommandType::Fmt,
+            "tokenize" => CommandType::Tokenize,
             "watch" | "w" => CommandType::Watch,
             "help" | "h" => CommandType::Help,
             _ => return Err(format!("Unknown command `{}`", command)),

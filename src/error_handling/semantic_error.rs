@@ -1,7 +1,9 @@
+use serde::Serialize;
+
 use super::utils::{get_line, get_line_number};
 use super::PrintableError;
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct SemanticError {
     pub error_start: usize,
     pub error_end: usize,
