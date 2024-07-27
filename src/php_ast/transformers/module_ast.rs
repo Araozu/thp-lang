@@ -1,5 +1,5 @@
 use super::super::PhpAst;
-use crate::php_ast::{PhpExpressionList, PhpStatement};
+use crate::php_ast::{PhpExpression, PhpExpressionList, PhpStatement};
 use crate::syntax::ast::{Expression, ModuleAST, ModuleMembers};
 
 use super::PHPTransformable;
@@ -17,20 +17,31 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                     php_statements.push(stmt.into_php_ast());
                 }
                 ModuleMembers::Expr(expr) => {
-                    // TODO: a print() function call is technically an
-                    // expression in the AST, but PHP expects it to be an statement.
-                    // transform beforehand?
-
+                    // TODO: This should be done by the Expression transformer
                     match expr {
                         Expression::FunctionCall(fc) => {
                             let function_expr: &Expression = &*fc.function;
                             match function_expr {
                                 Expression::Identifier(id) if *id == "print" => {
-                                        // transform to print() expression
-                                        // no parameters supported
-                                        php_statements.push(PhpStatement::PhpEchoStatement(PhpExpressionList {
-                                            expressions: vec![]
-                                        }));
+                                    // transform to print() expression
+                                    // no parameters supported
+
+                                    // transform parameters, expect them all to be strings
+
+                                    let mut expressions = Vec::<PhpExpression>::new();
+
+                                    for e in fc.arguments.arguments.iter() {
+                                        match e {
+                                            Expression::String(v) => {
+                                                expressions.push(PhpExpression::String(v))
+                                            },
+                                            _ => panic!("Non string expressions not supported")
+                                        }
+                                    }
+
+                                    php_statements.push(PhpStatement::PhpEchoStatement(PhpExpressionList {
+                                        expressions
+                                    }));
                                 },
                                 _ => todo!("Not implemented: AST transformation for function call that is not an identifier")
                             }

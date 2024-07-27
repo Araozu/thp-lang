@@ -23,13 +23,20 @@
 - Include the original tokens in the AST
 
 
+## v0.0.15
+
+- [ ] Replace all panics with actual errors
+- [ ] Remove all old codegen
+- [ ] Test codegen
+- [ ] Begin work on the code formatter
+
+
 ## v0.0.14
 
 - [x] Define a minimal PHP AST
 - [x] Transform THP AST into PHP AST
-- [ ] Implement minimal codegen for the PHP AST
-- [ ] Remove old codegen
-- [ ] Finish the workflow for a hello world
+- [x] Implement minimal codegen for the PHP AST
+- [x] Finish the workflow for a hello world
 
 
 ## v0.0.13
