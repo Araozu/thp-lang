@@ -25,8 +25,8 @@
 
 ## v0.0.14
 
-- [ ] Define a minimal PHP AST
-- [ ] Transform THP AST into PHP AST
+- [x] Define a minimal PHP AST
+- [x] Transform THP AST into PHP AST
 - [ ] Implement minimal codegen for the PHP AST
 - [ ] Remove old codegen
 - [ ] Finish the workflow for a hello world

@@ -2,12 +2,15 @@ use std::io::{self, Write};
 
 use colored::Colorize;
 
+use crate::codegen::Transpilable;
 use crate::error_handling::PrintableError;
 use crate::lexic::token::Token;
 
 use super::codegen;
 use super::lexic;
 use super::syntax;
+
+use crate::php_ast::transformers::PHPTransformable;
 
 /// Executes Lexical analysis, handles errors and calls build_ast for the next phase
 fn compile(input: &String) {
@@ -32,7 +35,9 @@ fn build_ast(input: &String, tokens: Vec<Token>) {
 
     match ast {
         Ok(ast) => {
+            /*
             let res1 = crate::semantic::check_semantics(&ast);
+            TODO: Disabled to test the PHP codegen. Reenable
             match res1 {
                 Ok(_) => {}
                 Err(reason) => {
@@ -42,8 +47,10 @@ fn build_ast(input: &String, tokens: Vec<Token>) {
                     return;
                 }
             }
+            */
 
-            let js_code = codegen::codegen(&ast);
+            let php_ast = ast.into_php_ast();
+            let js_code = php_ast.transpile();
             println!("{}", js_code)
         }
         Err(reason) => {
