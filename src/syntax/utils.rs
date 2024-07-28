@@ -75,3 +75,65 @@ pub fn parse_token_type(
         None => Err(ParsingError::Unmatched),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        lexic::{get_tokens, token::TokenType},
+        syntax::{parseable::ParsingError, utils::{parse_token_type, Tokenizer}},
+    };
+
+    use super::try_operator;
+
+    #[test]
+    fn test_1() {
+        let input = String::from("");
+        let tokens = get_tokens(&input).unwrap();
+        assert_eq!(1, tokens.len());
+
+        match try_operator(&tokens, 10, "+".into()) {
+            Ok(_) => panic!("Expected an error"),
+            Err(error) => match error {
+                ParsingError::Unmatched => {
+                    assert!(true);
+                }
+                _ => panic!(
+                    "Expected an error due to incorrect position, got {:?}",
+                    error
+                ),
+            },
+        }
+    }
+
+    #[test]
+    fn test_2() {
+        let input = String::from("");
+        let tokens = get_tokens(&input).unwrap();
+        assert_eq!(1, tokens.len());
+
+        match parse_token_type(&tokens, 10, TokenType::Operator) {
+            Ok(_) => panic!("Expected an error"),
+            Err(error) => match error {
+                ParsingError::Unmatched => {
+                    assert!(true);
+                }
+                _ => panic!(
+                    "Expected an error due to incorrect position, got {:?}",
+                    error
+                ),
+            },
+        }
+    }
+
+    #[test]
+    fn test_3() {
+        let input = String::from("");
+        let tokens = get_tokens(&input).unwrap();
+        assert_eq!(1, tokens.len());
+
+        match tokens.get_significant(10) {
+            Some(_) => panic!("Expected a None"),
+            None => {},
+        }
+    }
+}

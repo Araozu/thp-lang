@@ -84,4 +84,40 @@ mod test {
             }
         }
     }
+
+    #[test]
+    fn should_parse_variable_decl() {
+        let input = String::from("val x = 322");
+        let tokens = get_tokens(&input).unwrap();
+        let parsing = Statement::try_parse(&tokens, 0);
+
+        match parsing {
+            Ok(_) => {}
+            Err(_) => panic!("Expected parsing to be successful"),
+        }
+    }
+
+    #[test]
+    fn should_not_parse_invalid_variable_decl() {
+        let input = String::from("val x y");
+        let tokens = get_tokens(&input).unwrap();
+        let parsing = Statement::try_parse(&tokens, 0);
+
+        match parsing {
+            Ok(_) => panic!("Expected an Err"),
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn should_parse_fun_decl() {
+        let input = String::from("fun name(){}");
+        let tokens = get_tokens(&input).unwrap();
+        let parsing = Statement::try_parse(&tokens, 0);
+
+        match parsing {
+            Ok(_) => {}
+            Err(_) => panic!("Expected parsing to be successful"),
+        }
+    }
 }

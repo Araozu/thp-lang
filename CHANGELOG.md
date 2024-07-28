@@ -25,6 +25,7 @@
 
 ## v0.0.15
 
+- [ ] Include comments in the AST
 - [ ] Replace all panics with actual errors
 - [ ] Remove all old codegen
 - [ ] Test codegen

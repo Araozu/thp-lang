@@ -98,8 +98,19 @@ mod test {
     fn should_parse_expression() {
         let tokens = get_tokens(&String::from("1")).unwrap();
 
-        let (module, next) = ModuleAST::try_parse(&tokens, 0).unwrap();
+        let (_, next) = ModuleAST::try_parse(&tokens, 0).unwrap();
 
         assert_eq!(next, 1);
+    }
+
+    #[test]
+    fn should_fail_on_invalid_expression() {
+        let tokens = get_tokens(&String::from("function_call(1 2")).unwrap();
+        let result = ModuleAST::try_parse(&tokens, 0);
+
+        match result {
+            Ok(_) => panic!("Expected an error"),
+            Err(_) => {},
+        }
     }
 }

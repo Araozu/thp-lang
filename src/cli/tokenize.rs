@@ -1,5 +1,18 @@
-use crate::lexic::get_tokens;
+use serde::Serialize;
+
+use crate::{
+    error_handling::MistiError,
+    lexic::{get_tokens, token::Token},
+    syntax::build_ast,
+};
 use std::io::{self, BufRead};
+
+#[derive(Serialize)]
+enum TokenizeResult {
+    Ok(Vec<Token>),
+    TokensOnly(Vec<Token>, MistiError),
+    Err(MistiError),
+}
 
 pub fn tokenize_command(_options: Vec<String>) -> Result<(), ()> {
     // Get the input from stdin
@@ -19,7 +32,18 @@ pub fn tokenize_command(_options: Vec<String>) -> Result<(), ()> {
     let input_code = lines.join("\n");
     let tokens = get_tokens(&input_code);
 
-    let json = serde_json::to_string(&tokens).unwrap();
+    let result = match tokens {
+        Ok(tokens) => {
+            let ast_result = build_ast(&tokens);
+            match ast_result {
+                Ok(_) => TokenizeResult::Ok(tokens),
+                Err(error) => TokenizeResult::TokensOnly(tokens, error),
+            }
+        }
+        Err(error) => TokenizeResult::Err(error),
+    };
+
+    let json = serde_json::to_string(&result).unwrap();
     println!("{}", json);
 
     Ok(())

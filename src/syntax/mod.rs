@@ -70,4 +70,16 @@ mod tests {
             _ => panic!("Expected a function declaration as first production"),
         }
     }
+
+    #[test]
+    fn should_fail_on_syntax_error() {
+        let input = String::from("fun gaa {}");
+        let tokens = get_tokens(&input).unwrap();
+        let ast = build_ast(&tokens);
+
+        match ast {
+            Ok(_) => panic!("Expected an Err"),
+            Err(_) => {}
+        }
+    }
 }
