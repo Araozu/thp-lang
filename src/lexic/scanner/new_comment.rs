@@ -1,5 +1,8 @@
 use super::token::Token;
-use crate::lexic::{utils, LexResult};
+use crate::{
+    error_handling::LexError,
+    lexic::{utils, LexResult},
+};
 
 /// Scans a new line.
 ///
@@ -23,6 +26,74 @@ fn scan_any_except_new_line(
         Some(c) if *c == '\n' => (current, start_pos),
         Some(c) => scan_any_except_new_line(chars, start_pos + 1, utils::str_append(current, *c)),
         None => (current, start_pos),
+    }
+}
+
+/// Scans a multiline commend
+/// This function assumes that the character at `start_pos` is '/'
+/// and the character at `start_pos + 1` is '*'
+pub fn scan_multiline(chars: &Vec<char>, start_pos: usize) -> LexResult {
+    match multiline_impl(chars, start_pos + 2) {
+        Some((value, next_position)) => LexResult::Some(
+            Token::new_multiline_comment(value, start_pos),
+            next_position,
+        ),
+        None => {
+            // Throw an error: Incomplete multiline comment
+            LexResult::Err(LexError {
+                position: start_pos,
+                // TODO: add an end_position
+                reason: "Unfinished multiline commend".into(),
+            })
+        }
+    }
+}
+
+fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Option<(String, usize)> {
+    let mut current_position = start_pos;
+    let mut result = Vec::<char>::new();
+
+    loop {
+        match chars.get(current_position) {
+            Some('/') => {
+                // TODO: Check for a nested comment instead of
+                // appending
+                result.push('/');
+                current_position += 1;
+            }
+            Some('*') => {
+                // Check for the end of a comment
+                match chars.get(current_position + 1) {
+                    Some('/') => {
+                        // Create and return the token,
+                        // ignoring the `*/`
+                        return Some((result.iter().collect(), current_position + 2));
+                    }
+                    Some(c) => {
+                        // Append both and continue
+                        result.push('*');
+                        result.push(*c);
+                        current_position += 2;
+                    }
+                    None => {
+                        // Throw an error
+                        return None;
+                    }
+                }
+            }
+            Some(c) => {
+                // Append and continue
+                result.push(*c);
+                current_position += 1;
+            }
+            None => {
+                // Throw an error
+                // TODO: Also return the position where this token ends,
+                // to display better error messages.
+                // Requires LexError to implement an end_position field
+                return None;
+            }
+        }
     }
 }
 
@@ -70,6 +141,93 @@ mod tests {
             }
             _ => {
                 panic!()
+            }
+        }
+    }
+
+    #[test]
+    fn should_scan_multiline() {
+        let input = str_to_vec("/**/");
+
+        let result = scan_multiline(&input, 0);
+        match result {
+            LexResult::Some(t, next) => {
+                assert_eq!(4, next);
+                assert_eq!("", t.value);
+                assert_eq!(0, t.position);
+                assert_eq!(TokenType::MultilineComment, t.token_type);
+            }
+            _ => {
+                panic!("Expected a multine comment")
+            }
+        }
+    }
+
+    #[test]
+    fn should_scan_multiline_2() {
+        let input = str_to_vec("/* my comment */");
+
+        let result = scan_multiline(&input, 0);
+        match result {
+            LexResult::Some(t, next) => {
+                assert_eq!(16, next);
+                assert_eq!(" my comment ", t.value);
+                assert_eq!(0, t.position);
+                assert_eq!(TokenType::MultilineComment, t.token_type);
+            }
+            _ => {
+                panic!("Expected a multine comment")
+            }
+        }
+    }
+
+    #[test]
+    fn should_scan_multiline_with_multiple_lines() {
+        let input = str_to_vec("/* my\ncomment */");
+
+        let result = scan_multiline(&input, 0);
+        match result {
+            LexResult::Some(t, next) => {
+                assert_eq!(16, next);
+                assert_eq!(" my\ncomment ", t.value);
+                assert_eq!(0, t.position);
+                assert_eq!(TokenType::MultilineComment, t.token_type);
+            }
+            _ => {
+                panic!("Expected a multine comment")
+            }
+        }
+    }
+
+    #[test]
+    fn should_not_scan_multiline_comment_if_invalid() {
+        let input = str_to_vec("/* my\ncomment");
+
+        let result = scan_multiline(&input, 0);
+        match result {
+            LexResult::Err(error) => {
+                assert_eq!(0, error.position)
+            }
+            _ => {
+                panic!("Expected an error scannning an incomplete multiline comment")
+            }
+        }
+    }
+
+    #[test]
+    fn should_scan_multiline_comments_with_asterisk() {
+        let input = str_to_vec("/* my * comment */");
+
+        let result = scan_multiline(&input, 0);
+        match result {
+            LexResult::Some(t, next) => {
+                assert_eq!(18, next);
+                assert_eq!(" my * comment ", t.value);
+                assert_eq!(0, t.position);
+                assert_eq!(TokenType::MultilineComment, t.token_type);
+            }
+            _ => {
+                panic!("Expected a multine comment")
             }
         }
     }

@@ -135,6 +135,7 @@ fn next_token(
         .or_else(|| scanner::datatype(next_char, chars, current_pos))
         .or_else(|| scanner::string(next_char, chars, current_pos))
         .or_else(|| scanner::new_comment(next_char, chars, current_pos))
+        .or_else(|| scanner::new_multiline_comment(next_char, chars, current_pos))
         .or_else(|| scanner::operator(next_char, chars, current_pos))
         .or_else(|| scanner::grouping_sign(next_char, chars, current_pos))
         .or_else(|| scanner::new_line(next_char, chars, current_pos))

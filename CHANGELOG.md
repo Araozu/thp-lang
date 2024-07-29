@@ -25,6 +25,8 @@
 
 ## v0.0.15
 
+- [x] Multiline comments
+- [ ] Nested multiline comments
 - [ ] Include comments in the AST
 - [ ] Replace all panics with actual errors
 - [ ] Remove all old codegen

@@ -68,3 +68,11 @@ pub fn new_comment(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexRe
         _ => None,
     }
 }
+
+pub fn new_multiline_comment(c: char, chars: &Vec<char>, start_pos: usize) -> Option<LexResult> {
+    let next_char = chars.get(start_pos + 1);
+    match (c, next_char) {
+        ('/', Some('*')) => Some(new_comment::scan_multiline(chars, start_pos)),
+        _ => None,
+    }
+}

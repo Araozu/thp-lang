@@ -16,6 +16,7 @@ pub enum TokenType {
     RightBrace,
     NewLine,
     Comment,
+    MultilineComment,
     Comma,
     INDENT,
     DEDENT,
@@ -109,6 +110,14 @@ impl Token {
     pub fn new_comment(value: String, position: usize) -> Token {
         Token {
             token_type: TokenType::Comment,
+            value,
+            position,
+        }
+    }
+
+    pub fn new_multiline_comment(value: String, position: usize) -> Token {
+        Token {
+            token_type: TokenType::MultilineComment,
             value,
             position,
         }

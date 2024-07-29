@@ -21,6 +21,7 @@ pub enum MistiError {
 #[derive(Serialize, Debug)]
 pub struct LexError {
     pub position: usize,
+    // TODO: Add and end position
     pub reason: String,
 }
 
