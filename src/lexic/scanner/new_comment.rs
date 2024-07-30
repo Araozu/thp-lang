@@ -56,18 +56,17 @@ fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Option<(Vec<char>, usi
     loop {
         match chars.get(current_position) {
             Some('/') => {
-
                 match chars.get(current_position + 1) {
                     Some('*') => {
                         // Scan nested comment
-                        let (mut nested, next_position) = match multiline_impl(chars, current_position + 2)
-                        {
-                            Some(v) => v,
-                            None => {
-                                // The nested comment is not closed.
-                                return None;
-                            }
-                        };
+                        let (mut nested, next_position) =
+                            match multiline_impl(chars, current_position + 2) {
+                                Some(v) => v,
+                                None => {
+                                    // The nested comment is not closed.
+                                    return None;
+                                }
+                            };
                         result.push('/');
                         result.push('*');
                         result.append(&mut nested);

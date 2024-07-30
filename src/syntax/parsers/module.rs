@@ -110,7 +110,7 @@ mod test {
 
         match result {
             Ok(_) => panic!("Expected an error"),
-            Err(_) => {},
+            Err(_) => {}
         }
     }
 }

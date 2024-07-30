@@ -80,7 +80,10 @@ pub fn parse_token_type(
 mod tests {
     use crate::{
         lexic::{get_tokens, token::TokenType},
-        syntax::{parseable::ParsingError, utils::{parse_token_type, Tokenizer}},
+        syntax::{
+            parseable::ParsingError,
+            utils::{parse_token_type, Tokenizer},
+        },
     };
 
     use super::try_operator;
@@ -133,7 +136,7 @@ mod tests {
 
         match tokens.get_significant(10) {
             Some(_) => panic!("Expected a None"),
-            None => {},
+            None => {}
         }
     }
 }
