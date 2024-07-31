@@ -101,5 +101,6 @@ fn build_ast(input: &String, tokens: Vec<Token>) -> Result<String, String> {
         }
     };
 
-    Ok(codegen::codegen(&ast))
+    Err("Code generation disabled: rewriting into PHP AST".into())
+    // Ok(codegen::codegen(&ast))
 }

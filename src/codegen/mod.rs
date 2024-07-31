@@ -1,13 +1,5 @@
 // TODO: These are for the THP AST. Eventually replace this
 // with the PHP AST
-mod binding;
-mod block;
-mod expression;
-mod function_call;
-mod function_declaration;
-mod module_ast;
-mod statement;
-mod top_level_construct;
 
 mod php;
 

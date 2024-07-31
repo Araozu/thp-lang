@@ -1,5 +1,5 @@
 use super::super::PhpAst;
-use crate::php_ast::{PhpExpression, PhpExpressionList, PhpStatement};
+use crate::php_ast::{PhpExpression, PhpExpressionList, PhpPrimaryExpression, PhpStatement};
 use crate::syntax::ast::{Expression, ModuleAST, ModuleMembers};
 
 use super::PHPTransformable;
@@ -33,7 +33,9 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                                     for e in fc.arguments.arguments.iter() {
                                         match e {
                                             Expression::String(v) => {
-                                                expressions.push(PhpExpression::String(v))
+                                                expressions.push(
+                                                    PhpExpression::PrimaryExpression(PhpPrimaryExpression::StringLiteral(v.clone()))
+                                                )
                                             },
                                             _ => panic!("Non string expressions not supported")
                                         }
