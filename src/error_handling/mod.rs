@@ -22,6 +22,7 @@ pub enum MistiError {
 pub struct LexError {
     pub position: usize,
     // TODO: Add and end position
+    pub end_position: usize,
     pub reason: String,
 }
 

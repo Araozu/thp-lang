@@ -152,6 +152,7 @@ fn next_token(
         .unwrap_or_else(|| {
             let error = LexError {
                 position: current_pos,
+                end_position: current_pos + 1,
                 reason: format!(
                     "Illegal character `{}` (escaped: {})",
                     next_char,
@@ -196,6 +197,7 @@ fn handle_indentation(
                 // Illegal state: Indentation error
                 let error = LexError {
                     position: current_pos,
+                    end_position: current_pos + 1,
                     reason: format!(
                         "Indentation error: expected {} spaces, found {}",
                         new_top, spaces

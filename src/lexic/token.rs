@@ -38,7 +38,15 @@ pub struct Token {
 
 impl Token {
     pub fn get_end_position(&self) -> usize {
-        self.position + self.value.len()
+        match self.token_type {
+            // 4 extra characters for /* and */
+            TokenType::MultilineComment => self.position + self.value.len() + 4,
+            // 2 extra characters for //
+            TokenType::Comment => self.position + self.value.len() + 2,
+            // 2 extra characters for ""
+            TokenType::String => self.position + self.value.len() + 2,
+            _ => self.position + self.value.len()
+        }
     }
 }
 

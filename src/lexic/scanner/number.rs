@@ -53,6 +53,7 @@ fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
         }
         _ => LexResult::Err(LexError {
             position: start_pos,
+            end_position: start_pos + 1,
             reason: String::from("Tried to scan an incomplete hex value"),
         }),
     }
@@ -69,12 +70,14 @@ fn scan_double(chars: &Vec<char>, start_pos: usize, current: String) -> LexResul
         Some(c) if utils::is_digit(*c) => scan_double_impl(chars, start_pos, current),
         Some(_) => LexResult::Err(LexError {
             position: start_pos,
+            end_position: start_pos + 1,
             reason: String::from(
                 "The character after the dot when scanning a double is not a number.",
             ),
         }),
         _ => LexResult::Err(LexError {
             position: start_pos,
+            end_position: start_pos + 1,
             reason: String::from("EOF when scanning a double number."),
         }),
     }
@@ -122,6 +125,7 @@ fn scan_scientific(chars: &Vec<char>, start_pos: usize, current: String) -> LexR
         }
         _ => LexResult::Err(LexError {
             position: start_pos,
+            end_position: start_pos + 1,
             reason: String::from(
                 "The characters after 'e' are not + or -, or are not followed by a number",
             ),

@@ -66,7 +66,7 @@ mod tests {
 
         match expression {
             Ok((Expression::String(value), _)) => {
-                assert_eq!("\"Hello\"", format!("{}", value))
+                assert_eq!("Hello", format!("{}", value))
             }
             _ => panic!(),
         }

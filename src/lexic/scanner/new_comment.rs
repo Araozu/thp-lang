@@ -34,22 +34,27 @@ fn scan_any_except_new_line(
 /// and the character at `start_pos + 1` is '*'
 pub fn scan_multiline(chars: &Vec<char>, start_pos: usize) -> LexResult {
     match multiline_impl(chars, start_pos + 2) {
-        Some((value, next_position)) => LexResult::Some(
+        Ok((value, next_position)) => LexResult::Some(
             Token::new_multiline_comment(value.iter().collect(), start_pos),
             next_position,
         ),
-        None => {
+        Err(last_position) => {
             // Throw an error: Incomplete multiline comment
             LexResult::Err(LexError {
                 position: start_pos,
                 // TODO: add an end_position
+                end_position: last_position,
                 reason: "Unfinished multiline commend".into(),
             })
         }
     }
 }
 
-fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Option<(Vec<char>, usize)> {
+/// Implementation that scans the multiline comment.
+/// 
+/// May only error if EOF is found before the comment is finished.
+/// If Err, returns the last position where a char was available.
+fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Result<(Vec<char>, usize), usize> {
     let mut current_position = start_pos;
     let mut result = Vec::<char>::new();
 
@@ -61,10 +66,10 @@ fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Option<(Vec<char>, usi
                         // Scan nested comment
                         let (mut nested, next_position) =
                             match multiline_impl(chars, current_position + 2) {
-                                Some(v) => v,
-                                None => {
+                                Ok(v) => v,
+                                Err(pos) => {
                                     // The nested comment is not closed.
-                                    return None;
+                                    return Err(pos);
                                 }
                             };
                         result.push('/');
@@ -79,7 +84,7 @@ fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Option<(Vec<char>, usi
                         result.push('/');
                         result.push(*c);
                     }
-                    None => return None,
+                    None => return Err(current_position),
                 }
             }
             Some('*') => {
@@ -88,7 +93,7 @@ fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Option<(Vec<char>, usi
                     Some('/') => {
                         // Create and return the token,
                         // ignoring the `*/`
-                        return Some((result, current_position + 2));
+                        return Ok((result, current_position + 2));
                     }
                     Some(c) => {
                         // Append both and continue
@@ -98,7 +103,7 @@ fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Option<(Vec<char>, usi
                     }
                     None => {
                         // Throw an error
-                        return None;
+                        return Err(current_position);
                     }
                 }
             }
@@ -108,10 +113,7 @@ fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Option<(Vec<char>, usi
                 current_position += 1;
             }
             None => {
-                // TODO: Also return the position where this token ends,
-                // to display better error messages.
-                // Requires LexError to implement an end_position field
-                return None;
+                return Err(current_position);
             }
         }
     }
