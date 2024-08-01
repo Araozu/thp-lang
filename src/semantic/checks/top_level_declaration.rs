@@ -33,22 +33,6 @@ impl SemanticCheck for Statement<'_> {
 // TODO: Move to its own file when it grows
 impl SemanticCheck for Expression<'_> {
     fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError> {
-        // How to get the global definition into the symbol table?
-        // maybe just when creating the symbol table inject all
-        // the global elements at once?
-        // Store the global elements as binary/JSON
-        // and load them along with the symbol table
-
-        // then for efficiency they could be grouped by module?
-        // and stored as binary files?
-        // then the binary files are searched for and loaded when
-        // requested?
-
-        // For a function call:
-        //  check that the function exists
-        //  check its signature
-        //  check parameters
-
         match self {
             Expression::FunctionCall(f) => {
                 let fun = &*f.function;
@@ -104,7 +88,11 @@ impl SemanticCheck for Expression<'_> {
                     }
                 }
             }
-            _ => todo!("Check semantics for expression other than function call"),
+            Expression::Int(_) => {},
+            Expression::Float(_) => {},
+            Expression::String(_) => {},
+            Expression::Boolean(_) => {},
+            _ => todo!("Check semantics for expression other than function call and primitive"),
         }
 
         Ok(())

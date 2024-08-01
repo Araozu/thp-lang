@@ -22,6 +22,7 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                     // TODO: This should be done by the Expression transformer
                     match expr {
                         Expression::FunctionCall(fc) => {
+                            // TODO: This definitely needs refactoring
                             let function_expr: &Expression = &*fc.function;
                             match function_expr {
                                 Expression::Identifier(id) if *id == "print" => {
@@ -49,6 +50,27 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                                 },
                                 _ => todo!("Not implemented: AST transformation for function call that is not an identifier")
                             }
+                        }
+                        Expression::Int(value) => {
+                            php_statements.push(PhpStatement::PhpExpressionStatement(
+                                PhpExpression::Assignment(PhpAssignmentExpression::Primary(
+                                    PhpPrimaryExpression::IntegerLiteral(value),
+                                )),
+                            ));
+                        }
+                        Expression::Float(value) => {
+                            php_statements.push(PhpStatement::PhpExpressionStatement(
+                                PhpExpression::Assignment(PhpAssignmentExpression::Primary(
+                                    PhpPrimaryExpression::FloatingLiteral(value),
+                                )),
+                            ));
+                        }
+                        Expression::String(value) => {
+                            php_statements.push(PhpStatement::PhpExpressionStatement(
+                                PhpExpression::Assignment(PhpAssignmentExpression::Primary(
+                                    PhpPrimaryExpression::StringLiteral(value),
+                                )),
+                            ));
                         }
                         _ => {
                             todo!("not implemented: AST transform for expression {:?}", expr)

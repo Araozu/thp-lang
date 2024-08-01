@@ -62,8 +62,6 @@ pub struct Parameter<'a> {
 pub enum Expression<'a> {
     Int(&'a String),
     Float(&'a String),
-    // TODO: Specify if this contains or not the original quotes ""
-    // TODO: After this fix where neccesary
     String(&'a String),
     Boolean(bool),
     Identifier(&'a String),

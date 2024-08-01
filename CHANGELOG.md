@@ -25,6 +25,10 @@
 - Begin work on the code formatter
 
 
+## v0.1.1
+
+- [x] Top level expressions as statements
+
 ## v0.1.0
 
 - [x] Complete workflow for "Hello world"
