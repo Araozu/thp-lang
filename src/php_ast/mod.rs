@@ -19,6 +19,7 @@ pub struct PhpAst<'a> {
 ///   echo-statement
 pub enum PhpStatement<'a> {
     PhpEchoStatement(PhpExpressionList<'a>),
+    PhpExpressionStatement(PhpExpression<'a>),
 }
 
 pub struct PhpExpressionList<'a> {
@@ -26,15 +27,30 @@ pub struct PhpExpressionList<'a> {
 }
 
 pub enum PhpExpression<'a> {
-    PrimaryExpression(PhpPrimaryExpression<'a>),
+    Assignment(PhpAssignmentExpression<'a>),
+}
+
+pub enum PhpAssignmentExpression<'a> {
+    Primary(PhpPrimaryExpression<'a>),
+    SimpleAssignment(PhpSimpleAssignment<'a>),
+}
+
+pub struct PhpSimpleAssignment<'a> {
+    pub variable: String,
+    pub assignment: PhpPrimaryExpression<'a>,
 }
 
 /// https://phplang.org/spec/19-grammar.html#grammar-primary-expression
 ///
 /// primary-expression:
 ///     literal
+///     variable
 pub enum PhpPrimaryExpression<'a> {
     IntegerLiteral(&'a String),
     FloatingLiteral(&'a String),
     StringLiteral(&'a String),
+    /// https://phplang.org/spec/19-grammar.html#grammar-variable
+    ///
+    /// Supports only variable -> callable-variable -> simple-variable -> variable-name
+    Variable(&'a String),
 }

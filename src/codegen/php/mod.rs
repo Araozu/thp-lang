@@ -8,7 +8,7 @@ pub mod statement_list;
 impl Transpilable for PhpExpression<'_> {
     fn transpile(&self) -> String {
         match self {
-            PhpExpression::PrimaryExpression(p) => p.transpile(),
+            PhpExpression::Assignment(p) => p.transpile(),
         }
     }
 }

@@ -1,5 +1,8 @@
 use super::super::PhpExpression;
-use crate::{php_ast::PhpPrimaryExpression, syntax::ast::Expression};
+use crate::{
+    php_ast::{PhpAssignmentExpression, PhpPrimaryExpression},
+    syntax::ast::Expression,
+};
 
 use super::PHPTransformable;
 
@@ -11,7 +14,7 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
         match self {
             Expression::String(value) => {
                 let expr = PhpPrimaryExpression::StringLiteral(value);
-                PhpExpression::PrimaryExpression(expr)
+                PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr))
             }
             _ => todo!("transformation for expression: {:?}", self),
         }

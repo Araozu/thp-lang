@@ -20,6 +20,10 @@ impl Transpilable for PhpStatement<'_> {
 
                 format!("echo {};", expressions_str)
             }
+            PhpStatement::PhpExpressionStatement(expr) => {
+                let expr_str = expr.transpile();
+                format!("{};", expr_str)
+            }
         }
     }
 }
@@ -28,7 +32,10 @@ impl Transpilable for PhpStatement<'_> {
 mod tests {
     use crate::{
         codegen::Transpilable,
-        php_ast::{PhpExpression, PhpExpressionList, PhpPrimaryExpression, PhpStatement},
+        php_ast::{
+            PhpAssignmentExpression, PhpExpression, PhpExpressionList, PhpPrimaryExpression,
+            PhpStatement,
+        },
     };
 
     #[test]
@@ -47,7 +54,9 @@ mod tests {
         let input = String::from("322");
         let exp_1 = PhpPrimaryExpression::FloatingLiteral(&input);
         let expressions = PhpExpressionList {
-            expressions: vec![PhpExpression::PrimaryExpression(exp_1)],
+            expressions: vec![PhpExpression::Assignment(PhpAssignmentExpression::Primary(
+                exp_1,
+            ))],
         };
         let ast = PhpStatement::PhpEchoStatement(expressions);
         let output = ast.transpile();
@@ -65,13 +74,25 @@ mod tests {
 
         let expressions = PhpExpressionList {
             expressions: vec![
-                PhpExpression::PrimaryExpression(exp_1),
-                PhpExpression::PrimaryExpression(exp_2),
+                PhpExpression::Assignment(PhpAssignmentExpression::Primary(exp_1)),
+                PhpExpression::Assignment(PhpAssignmentExpression::Primary(exp_2)),
             ],
         };
         let ast = PhpStatement::PhpEchoStatement(expressions);
         let output = ast.transpile();
 
         assert_eq!("echo 322, \"Hai world\";", output)
+    }
+
+    #[test]
+    fn should_gen_expression_stmt() {
+        let input = String::from("Hi!");
+        let exp_1 = PhpPrimaryExpression::StringLiteral(&input);
+        let ast = PhpStatement::PhpExpressionStatement(PhpExpression::Assignment(
+            PhpAssignmentExpression::Primary(exp_1),
+        ));
+        let output = ast.transpile();
+
+        assert_eq!("\"Hi!\";", output)
     }
 }

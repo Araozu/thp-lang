@@ -6,6 +6,7 @@ impl Transpilable for PhpPrimaryExpression<'_> {
             PhpPrimaryExpression::IntegerLiteral(value) => value.to_string(),
             PhpPrimaryExpression::FloatingLiteral(value) => value.to_string(),
             PhpPrimaryExpression::StringLiteral(value) => format!("\"{}\"", value),
+            PhpPrimaryExpression::Variable(name) => format!("${}", name),
         }
     }
 }
@@ -57,5 +58,14 @@ mod tests {
         let output = ast.transpile();
 
         assert_eq!("322.644", output)
+    }
+
+    #[test]
+    fn should_transpile_variable() {
+        let input = String::from("name");
+        let ast = PhpPrimaryExpression::Variable(&input);
+        let output = ast.transpile();
+
+        assert_eq!("$name", output)
     }
 }
