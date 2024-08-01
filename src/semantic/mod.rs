@@ -2,6 +2,7 @@ use crate::{error_handling::MistiError, syntax::ast::ModuleAST};
 
 mod checks;
 mod impls;
+mod std;
 mod symbol_table;
 mod types;
 
@@ -18,19 +19,22 @@ pub fn check_semantics(ast: &ModuleAST) -> Result<(), MistiError> {
     // For now there's only support for a single file
     // TODO: Receive a symbol table as a reference and work on it.
     // this way we can implement a unique symbol table for REPL session
-    let global_scope = symbol_table::SymbolTable::new();
+    let mut global_scope = symbol_table::SymbolTable::new();
+    std::populate(&mut global_scope);
 
     ast.check_semantics(&global_scope)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::symbol_table::{SymbolEntry, SymbolTable};
+    use crate::semantic::types::Type;
+
+    use super::symbol_table::SymbolTable;
 
     #[test]
     fn test_1() {
         let global_scope = SymbolTable::new();
-        let main_function = SymbolEntry::new_function(vec![], String::from("Unit"));
+        let main_function = Type::Function(vec![], String::from("Unit"));
 
         global_scope.insert("main".into(), main_function);
 
@@ -41,17 +45,16 @@ mod tests {
     fn test_2() {
         let global_scope = SymbolTable::new();
 
-        let main_function = SymbolEntry::new_function(vec![], String::from("Unit"));
+        let main_function = Type::Function(vec![], String::from("Unit"));
         global_scope.insert("main".into(), main_function);
-        global_scope.insert("db_url".into(), SymbolEntry::Variable("String".into()));
+        global_scope.insert("db_url".into(), Type::Value("String".into()));
 
-        let add_function =
-            SymbolEntry::new_function(vec!["Int".into(), "Int".into()], "Int".into());
+        let add_function = Type::Function(vec!["Int".into(), "Int".into()], "Int".into());
 
         global_scope.insert("add".into(), add_function);
 
         let main_function_scope = SymbolTable::new_from_parent(&global_scope);
-        main_function_scope.insert("message".into(), SymbolEntry::Variable("String".into()));
+        main_function_scope.insert("message".into(), Type::Value("String".into()));
 
         assert!(main_function_scope.test(&"message".into()));
         assert!(main_function_scope.test(&"db_url".into()));
@@ -59,10 +62,10 @@ mod tests {
 
         let add_function_scope = SymbolTable::new_from_parent(&global_scope);
 
-        add_function_scope.insert("a".into(), SymbolEntry::Variable("Int".into()));
-        add_function_scope.insert("b".into(), SymbolEntry::Variable("Int".into()));
+        add_function_scope.insert("a".into(), Type::Value("Int".into()));
+        add_function_scope.insert("b".into(), Type::Value("Int".into()));
 
         assert!(add_function_scope.test(&"a".into()));
-        global_scope.insert("test".into(), SymbolEntry::Variable("Int".into()));
+        global_scope.insert("test".into(), Type::Value("Int".into()));
     }
 }

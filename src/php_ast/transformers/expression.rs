@@ -12,7 +12,7 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
             Expression::String(value) => {
                 let expr = PhpPrimaryExpression::StringLiteral(value);
                 PhpExpression::PrimaryExpression(expr)
-            },
+            }
             _ => todo!("transformation for expression: {:?}", self),
         }
     }

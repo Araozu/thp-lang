@@ -4,61 +4,11 @@ use colored::Colorize;
 
 use crate::codegen::Transpilable;
 use crate::error_handling::PrintableError;
-use crate::lexic::token::Token;
 
-use super::codegen;
 use super::lexic;
 use super::syntax;
 
 use crate::php_ast::transformers::PHPTransformable;
-
-/// Executes Lexical analysis, handles errors and calls build_ast for the next phase
-fn compile(input: &String) {
-    let tokens = lexic::get_tokens(input);
-
-    match tokens {
-        Ok(tokens) => {
-            build_ast(input, tokens);
-        }
-        Err(error) => {
-            let chars: Vec<char> = input.chars().into_iter().collect();
-            eprintln!("{}", error.get_error_str(&chars))
-        }
-    }
-}
-
-/// Executes Syntax analysis, and for now, Semantic analysis and Code generation.
-///
-/// Prints the generated code in stdin
-fn build_ast(input: &String, tokens: Vec<Token>) {
-    let ast = syntax::build_ast(&tokens);
-
-    match ast {
-        Ok(ast) => {
-            /*
-            let res1 = crate::semantic::check_semantics(&ast);
-            TODO: Disabled to test the PHP codegen. Reenable
-            match res1 {
-                Ok(_) => {}
-                Err(reason) => {
-                    let chars: Vec<char> = input.chars().into_iter().collect();
-                    let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
-                    eprintln!("{}", error);
-                    return;
-                }
-            }
-            */
-
-            let php_ast = ast.into_php_ast();
-            let js_code = php_ast.transpile();
-            println!("{}", js_code)
-        }
-        Err(reason) => {
-            let chars: Vec<char> = input.chars().into_iter().collect();
-            eprintln!("{}", reason.get_error_str(&chars))
-        }
-    }
-}
 
 /// Executes the REPL, reading from stdin, compiling and emitting PHP to stdout
 pub fn run() -> io::Result<()> {
@@ -86,4 +36,55 @@ pub fn run() -> io::Result<()> {
             }
         };
     }
+}
+
+/// Full pipeline from THP source code to PHP output
+fn compile(input: &String) {
+    //
+    // Lexical analysis
+    //
+    let tokens = match lexic::get_tokens(input) {
+        Ok(t) => t,
+        Err(error) => {
+            let chars: Vec<char> = input.chars().into_iter().collect();
+            eprintln!("{}", error.get_error_str(&chars));
+            return;
+        }
+    };
+
+    //
+    // Syntax analysis
+    //
+    let ast = match syntax::build_ast(&tokens) {
+        Ok(ast) => ast,
+        Err(reason) => {
+            let chars: Vec<char> = input.chars().into_iter().collect();
+            eprintln!("{}", reason.get_error_str(&chars));
+            return;
+        }
+    };
+
+    //
+    // Semantic analysis
+    //
+    let res1 = crate::semantic::check_semantics(&ast);
+    match res1 {
+        Ok(_) => {}
+        Err(reason) => {
+            let chars: Vec<char> = input.chars().into_iter().collect();
+            let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
+            eprintln!("{}", error);
+            return;
+        }
+    }
+
+    //
+    // Intermediate representation (THP -> PHP ast)
+    //
+    let php_ast = ast.into_php_ast();
+
+    //
+    // Codegen
+    //
+    println!("{}", php_ast.transpile());
 }

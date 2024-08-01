@@ -1,9 +1,6 @@
 use crate::{
     error_handling::{semantic_error::SemanticError, MistiError},
-    semantic::{
-        impls::SemanticCheck,
-        symbol_table::{SymbolEntry, SymbolTable},
-    },
+    semantic::{impls::SemanticCheck, symbol_table::SymbolTable, types::Type},
     syntax::ast::{BlockMember, FunctionDeclaration, Statement},
 };
 
@@ -49,10 +46,7 @@ impl SemanticCheck for FunctionDeclaration<'_> {
 
         // TODO: Check the return type of the function
 
-        scope.insert(
-            function_name,
-            SymbolEntry::new_function(vec![], "Unit".into()),
-        );
+        scope.insert(function_name, Type::Function(vec![], "Unit".into()));
 
         Ok(())
     }

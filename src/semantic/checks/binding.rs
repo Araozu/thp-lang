@@ -1,6 +1,9 @@
 use crate::{
     error_handling::{semantic_error::SemanticError, MistiError},
-    semantic::{impls::SemanticCheck, symbol_table::SymbolEntry, types::Typed},
+    semantic::{
+        impls::SemanticCheck,
+        types::{Type, Typed},
+    },
     syntax::ast::var_binding::VariableBinding,
 };
 
@@ -31,7 +34,7 @@ impl SemanticCheck for VariableBinding<'_> {
         let expression_datatype = self.expression.get_type(scope)?;
 
         let datatype = match self.datatype {
-            Some(t) => t.value.clone(),
+            Some(t) => Type::Value(t.value.clone()),
             // If the datatype is not defined, we use the expression datatype
             None => expression_datatype.clone(),
         };
@@ -42,7 +45,7 @@ impl SemanticCheck for VariableBinding<'_> {
                 error_start: self.identifier.position,
                 error_end: self.identifier.get_end_position(),
                 reason: format!(
-                    "The variable `{}` was declared as `{}` but its expression has type `{}`",
+                    "The variable `{}` was declared as `{:?}` but its expression has type `{:?}`",
                     binding_name, datatype, expression_datatype
                 ),
             };
@@ -50,7 +53,7 @@ impl SemanticCheck for VariableBinding<'_> {
             return Err(MistiError::Semantic(error));
         }
 
-        scope.insert(binding_name.clone(), SymbolEntry::new_variable(datatype));
+        scope.insert(binding_name.clone(), datatype);
 
         Ok(())
     }

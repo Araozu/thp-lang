@@ -34,10 +34,10 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                                         match e {
                                             Expression::String(v) => {
                                                 expressions.push(
-                                                    PhpExpression::PrimaryExpression(PhpPrimaryExpression::StringLiteral(v.clone()))
+                                                    PhpExpression::PrimaryExpression(PhpPrimaryExpression::StringLiteral(v))
                                                 )
                                             },
-                                            _ => panic!("Non string expressions not supported")
+                                            _ => todo!("Non string expressions not supported")
                                         }
                                     }
 

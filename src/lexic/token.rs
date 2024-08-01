@@ -45,7 +45,7 @@ impl Token {
             TokenType::Comment => self.position + self.value.len() + 2,
             // 2 extra characters for ""
             TokenType::String => self.position + self.value.len() + 2,
-            _ => self.position + self.value.len()
+            _ => self.position + self.value.len(),
         }
     }
 }

@@ -21,17 +21,20 @@
 - Not ignore comments & whitespace, for code formatting
 - Abstract the parsing of datatypes, such that in the future generics can be implemented in a single place
 - Include the original tokens in the AST
+- Include comments in the AST
+- Begin work on the code formatter
 
 
-## v0.0.15
+## v0.1.0
 
+- [x] Complete workflow for "Hello world"
 - [x] Multiline comments
 - [x] Nested multiline comments
-- [ ] Include comments in the AST
-- [ ] Replace all panics with actual errors
-- [ ] Remove all old codegen
-- [ ] Test codegen
-- [ ] Begin work on the code formatter
+- [x] Replace all panics with actual errors
+- [x] Remove all old codegen
+- [x] Test codegen
+- [x] Reenable semantic analysis
+- [x] Create minimal type definitions for the stdlib
 
 
 ## v0.0.14

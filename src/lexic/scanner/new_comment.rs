@@ -51,7 +51,7 @@ pub fn scan_multiline(chars: &Vec<char>, start_pos: usize) -> LexResult {
 }
 
 /// Implementation that scans the multiline comment.
-/// 
+///
 /// May only error if EOF is found before the comment is finished.
 /// If Err, returns the last position where a char was available.
 fn multiline_impl(chars: &Vec<char>, start_pos: usize) -> Result<(Vec<char>, usize), usize> {

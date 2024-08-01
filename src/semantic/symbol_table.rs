@@ -1,5 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
+use super::types::Type;
+
 /// Public interface for the symbol table
 pub struct SymbolTable {
     node: Rc<RefCell<SymbolTableNode>>,
@@ -10,14 +12,7 @@ struct SymbolTableNode {
     // the parent scope
     parent: Option<Rc<RefCell<SymbolTableNode>>>,
     // the current scope
-    scope: HashMap<String, SymbolEntry>,
-}
-
-pub enum SymbolEntry {
-    // Just a Datatype
-    Variable(String),
-    // Contains: parameters, return type
-    Function(Vec<String>, String),
+    scope: HashMap<String, Type>,
 }
 
 impl SymbolTable {
@@ -37,7 +32,7 @@ impl SymbolTable {
     }
 
     /// Inserts a new symbol into the current table scope
-    pub fn insert(&self, key: String, value: SymbolEntry) {
+    pub fn insert(&self, key: String, value: Type) {
         self.node.borrow_mut().insert(key, value);
     }
 
@@ -47,7 +42,7 @@ impl SymbolTable {
     }
 
     /// Gets the datatype of a symbol, if it exists
-    pub fn get_type(&self, key: &String) -> Option<String> {
+    pub fn get_type<'a>(&'a self, key: &String) -> Option<Type> {
         self.node.borrow_mut().get_type(key)
     }
 }
@@ -62,7 +57,7 @@ impl SymbolTableNode {
     }
 
     /// Creates a new symbol table with a parent
-    pub fn new_from_parent<'a>(parent: &Rc<RefCell<SymbolTableNode>>) -> SymbolTableNode {
+    pub fn new_from_parent(parent: &Rc<RefCell<SymbolTableNode>>) -> SymbolTableNode {
         SymbolTableNode {
             parent: Some(Rc::clone(&parent)),
             scope: HashMap::new(),
@@ -70,7 +65,7 @@ impl SymbolTableNode {
     }
 
     /// Inserts a new symbol into the current scope
-    pub fn insert(&mut self, key: String, value: SymbolEntry) {
+    pub fn insert(&mut self, key: String, value: Type) {
         self.scope.insert(key, value);
     }
 
@@ -90,33 +85,20 @@ impl SymbolTableNode {
     }
 
     /// Returns the symbol's datatype
-    pub fn get_type(&mut self, key: &String) -> Option<String> {
+    pub fn get_type<'a>(&'a mut self, key: &String) -> Option<Type> {
         // Try to get the type in the current scope
         if let Some(entry) = self.scope.get(key) {
             // TODO: Change to allow other types of datatypes: functions, classes, maps
-            return match entry {
-                SymbolEntry::Variable(t) => Some(t.clone()),
-                SymbolEntry::Function(_, _) => None,
-            };
+            return Some(entry.clone());
         }
 
         // Try to get the type in the parent scope
         match &self.parent {
             Some(parent) => {
-                let mut parent = parent.as_ref().borrow_mut();
-                parent.get_type(key)
+                parent.as_ref().borrow_mut().get_type(key)
+                // parent.get_type(key)
             }
             None => None,
         }
-    }
-}
-
-impl SymbolEntry {
-    pub fn new_variable(datatype: String) -> SymbolEntry {
-        SymbolEntry::Variable(datatype)
-    }
-
-    pub fn new_function(parameters: Vec<String>, return_type: String) -> SymbolEntry {
-        SymbolEntry::Function(parameters, return_type)
     }
 }

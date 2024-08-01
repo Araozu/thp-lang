@@ -18,10 +18,9 @@ mod tests {
 
     #[test]
     fn should_transpile_empty_file() {
-        let ast = PhpAst {statements: vec![]};
+        let ast = PhpAst { statements: vec![] };
         let output = ast.transpile();
 
         assert_eq!("<?php\n", output);
     }
 }
-
