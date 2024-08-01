@@ -85,3 +85,18 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{php_ast::transformers::PHPTransformable, syntax::ast::ModuleAST};
+
+    #[test]
+    fn should_transform_empty_ast() {
+        let input = ModuleAST {
+            productions: vec![],
+        };
+        let output = input.into_php_ast();
+
+        assert!(output.statements.is_empty())
+    }
+}

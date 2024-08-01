@@ -88,10 +88,10 @@ impl SemanticCheck for Expression<'_> {
                     }
                 }
             }
-            Expression::Int(_) => {},
-            Expression::Float(_) => {},
-            Expression::String(_) => {},
-            Expression::Boolean(_) => {},
+            Expression::Int(_) => {}
+            Expression::Float(_) => {}
+            Expression::String(_) => {}
+            Expression::Boolean(_) => {}
             _ => todo!("Check semantics for expression other than function call and primitive"),
         }
 

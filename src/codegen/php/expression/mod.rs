@@ -1,2 +1,2 @@
-mod primary_expression;
 mod assignment;
+mod primary_expression;

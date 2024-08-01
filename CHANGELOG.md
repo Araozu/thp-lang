@@ -28,6 +28,7 @@
 ## v0.1.1
 
 - [x] Top level expressions as statements
+- [ ] Naively transpile variable bindings
 
 ## v0.1.0
 
