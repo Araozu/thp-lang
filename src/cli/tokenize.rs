@@ -1,15 +1,14 @@
 use serde::Serialize;
 
 use crate::{
-    error_handling::MistiError,
-    lexic::{get_tokens, token::Token},
-    syntax::build_ast,
+    error_handling::MistiError, lexic::{get_tokens, token::Token}, semantic, syntax::build_ast
 };
 use std::io::{self, BufRead};
 
 #[derive(Serialize)]
 enum TokenizeResult {
     Ok(Vec<Token>),
+    SyntaxOnly(Vec<Token>, MistiError),
     TokensOnly(Vec<Token>, MistiError),
     Err(MistiError),
 }
@@ -36,7 +35,12 @@ pub fn tokenize_command(_options: Vec<String>) -> Result<(), ()> {
         Ok(tokens) => {
             let ast_result = build_ast(&tokens);
             match ast_result {
-                Ok(_) => TokenizeResult::Ok(tokens),
+                Ok(ast) => {
+                    match semantic::check_semantics(&ast) {
+                        Ok(()) => TokenizeResult::Ok(tokens),
+                        Err(error) => TokenizeResult::SyntaxOnly(tokens, error)
+                    }
+                },
                 Err(error) => TokenizeResult::TokensOnly(tokens, error),
             }
         }
