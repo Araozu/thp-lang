@@ -1,8 +1,9 @@
 use colored::*;
 use std::{fs, path::Path};
 
-use crate::lexic::token::Token;
-use crate::{codegen, error_handling::PrintableError, lexic, syntax};
+use crate::codegen::Transpilable;
+use crate::php_ast::transformers::PHPTransformable;
+use crate::{error_handling::PrintableError, lexic, syntax};
 
 pub fn compile_file(input: &String) -> Result<(), ()> {
     let input_path = Path::new(input);
@@ -58,49 +59,50 @@ pub fn compile_file(input: &String) -> Result<(), ()> {
     }
 }
 
-/// THP source code goes in, PHP code or an error comes out
+/// Full pipeline from THP source code to PHP output
 fn compile(input: &String) -> Result<String, String> {
-    let tokens = lexic::get_tokens(input);
-
-    let tokens = match tokens {
-        Ok(tokens) => tokens,
+    //
+    // Lexical analysis
+    //
+    let tokens = match lexic::get_tokens(input) {
+        Ok(t) => t,
         Err(error) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
-            return Err(format!(
-                "{}:\n{}",
-                "syntax error".on_red(),
-                error.get_error_str(&chars)
-            ));
+            return Err(error.get_error_str(&chars));
         }
     };
 
-    build_ast(input, tokens)
-}
-
-/// Executes Syntax analysis, and for now, Semantic analysis and Code generation.
-///
-/// Prints the generated code in stdin
-fn build_ast(input: &String, tokens: Vec<Token>) -> Result<String, String> {
-    let ast = syntax::build_ast(&tokens);
-
-    let ast = match ast {
+    //
+    // Syntax analysis
+    //
+    let ast = match syntax::build_ast(&tokens) {
         Ok(ast) => ast,
         Err(reason) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
-            let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
-            return Err(error);
+            return Err(reason.get_error_str(&chars));
         }
     };
 
-    match crate::semantic::check_semantics(&ast) {
+    //
+    // Semantic analysis
+    //
+    let res1 = crate::semantic::check_semantics(&ast);
+    match res1 {
         Ok(_) => {}
         Err(reason) => {
             let chars: Vec<char> = input.chars().into_iter().collect();
             let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
             return Err(error);
         }
-    };
+    }
 
-    Err("Code generation disabled: rewriting into PHP AST".into())
-    // Ok(codegen::codegen(&ast))
+    //
+    // Intermediate representation (THP -> PHP ast)
+    //
+    let php_ast = ast.into_php_ast();
+
+    //
+    // Codegen
+    //
+    Ok(php_ast.transpile())
 }

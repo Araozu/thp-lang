@@ -1,7 +1,10 @@
 use serde::Serialize;
 
 use crate::{
-    error_handling::MistiError, lexic::{get_tokens, token::Token}, semantic, syntax::build_ast
+    error_handling::MistiError,
+    lexic::{get_tokens, token::Token},
+    semantic,
+    syntax::build_ast,
 };
 use std::io::{self, BufRead};
 
@@ -35,11 +38,9 @@ pub fn tokenize_command(_options: Vec<String>) -> Result<(), ()> {
         Ok(tokens) => {
             let ast_result = build_ast(&tokens);
             match ast_result {
-                Ok(ast) => {
-                    match semantic::check_semantics(&ast) {
-                        Ok(()) => TokenizeResult::Ok(tokens),
-                        Err(error) => TokenizeResult::SyntaxOnly(tokens, error)
-                    }
+                Ok(ast) => match semantic::check_semantics(&ast) {
+                    Ok(()) => TokenizeResult::Ok(tokens),
+                    Err(error) => TokenizeResult::SyntaxOnly(tokens, error),
                 },
                 Err(error) => TokenizeResult::TokensOnly(tokens, error),
             }

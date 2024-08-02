@@ -11,13 +11,15 @@ impl Tokenizer for Vec<Token> {
     fn get_significant<'a>(&'a self, index: usize) -> Option<(&'a Token, usize)> {
         let mut current_pos = index;
 
-        // Ignore all whitespace and newlines
+        // Ignore all whitespace, newlines and comments
         loop {
             match self.get(current_pos) {
                 Some(token) => {
                     if token.token_type == TokenType::INDENT
                         || token.token_type == TokenType::DEDENT
                         || token.token_type == TokenType::NewLine
+                        || token.token_type == TokenType::Comment
+                        || token.token_type == TokenType::MultilineComment
                     {
                         current_pos += 1;
                     } else {
@@ -44,7 +46,7 @@ pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Parsin
 
 /// Expects the token at `pos` to be of type `token_type`, and returns the token and the next position.
 ///
-/// Ignores all whitespace and newlines.
+/// Ignores all whitespace, newlines and comments.
 ///
 /// Only returns: Ok, Unmatched, Mismatched
 pub fn parse_token_type(
@@ -59,6 +61,8 @@ pub fn parse_token_type(
         if t.token_type == TokenType::INDENT
             || t.token_type == TokenType::DEDENT
             || t.token_type == TokenType::NewLine
+            || t.token_type == TokenType::Comment
+            || t.token_type == TokenType::MultilineComment
         {
             current_pos += 1;
         } else {
