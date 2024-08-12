@@ -19,7 +19,7 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
             TokenType::Identifier if token.value == "true" || token.value == "false" => {
                 Ok((Expression::Boolean(token.value == "true"), token_pos + 1))
             }
-            TokenType::Identifier => Ok((Expression::Identifier(&token.value), token_pos + 1)),
+            TokenType::Identifier => Ok((Expression::Identifier(&token), token_pos + 1)),
             TokenType::LeftParen => parse_parenthesized_expression(tokens, token_pos),
             _ => Err(ParsingError::Unmatched),
         },
@@ -90,7 +90,7 @@ mod tests {
 
         match expression {
             Ok((Expression::Identifier(value), _)) => {
-                assert_eq!("someIdentifier", format!("{}", value))
+                assert_eq!("someIdentifier", format!("{}", value.value))
             }
             _ => panic!(),
         }
@@ -103,7 +103,7 @@ mod tests {
 
         match expression {
             Ok((Expression::Identifier(value), _)) => {
-                assert_eq!("identifier", format!("{}", value))
+                assert_eq!("identifier", format!("{}", value.value))
             }
             _ => panic!(),
         }

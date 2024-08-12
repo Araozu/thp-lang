@@ -25,7 +25,7 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                             // TODO: This definitely needs refactoring
                             let function_expr: &Expression = &*fc.function;
                             match function_expr {
-                                Expression::Identifier(id) if *id == "print" => {
+                                Expression::Identifier(id) if id.value == "print" => {
                                     // transform to print() expression
                                     // no parameters supported
 

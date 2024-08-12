@@ -65,8 +65,8 @@ mod tests {
                 Expression::BinaryOperator(exp1, exp2, op) => {
                     match (*exp1, *exp2) {
                         (Expression::Identifier(id1), Expression::Identifier(id2)) => {
-                            assert_eq!("a", id1);
-                            assert_eq!("b", id2);
+                            assert_eq!("a", id1.value);
+                            assert_eq!("b", id2.value);
                         }
                         _ => panic!("Expected 2 identifiers"),
                     }

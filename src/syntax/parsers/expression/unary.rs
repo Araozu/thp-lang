@@ -38,7 +38,7 @@ mod tests {
 
         match expression {
             Ok((Expression::Identifier(value), _)) => {
-                assert_eq!("identifier", format!("{}", value))
+                assert_eq!("identifier", format!("{}", value.value))
             }
             _ => panic!(),
         }

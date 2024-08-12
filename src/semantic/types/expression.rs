@@ -16,13 +16,13 @@ impl Typed for Expression<'_> {
             Expression::Boolean(_) => Ok(Type::Value("Bool".into())),
             Expression::Identifier(identifier) => {
                 // Attempt to get the datatype of the identifier in the current scope
-                let datatype = match scope.get_type(identifier) {
+                let datatype = match scope.get_type(&identifier.value) {
                     Some(x) => x,
                     None => {
                         return Err(MistiError::Semantic(SemanticError {
-                            error_start: 0,
-                            error_end: 1,
-                            reason: format!("The identifier {} does not exist.", identifier),
+                            error_start: identifier.position,
+                            error_end: identifier.get_end_position(),
+                            reason: format!("Cannot find `{}` in this scope.", identifier.value),
                         }))
                     }
                 };
@@ -37,7 +37,7 @@ impl Typed for Expression<'_> {
 
                 match &*f.function {
                     Expression::Identifier(id) => {
-                        match scope.get_type(id) {
+                        match scope.get_type(&id.value) {
                             Some(t) => Ok(t),
                             None => Err(MistiError::Semantic(SemanticError {
                                 // TODO: Actually find the start and end position
@@ -45,7 +45,7 @@ impl Typed for Expression<'_> {
                                 // just the string value
                                 error_start: 0,
                                 error_end: 1,
-                                reason: format!("Type not found for symbol {}", id),
+                                reason: format!("Type not found for symbol {}", id.value),
                             })),
                         }
                     }
@@ -112,5 +112,14 @@ impl Typed for Expression<'_> {
                 }));
             }
         }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn should_error() {
+
     }
 }

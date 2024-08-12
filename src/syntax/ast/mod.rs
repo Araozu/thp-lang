@@ -64,7 +64,7 @@ pub enum Expression<'a> {
     Float(&'a String),
     String(&'a String),
     Boolean(bool),
-    Identifier(&'a String),
+    Identifier(&'a Token),
     FunctionCall(FunctionCall<'a>),
     UnaryOperator(&'a String, Box<Expression<'a>>),
     BinaryOperator(Box<Expression<'a>>, Box<Expression<'a>>, &'a String),
