@@ -118,8 +118,42 @@ impl Typed for Expression<'_> {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn should_error() {
+    use crate::{error_handling::MistiError, lexic::token::Token, semantic::{std::populate, symbol_table::SymbolTable, types::{Type, Typed}}, syntax::ast::Expression};
 
+    #[test]
+    fn should_get_global_print_type() {
+        let mut scope = SymbolTable::new();
+        populate(&mut scope);
+
+        let identifier_token = Token::new_identifier("print".into(), 0);
+        let expr = Expression::Identifier(&identifier_token);
+
+        match expr.get_type(&scope) {
+            Ok(Type::Function(params, return_type)) => {
+                assert_eq!(params.len(), 1);
+                assert_eq!(params[0], "String");
+                assert_eq!(return_type, "Void");
+            },
+            Ok(t) => panic!("Expected a Function, got {:?}", t),
+            Err(e) => panic!("Expected Ok, got Err: {:?}", e),
+        }
+    }
+
+    #[test]
+    fn should_error_on_invalid_identifier() {
+        let identifier_token = Token::new_identifier("print".into(), 0);
+        let expr = Expression::Identifier(&identifier_token);
+        let scope = SymbolTable::new();
+
+        let expr_type = expr.get_type(&scope);
+        match expr_type {
+            Ok(_) => panic!("Expected an error"),
+            Err(MistiError::Semantic(err)) => {
+                assert_eq!(err.error_start, 0);
+                assert_eq!(err.error_end, 5);
+                assert_eq!(err.reason, "Cannot find `print` in this scope.");
+            },
+            Err(e) => panic!("Expected a semantic error, got {:?}", e)
+        }
     }
 }
