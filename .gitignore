@@ -1,3 +1,4 @@
 target
 examples
 tarpaulin-report.html
+run.sh

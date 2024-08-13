@@ -72,8 +72,10 @@ pub enum Expression<'a> {
     Boolean(&'a Token),
     Identifier(&'a Token),
     FunctionCall(FunctionCall<'a>),
-    UnaryOperator(&'a String, Box<Expression<'a>>),
-    BinaryOperator(Box<Expression<'a>>, Box<Expression<'a>>, &'a String),
+    /// operator, right expression
+    UnaryOperator(&'a Token, Box<Expression<'a>>),
+    /// left expression, right expression, operator
+    BinaryOperator(Box<Expression<'a>>, Box<Expression<'a>>, &'a Token),
 }
 
 impl Positionable for Expression<'_> {
@@ -86,8 +88,12 @@ impl Positionable for Expression<'_> {
             Expression::Float(id) => (id.position, id.get_end_position()),
             Expression::String(id) => (id.position, id.get_end_position()),
             Expression::Boolean(id) => (id.position, id.get_end_position()),
-            Expression::FunctionCall(_) => (0, 1),
-            Expression::UnaryOperator(_, _) => (0, 1),
+            Expression::FunctionCall(f) => f.get_position(),
+            Expression::UnaryOperator(operator, exp) => {
+                let start = operator.position;
+                let (_, end) = exp.get_position();
+                (start, end)
+            }
             Expression::BinaryOperator(_, _, _) => (0, 1),
         }
     }

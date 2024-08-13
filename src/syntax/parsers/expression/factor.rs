@@ -39,7 +39,7 @@ fn parse_many<'a>(
                     let expr = Expression::BinaryOperator(
                         Box::new(prev_expr),
                         Box::new(expr),
-                        &token.value,
+                        &token,
                     );
 
                     parse_many(tokens, next_pos, expr, indentation_level + indent_count)
@@ -70,7 +70,7 @@ mod tests {
                         }
                         _ => panic!("Expected 2 identifiers"),
                     }
-                    assert_eq!("*", op)
+                    assert_eq!("*", op.value)
                 }
                 _ => panic!("Expected a binary expression with 2 identifiers"),
             },
@@ -101,7 +101,7 @@ mod tests {
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
-                assert_eq!(op, "*")
+                assert_eq!(op.value, "*")
             }
             _ => panic!("Expected a binary operator"),
         }
@@ -118,7 +118,7 @@ mod tests {
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
-                assert_eq!(op, "*")
+                assert_eq!(op.value, "*")
             }
             _ => panic!("Expected a binary operator"),
         }
@@ -134,7 +134,7 @@ mod tests {
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
-                assert_eq!(op, "*")
+                assert_eq!(op.value, "*")
             }
             _ => panic!("Expected a binary operator"),
         }
@@ -149,7 +149,7 @@ mod tests {
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
-                assert_eq!(op, "*")
+                assert_eq!(op.value, "*")
             }
             _ => panic!("Expected a binary operator"),
         }
@@ -164,7 +164,7 @@ mod tests {
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
-                assert_eq!(op, "/")
+                assert_eq!(op.value, "/")
             }
             _ => panic!("Expected a binary operator"),
         }
@@ -179,7 +179,7 @@ mod tests {
 
         match result {
             Expression::BinaryOperator(_, _, op) => {
-                assert_eq!(op, "/")
+                assert_eq!(op.value, "/")
             }
             _ => panic!("Expected a binary operator"),
         }

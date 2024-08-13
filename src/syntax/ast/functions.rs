@@ -6,6 +6,15 @@ pub struct FunctionCall<'a> {
     pub arguments: Box<ArgumentsList<'a>>,
 }
 
+impl Positionable for FunctionCall<'_> {
+    fn get_position(&self) -> (usize, usize) {
+        let (start, _) = self.function.get_position();
+        let (_, end) = self.arguments.get_position();
+        (start, end)
+    }
+}
+
+
 #[derive(Debug)]
 pub struct ArgumentsList<'a> {
     pub arguments: Vec<Expression<'a>>,

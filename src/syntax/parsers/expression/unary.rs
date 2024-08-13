@@ -16,7 +16,7 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
         Some(token) if token.value == "!" || token.value == "-" => {
             match Expression::try_parse(tokens, pos + 1) {
                 Ok((expression, next_pos)) => Ok((
-                    Expression::UnaryOperator(&token.value, Box::new(expression)),
+                    Expression::UnaryOperator(&token, Box::new(expression)),
                     next_pos,
                 )),
                 _ => Err(ParsingError::Unmatched),
@@ -53,7 +53,7 @@ mod tests {
             Ok((Expression::UnaryOperator(operator, expression), _)) => {
                 match (operator, *expression) {
                     (op, Expression::Int(value)) => {
-                        assert_eq!(*op, "-");
+                        assert_eq!(op.value, "-");
                         assert_eq!(value.value, "10");
                     }
                     _ => panic!("unexpected values"),
@@ -70,7 +70,7 @@ mod tests {
 
         match expression {
             Ok((Expression::UnaryOperator(operator, expression), _)) => {
-                assert_eq!(*operator, "-");
+                assert_eq!(operator.value, "-");
                 match *expression {
                     Expression::BinaryOperator(_, _, _) => {
                         // :D

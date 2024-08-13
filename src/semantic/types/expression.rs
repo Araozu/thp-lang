@@ -74,7 +74,7 @@ impl Typed for Expression<'_> {
                 };
 
                 // Only supported unary operator: - & !
-                if *op == "-" {
+                if op.value == "-" {
                     if !expr_type.is_value("Int") && !expr_type.is_value("Float") {
                         return Err(MistiError::Semantic(SemanticError {
                             error_start: 0,
@@ -87,7 +87,7 @@ impl Typed for Expression<'_> {
                     } else {
                         return Ok(Type::Value("Int".into()));
                     }
-                } else if *op == "!" {
+                } else if op.value == "!" {
                     if !expr_type.is_value("Bool") {
                         return Err(MistiError::Semantic(SemanticError {
                             error_start: 0,
@@ -99,16 +99,16 @@ impl Typed for Expression<'_> {
                     }
                 }
 
-                unreachable!("Illegal state: Found an unexpected unary operator during semantic analysis: {}", *op);
+                unreachable!("Illegal state: Found an unexpected unary operator during semantic analysis: {}", op.value);
             }
             Expression::BinaryOperator(exp1, exp2, operator) => {
                 let t1 = exp1.get_type(scope)?;
                 let t2 = exp2.get_type(scope)?;
 
                 // TODO: There's definitely a better way to do this
-                if *operator == "+" && t1.is_value("Int") && t2.is_value("Int") {
+                if operator.value == "+" && t1.is_value("Int") && t2.is_value("Int") {
                     return Ok(Type::Value("Int".into()));
-                } else if *operator == "-" && t1.is_value("Int") && t2.is_value("Int") {
+                } else if operator.value == "-" && t1.is_value("Int") && t2.is_value("Int") {
                     return Ok(Type::Value("Int".into()));
                 }
 
