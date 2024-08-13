@@ -35,17 +35,29 @@ impl Typed for Expression<'_> {
                 // for this to work with any arbitrary expression.
                 // for now it justs expects an identifier
 
+                // The type of a function call is the return type
+                // of the function
+
+                // TODO: Should this check that the type signature is correct?
+                // or is this done elsewhere?
+
                 match &*f.function {
                     Expression::Identifier(id) => {
                         match scope.get_type(&id.value) {
-                            Some(t) => Ok(t),
+                            Some(Type::Function(_, return_type)) => {
+                                // Return the return type of the function,
+                                // not the function itself
+                                Ok(Type::Value(return_type))
+                            },
+                            Some(_) => Err(MistiError::Semantic(SemanticError {
+                                error_start: id.position,
+                                error_end: id.get_end_position(),
+                                reason: format!("Expected `{}` to be a function", &id.value),
+                            })),
                             None => Err(MistiError::Semantic(SemanticError {
-                                // TODO: Actually find the start and end position
-                                // this requires the token to be stored, rather than
-                                // just the string value
-                                error_start: 0,
-                                error_end: 1,
-                                reason: format!("Type not found for symbol {}", id.value),
+                                error_start: id.position,
+                                error_end: id.get_end_position(),
+                                reason: format!("Cannot find `{}` in this scope.", id.value),
                             })),
                         }
                     }
@@ -118,7 +130,7 @@ impl Typed for Expression<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{error_handling::MistiError, lexic::token::Token, semantic::{std::populate, symbol_table::SymbolTable, types::{Type, Typed}}, syntax::ast::Expression};
+    use crate::{error_handling::MistiError, lexic::token::Token, semantic::{std::populate, symbol_table::SymbolTable, types::{Type, Typed}}, syntax::ast::{functions::{ArgumentsList, FunctionCall}, Expression}};
 
     #[test]
     fn should_get_global_print_type() {
@@ -154,6 +166,80 @@ mod tests {
                 assert_eq!(err.reason, "Cannot find `print` in this scope.");
             },
             Err(e) => panic!("Expected a semantic error, got {:?}", e)
+        }
+    }
+
+    #[test]
+    fn should_get_type_from_function_call() {
+        let mut scope = SymbolTable::new();
+        populate(&mut scope);
+
+        let id_token = Token::new_identifier("print".into(), 0);
+        let fn_expr = Expression::Identifier(&id_token);
+        
+        let args = ArgumentsList{arguments: vec![]};
+
+        let fn_call = Expression::FunctionCall(FunctionCall {
+            function: Box::new(fn_expr),
+            arguments: Box::new(args),
+        });
+
+        match fn_call.get_type(&scope) {
+            Ok(Type::Value(v)) => assert_eq!(v, "Void"),
+            Ok(v) => panic!("Expected a value, got {:?}", v),
+            Err(e) => panic!("Expected a value, got Err {:?}", e),
+        }
+    }
+
+    #[test]
+    fn should_fail_if_a_function_is_expected() {
+        let scope = SymbolTable::new();
+        // Add `print` as a Int
+        scope.insert("print".into(), Type::Value("Int".into()));
+
+        let id_token = Token::new_identifier("print".into(), 0);
+        let fn_expr = Expression::Identifier(&id_token);
+        
+        let args = ArgumentsList{arguments: vec![]};
+
+        let fn_call = Expression::FunctionCall(FunctionCall {
+            function: Box::new(fn_expr),
+            arguments: Box::new(args),
+        });
+
+        match fn_call.get_type(&scope) {
+            Ok(v) => panic!("Expected an error, got {:?}", v),
+            Err(MistiError::Semantic(e)) => {
+                assert_eq!(e.error_start, 0);
+                assert_eq!(e.error_end, 5);
+                assert_eq!(e.reason, "Expected `print` to be a function");
+            }
+            Err(e) => panic!("Expected a semantic error, got {:?}", e),
+        }
+    }
+
+    #[test]
+    fn should_fail_if_a_function_is_not_defined() {
+        let scope = SymbolTable::new();
+
+        let id_token = Token::new_identifier("print".into(), 0);
+        let fn_expr = Expression::Identifier(&id_token);
+        
+        let args = ArgumentsList{arguments: vec![]};
+
+        let fn_call = Expression::FunctionCall(FunctionCall {
+            function: Box::new(fn_expr),
+            arguments: Box::new(args),
+        });
+
+        match fn_call.get_type(&scope) {
+            Ok(v) => panic!("Expected an error, got {:?}", v),
+            Err(MistiError::Semantic(e)) => {
+                assert_eq!(e.error_start, 0);
+                assert_eq!(e.error_end, 5);
+                assert_eq!(e.reason, "Cannot find `print` in this scope.");
+            }
+            Err(e) => panic!("Expected a semantic error, got {:?}", e),
         }
     }
 }
