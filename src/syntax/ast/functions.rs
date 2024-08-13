@@ -14,7 +14,6 @@ impl Positionable for FunctionCall<'_> {
     }
 }
 
-
 #[derive(Debug)]
 pub struct ArgumentsList<'a> {
     pub arguments: Vec<Expression<'a>>,

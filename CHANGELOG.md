@@ -5,30 +5,30 @@
 - Test correct operator precedence
 - Implement functions as first class citizens
 - Parse __more__ binary operators
-- Store tokens for the semantic analysis phase, to have actual error reporting
 - Parse more complex bindings
 - Rework error messages
 - Parse other language constructions
-- Type checking
-- Check for conflicting identifiers
 - Namespace identifiers in the symbol table
 - Stdlib
 - Document code
 - Watch mode
-- Formatter
 - Simple language server
 - Decide how to handle comments in the syntax (?)(should comments mean something like in rust?)
-- Not ignore comments & whitespace, for code formatting
+- Fix comment handling in the AST
 - Abstract the parsing of datatypes, such that in the future generics can be implemented in a single place
-- Include the original tokens in the AST
-- Include comments in the AST
 - Begin work on the code formatter
+- Remove all panic! and todo!
 
 
 ## v0.1.1
 
 - [x] Top level expressions as statements
-- [ ] Naively transpile variable bindings
+- [x] Naively transpile variable bindings
+- [x] Store tokens in the AST, to have actual error reporting
+- [x] Scan octal and binary numbers
+- [x] Simple type checking
+- [x] Check for conflicting identifiers at the current scope
+
 
 ## v0.1.0
 

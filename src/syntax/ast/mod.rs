@@ -94,7 +94,11 @@ impl Positionable for Expression<'_> {
                 let (_, end) = exp.get_position();
                 (start, end)
             }
-            Expression::BinaryOperator(_, _, _) => (0, 1),
+            Expression::BinaryOperator(left_expr, right_expr, _) => {
+                let (start, _) = left_expr.get_position();
+                let (_, end) = right_expr.get_position();
+                (start, end)
+            }
         }
     }
 }

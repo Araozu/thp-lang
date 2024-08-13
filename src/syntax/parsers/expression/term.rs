@@ -36,11 +36,8 @@ fn parse_many<'a>(
             // Parse the next factor
             match super::factor::try_parse(tokens, pos) {
                 Ok((expr, next_pos)) => {
-                    let expr = Expression::BinaryOperator(
-                        Box::new(prev_expr),
-                        Box::new(expr),
-                        &token,
-                    );
+                    let expr =
+                        Expression::BinaryOperator(Box::new(prev_expr), Box::new(expr), &token);
 
                     parse_many(tokens, next_pos, expr, indentation_level + indent_count)
                 }

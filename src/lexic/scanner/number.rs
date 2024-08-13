@@ -11,10 +11,8 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
 
     match (next_char_1, next_char_2) {
         // Test if the input contains a hex number
-        (Some('0'), Some('x'|'X')) => {
-            scan_hex(chars, start_pos + 2, String::from("0x"))
-        }
-        (Some('0'), Some('o'|'O')) => {
+        (Some('0'), Some('x' | 'X')) => scan_hex(chars, start_pos + 2, String::from("0x")),
+        (Some('0'), Some('o' | 'O')) => {
             // octal
             scan_octal(chars, start_pos + 2)
         }
@@ -375,7 +373,7 @@ mod tests {
                 assert_eq!(t.get_end_position(), 4);
                 assert_eq!(next, 4);
             }
-            _ => panic!("Expected a token")
+            _ => panic!("Expected a token"),
         }
     }
 
@@ -389,7 +387,7 @@ mod tests {
                 assert_eq!(error.end_position, 2);
                 assert_eq!(error.reason, "Found an incomplete octal number");
             }
-            _ => panic!("Expected an error, got {:?}", result)
+            _ => panic!("Expected an error, got {:?}", result),
         }
     }
 
@@ -404,7 +402,7 @@ mod tests {
                 assert_eq!(t.get_end_position(), 6);
                 assert_eq!(next, 6);
             }
-            _ => panic!("Expected a token")
+            _ => panic!("Expected a token"),
         }
     }
 
@@ -418,10 +416,9 @@ mod tests {
                 assert_eq!(error.end_position, 2);
                 assert_eq!(error.reason, "Found an incomplete binary number");
             }
-            _ => panic!("Expected an error, got {:?}", result)
+            _ => panic!("Expected an error, got {:?}", result),
         }
     }
-
 
     // Should scan a double
     #[test]

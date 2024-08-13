@@ -36,8 +36,7 @@ fn parse_many<'a>(
             tokens, next_pos,
         ) {
             Ok((expr, next_pos)) => {
-                let expr =
-                    Expression::BinaryOperator(Box::new(prev_expr), Box::new(expr), &token);
+                let expr = Expression::BinaryOperator(Box::new(prev_expr), Box::new(expr), &token);
 
                 parse_many(tokens, next_pos, expr, indentation_level + indent_count)
             }
