@@ -1,11 +1,7 @@
 use crate::{
-    error_handling::{semantic_error::SemanticError, MistiError},
-    semantic::{
-        impls::SemanticCheck,
-        symbol_table::SymbolTable,
-        types::{Type, Typed},
-    },
-    syntax::ast::{Expression, ModuleMembers, Statement},
+    error_handling::MistiError,
+    semantic::{impls::SemanticCheck, symbol_table::SymbolTable},
+    syntax::ast::{ModuleMembers, Statement},
 };
 
 impl SemanticCheck for ModuleMembers<'_> {

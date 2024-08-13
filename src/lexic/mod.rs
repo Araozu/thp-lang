@@ -11,6 +11,7 @@ use self::token::TokenType;
 type Chars = Vec<char>;
 
 /// Represents the result of scanning a single token from the input
+#[derive(Debug)]
 pub enum LexResult {
     /// A token was found. The first element is the token, and the
     /// second element is the position in the input after the token.

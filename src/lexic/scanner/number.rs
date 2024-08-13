@@ -11,8 +11,16 @@ pub fn scan(chars: &Vec<char>, start_pos: usize) -> LexResult {
 
     match (next_char_1, next_char_2) {
         // Test if the input contains a hex number
-        (Some(c1), Some(c2)) if *c1 == '0' && (*c2 == 'x' || *c2 == 'X') => {
+        (Some('0'), Some('x'|'X')) => {
             scan_hex(chars, start_pos + 2, String::from("0x"))
+        }
+        (Some('0'), Some('o'|'O')) => {
+            // octal
+            scan_octal(chars, start_pos + 2)
+        }
+        (Some('0'), Some('b')) => {
+            // binary
+            scan_binary(chars, start_pos + 2)
         }
         // Scan decimal/double/scientific otherwise
         _ => scan_decimal(chars, start_pos, String::from("")),
@@ -45,7 +53,7 @@ fn scan_decimal(chars: &Vec<char>, start_pos: usize, current: String) -> LexResu
 /// This function expects the following on the first call:
 /// - The char at `start_pos` is a value between [0-9a-fA-F]. If not, will return an error.
 /// - `current == "0x"`. If not will return an incorrect value, or panic.
-fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
+fn scan_hex(chars: &[char], start_pos: usize, current: String) -> LexResult {
     match chars.get(start_pos) {
         Some(c) if utils::is_hex_digit(*c) => {
             let (t, next) = scan_hex_digits(chars, start_pos + 1, utils::str_append(current, *c));
@@ -56,6 +64,67 @@ fn scan_hex(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
             end_position: start_pos + 1,
             reason: String::from("Tried to scan an incomplete hex value"),
         }),
+    }
+}
+
+fn scan_octal(chars: &[char], start_pos: usize) -> LexResult {
+    let mut token_vec = vec![];
+    let mut current_pos = start_pos;
+    let input_len = chars.len();
+
+    while current_pos < input_len {
+        match chars.get(current_pos) {
+            Some(c) if *c >= '0' && *c <= '7' => {
+                token_vec.push(*c);
+            }
+            _ => break,
+        }
+
+        current_pos += 1;
+    }
+
+    if token_vec.is_empty() {
+        LexResult::Err(LexError {
+            // minus 2 to account for the opening '0o'
+            position: start_pos - 2,
+            end_position: current_pos,
+            reason: String::from("Found an incomplete octal number"),
+        })
+    } else {
+        let octal_numbers = format!("0o{}", token_vec.iter().collect::<String>());
+        let new_token = Token::new_int(octal_numbers, start_pos - 2);
+        LexResult::Some(new_token, current_pos)
+    }
+}
+
+// TODO: Unify this, octal and hex in a single macro
+fn scan_binary(chars: &[char], start_pos: usize) -> LexResult {
+    let mut token_vec = vec![];
+    let mut current_pos = start_pos;
+    let input_len = chars.len();
+
+    while current_pos < input_len {
+        match chars.get(current_pos) {
+            Some(c) if *c == '0' || *c == '1' => {
+                token_vec.push(*c);
+            }
+            _ => break,
+        }
+
+        current_pos += 1;
+    }
+
+    if token_vec.is_empty() {
+        LexResult::Err(LexError {
+            // minus 2 to account for the opening '0b'
+            position: start_pos - 2,
+            end_position: current_pos,
+            reason: String::from("Found an incomplete binary number"),
+        })
+    } else {
+        let octal_numbers = format!("0b{}", token_vec.iter().collect::<String>());
+        let new_token = Token::new_int(octal_numbers, start_pos - 2);
+        LexResult::Some(new_token, current_pos)
     }
 }
 
@@ -153,7 +222,7 @@ fn scan_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, 
 }
 
 /// Scans chars between [0-9a-fA-F], returns when none is found
-fn scan_hex_digits(chars: &Vec<char>, start_pos: usize, current: String) -> (Token, usize) {
+fn scan_hex_digits(chars: &[char], start_pos: usize, current: String) -> (Token, usize) {
     match chars.get(start_pos) {
         Some(c) if utils::is_hex_digit(*c) => {
             scan_hex_digits(chars, start_pos + 1, utils::str_append(current, *c))
@@ -294,6 +363,65 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_octal_1() {
+        let input = str_to_vec("0o20  ");
+        match scan(&input, 0) {
+            LexResult::Some(t, next) => {
+                assert_eq!(t.token_type, TokenType::Int);
+                assert_eq!(t.value, "0o20");
+                assert_eq!(t.position, 0);
+                assert_eq!(t.get_end_position(), 4);
+                assert_eq!(next, 4);
+            }
+            _ => panic!("Expected a token")
+        }
+    }
+
+    #[test]
+    fn test_octal_2() {
+        let input = str_to_vec("0o  ");
+        let result = scan(&input, 0);
+        match result {
+            LexResult::Err(error) => {
+                assert_eq!(error.position, 0);
+                assert_eq!(error.end_position, 2);
+                assert_eq!(error.reason, "Found an incomplete octal number");
+            }
+            _ => panic!("Expected an error, got {:?}", result)
+        }
+    }
+
+    #[test]
+    fn test_binary_1() {
+        let input = str_to_vec("0b1011  ");
+        match scan(&input, 0) {
+            LexResult::Some(t, next) => {
+                assert_eq!(t.token_type, TokenType::Int);
+                assert_eq!(t.value, "0b1011");
+                assert_eq!(t.position, 0);
+                assert_eq!(t.get_end_position(), 6);
+                assert_eq!(next, 6);
+            }
+            _ => panic!("Expected a token")
+        }
+    }
+
+    #[test]
+    fn test_binary_2() {
+        let input = str_to_vec("0b  ");
+        let result = scan(&input, 0);
+        match result {
+            LexResult::Err(error) => {
+                assert_eq!(error.position, 0);
+                assert_eq!(error.end_position, 2);
+                assert_eq!(error.reason, "Found an incomplete binary number");
+            }
+            _ => panic!("Expected an error, got {:?}", result)
+        }
+    }
+
 
     // Should scan a double
     #[test]
