@@ -35,9 +35,6 @@ impl Typed for Expression<'_> {
                 // for this to work with any arbitrary expression.
                 // for now it justs expects an identifier
 
-                // The type of a function call is the return type
-                // of the function
-
                 // TODO: Should this check that the type signature is correct?
                 // or is this done elsewhere?
 
@@ -48,7 +45,7 @@ impl Typed for Expression<'_> {
                                 // Return the return type of the function,
                                 // not the function itself
                                 Ok(Type::Value(return_type))
-                            },
+                            }
                             Some(_) => Err(MistiError::Semantic(SemanticError {
                                 error_start: id.position,
                                 error_end: id.get_end_position(),
@@ -127,10 +124,21 @@ impl Typed for Expression<'_> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::{error_handling::MistiError, lexic::token::Token, semantic::{std::populate, symbol_table::SymbolTable, types::{Type, Typed}}, syntax::ast::{functions::{ArgumentsList, FunctionCall}, Expression}};
+    use crate::{
+        error_handling::MistiError,
+        lexic::token::Token,
+        semantic::{
+            std::populate,
+            symbol_table::SymbolTable,
+            types::{Type, Typed},
+        },
+        syntax::ast::{
+            functions::{ArgumentsList, FunctionCall},
+            Expression,
+        },
+    };
 
     #[test]
     fn should_get_global_print_type() {
@@ -145,7 +153,7 @@ mod tests {
                 assert_eq!(params.len(), 1);
                 assert_eq!(params[0], "String");
                 assert_eq!(return_type, "Void");
-            },
+            }
             Ok(t) => panic!("Expected a Function, got {:?}", t),
             Err(e) => panic!("Expected Ok, got Err: {:?}", e),
         }
@@ -164,8 +172,8 @@ mod tests {
                 assert_eq!(err.error_start, 0);
                 assert_eq!(err.error_end, 5);
                 assert_eq!(err.reason, "Cannot find `print` in this scope.");
-            },
-            Err(e) => panic!("Expected a semantic error, got {:?}", e)
+            }
+            Err(e) => panic!("Expected a semantic error, got {:?}", e),
         }
     }
 
@@ -176,8 +184,8 @@ mod tests {
 
         let id_token = Token::new_identifier("print".into(), 0);
         let fn_expr = Expression::Identifier(&id_token);
-        
-        let args = ArgumentsList{arguments: vec![]};
+
+        let args = ArgumentsList { arguments: vec![] };
 
         let fn_call = Expression::FunctionCall(FunctionCall {
             function: Box::new(fn_expr),
@@ -199,8 +207,8 @@ mod tests {
 
         let id_token = Token::new_identifier("print".into(), 0);
         let fn_expr = Expression::Identifier(&id_token);
-        
-        let args = ArgumentsList{arguments: vec![]};
+
+        let args = ArgumentsList { arguments: vec![] };
 
         let fn_call = Expression::FunctionCall(FunctionCall {
             function: Box::new(fn_expr),
@@ -224,8 +232,8 @@ mod tests {
 
         let id_token = Token::new_identifier("print".into(), 0);
         let fn_expr = Expression::Identifier(&id_token);
-        
-        let args = ArgumentsList{arguments: vec![]};
+
+        let args = ArgumentsList { arguments: vec![] };
 
         let fn_call = Expression::FunctionCall(FunctionCall {
             function: Box::new(fn_expr),

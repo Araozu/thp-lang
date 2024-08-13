@@ -54,7 +54,7 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                         Expression::Int(value) => {
                             php_statements.push(PhpStatement::PhpExpressionStatement(
                                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                                    PhpPrimaryExpression::IntegerLiteral(value),
+                                    PhpPrimaryExpression::IntegerLiteral(&value.value),
                                 )),
                             ));
                         }

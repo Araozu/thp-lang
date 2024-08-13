@@ -1,6 +1,10 @@
 use crate::{
     error_handling::{semantic_error::SemanticError, MistiError},
-    semantic::{impls::SemanticCheck, symbol_table::SymbolTable, types::{Type, Typed}},
+    semantic::{
+        impls::SemanticCheck,
+        symbol_table::SymbolTable,
+        types::{Type, Typed},
+    },
     syntax::ast::Expression,
 };
 
@@ -36,13 +40,14 @@ impl SemanticCheck for Expression<'_> {
                             let argument_datatype = argument.get_type(scope)?;
                             if !argument_datatype.is_value(parameter) {
                                 // The argument and the parameter have diferent types
+                                let (error_start, error_end) = argument.get_position();
                                 return Err(MistiError::Semantic(SemanticError {
                                     // TODO: fix
-                                    error_start: 0,
-                                    error_end: 1,
+                                    error_start,
+                                    error_end,
                                     reason: format!(
-                                        "Expected datatype {}, got {:?}",
-                                        parameter, argument
+                                        "Expected a {}, got {:?}",
+                                        parameter, argument_datatype
                                     ),
                                 }));
                             }
@@ -74,16 +79,22 @@ impl SemanticCheck for Expression<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{error_handling::MistiError, lexic::token::Token, semantic::{impls::SemanticCheck, symbol_table::SymbolTable}, syntax::ast::{functions::{ArgumentsList, FunctionCall}, Expression}};
+    use crate::{
+        error_handling::MistiError,
+        lexic::token::Token,
+        semantic::{impls::SemanticCheck, std::populate, symbol_table::SymbolTable},
+        syntax::ast::{
+            functions::{ArgumentsList, FunctionCall},
+            Expression,
+        },
+    };
 
     #[test]
-    fn should_error() {
+    fn should_error_on_undefined_symbol() {
         // source code: `print()`
         let expr_token = Token::new_identifier("print".into(), 0);
         let expr_function = Expression::Identifier(&expr_token);
-        let arguments = ArgumentsList {
-            arguments: vec![]
-        };
+        let arguments = ArgumentsList { arguments: vec![] };
 
         let expr = Expression::FunctionCall(FunctionCall {
             function: Box::new(expr_function),
@@ -99,8 +110,39 @@ mod tests {
                 assert_eq!(err.reason, "Cannot find `print` in this scope.");
                 assert_eq!(err.error_start, 0);
                 assert_eq!(err.error_end, 5);
-            },
-            Err(e) => panic!("Expected a Semantic error, got {:?}", e)
+            }
+            Err(e) => panic!("Expected a Semantic error, got {:?}", e),
+        }
+    }
+
+    #[test]
+    fn should_error_on_invalid_function_argument() {
+        // source code: `print(322)`
+        let mut scope = SymbolTable::new();
+        populate(&mut scope);
+
+        let expr_token = Token::new_identifier("print".into(), 0);
+        let expr_function = Expression::Identifier(&expr_token);
+
+        let arg_t = Token::new_int(String::from("322"), 6);
+        let arg_1 = Expression::Int(&arg_t);
+        let arguments = ArgumentsList {
+            arguments: vec![arg_1],
+        };
+
+        let expr = Expression::FunctionCall(FunctionCall {
+            function: Box::new(expr_function),
+            arguments: Box::new(arguments),
+        });
+
+        match expr.check_semantics(&scope) {
+            Ok(_) => panic!("Expected semantic error, got ok"),
+            Err(MistiError::Semantic(e)) => {
+                assert_eq!(e.reason, "Expected a String, got Value(\"Int\")");
+                assert_eq!(e.error_start, 6);
+                assert_eq!(e.error_end, 9);
+            }
+            Err(e) => panic!("Expected semantic error, got {:?}", e),
         }
     }
 }

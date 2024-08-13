@@ -17,7 +17,7 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr))
             }
             Expression::Int(value) => {
-                let expr = PhpPrimaryExpression::IntegerLiteral(value);
+                let expr = PhpPrimaryExpression::IntegerLiteral(&value.value);
                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr))
             }
             Expression::Float(value) => {
@@ -32,6 +32,7 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
 #[cfg(test)]
 mod tests {
     use crate::{
+        lexic::token::Token,
         php_ast::{
             transformers::PHPTransformable, PhpAssignmentExpression, PhpExpression,
             PhpPrimaryExpression,
@@ -57,8 +58,8 @@ mod tests {
 
     #[test]
     fn should_transform_int() {
-        let value = String::from("322");
-        let input = Expression::Int(&value);
+        let binding = Token::new_int(String::from("322"), 0);
+        let input = Expression::Int(&binding);
         let output = input.into_php_ast();
 
         match output {

@@ -60,7 +60,7 @@ pub struct Parameter<'a> {
 
 #[derive(Debug)]
 pub enum Expression<'a> {
-    Int(&'a String),
+    Int(&'a Token),
     Float(&'a String),
     String(&'a String),
     Boolean(bool),
@@ -68,4 +68,21 @@ pub enum Expression<'a> {
     FunctionCall(FunctionCall<'a>),
     UnaryOperator(&'a String, Box<Expression<'a>>),
     BinaryOperator(Box<Expression<'a>>, Box<Expression<'a>>, &'a String),
+}
+
+impl Expression<'_> {
+    /// Returns the absolute start and end position
+    /// of this expression
+    pub fn get_position(&self) -> (usize, usize) {
+        match self {
+            Expression::Identifier(id) => (id.position, id.get_end_position()),
+            Expression::Int(id) => (id.position, id.get_end_position()),
+            Expression::Float(_) => todo!(),
+            Expression::String(_) => todo!(),
+            Expression::Boolean(_) => todo!(),
+            Expression::FunctionCall(_) => todo!(),
+            Expression::UnaryOperator(_, _) => todo!(),
+            Expression::BinaryOperator(_, _, _) => todo!(),
+        }
+    }
 }

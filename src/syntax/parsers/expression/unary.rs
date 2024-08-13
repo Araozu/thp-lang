@@ -54,7 +54,7 @@ mod tests {
                 match (operator, *expression) {
                     (op, Expression::Int(value)) => {
                         assert_eq!(*op, "-");
-                        assert_eq!(*value, "10");
+                        assert_eq!(value.value, "10");
                     }
                     _ => panic!("unexpected values"),
                 }

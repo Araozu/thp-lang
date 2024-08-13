@@ -13,7 +13,7 @@ use crate::{
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     match tokens.get_significant(pos) {
         Some((token, token_pos)) => match token.token_type {
-            TokenType::Int => Ok((Expression::Int(&token.value), token_pos + 1)),
+            TokenType::Int => Ok((Expression::Int(&token), token_pos + 1)),
             TokenType::Float => Ok((Expression::Float(&token.value), token_pos + 1)),
             TokenType::String => Ok((Expression::String(&token.value), token_pos + 1)),
             TokenType::Identifier if token.value == "true" || token.value == "false" => {
@@ -53,7 +53,7 @@ mod tests {
 
         match expression {
             Ok((Expression::Int(value), _)) => {
-                assert_eq!("40", format!("{}", value))
+                assert_eq!("40", format!("{}", value.value))
             }
             _ => panic!(),
         }
