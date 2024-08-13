@@ -6,6 +6,12 @@ use var_binding::VariableBinding;
 pub mod functions;
 pub mod var_binding;
 
+/// Trait that allows nodes to inform
+/// on where they start and end on the source code
+pub trait Positionable {
+    fn get_position(&self) -> (usize, usize);
+}
+
 /// The AST for a whole THP file
 #[derive(Debug)]
 pub struct ModuleAST<'a> {
@@ -70,19 +76,19 @@ pub enum Expression<'a> {
     BinaryOperator(Box<Expression<'a>>, Box<Expression<'a>>, &'a String),
 }
 
-impl Expression<'_> {
+impl Positionable for Expression<'_> {
     /// Returns the absolute start and end position
     /// of this expression
-    pub fn get_position(&self) -> (usize, usize) {
+    fn get_position(&self) -> (usize, usize) {
         match self {
             Expression::Identifier(id) => (id.position, id.get_end_position()),
             Expression::Int(id) => (id.position, id.get_end_position()),
             Expression::Float(id) => (id.position, id.get_end_position()),
             Expression::String(id) => (id.position, id.get_end_position()),
             Expression::Boolean(id) => (id.position, id.get_end_position()),
-            Expression::FunctionCall(_) => todo!(),
-            Expression::UnaryOperator(_, _) => todo!(),
-            Expression::BinaryOperator(_, _, _) => todo!(),
+            Expression::FunctionCall(_) => (0, 1),
+            Expression::UnaryOperator(_, _) => (0, 1),
+            Expression::BinaryOperator(_, _, _) => (0, 1),
         }
     }
 }

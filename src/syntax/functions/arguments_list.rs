@@ -53,7 +53,7 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Argume
     }
 
     // Parse closing paren
-    let (_closing_paren, next_pos) =
+    let (closing_paren, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::RightParen) {
             Ok((t, next)) => (t, next),
             Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
@@ -74,7 +74,14 @@ pub fn try_parse<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Argume
         };
     current_pos = next_pos;
 
-    Ok((ArgumentsList { arguments }, current_pos))
+    Ok((
+        ArgumentsList {
+            arguments,
+            paren_open_pos: opening_paren.position,
+            paren_close_pos: closing_paren.get_end_position(),
+        },
+        current_pos,
+    ))
 }
 
 #[cfg(test)]

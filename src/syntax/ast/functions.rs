@@ -1,4 +1,4 @@
-use super::Expression;
+use super::{Expression, Positionable};
 
 #[derive(Debug)]
 pub struct FunctionCall<'a> {
@@ -9,4 +9,13 @@ pub struct FunctionCall<'a> {
 #[derive(Debug)]
 pub struct ArgumentsList<'a> {
     pub arguments: Vec<Expression<'a>>,
+    pub paren_open_pos: usize,
+    /// This is after the paren is closed
+    pub paren_close_pos: usize,
+}
+
+impl Positionable for ArgumentsList<'_> {
+    fn get_position(&self) -> (usize, usize) {
+        (self.paren_open_pos, self.paren_close_pos)
+    }
 }

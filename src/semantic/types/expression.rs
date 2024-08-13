@@ -185,7 +185,11 @@ mod tests {
         let id_token = Token::new_identifier("print".into(), 0);
         let fn_expr = Expression::Identifier(&id_token);
 
-        let args = ArgumentsList { arguments: vec![] };
+        let args = ArgumentsList {
+            arguments: vec![],
+            paren_open_pos: 5,
+            paren_close_pos: 7,
+        };
 
         let fn_call = Expression::FunctionCall(FunctionCall {
             function: Box::new(fn_expr),
@@ -208,7 +212,11 @@ mod tests {
         let id_token = Token::new_identifier("print".into(), 0);
         let fn_expr = Expression::Identifier(&id_token);
 
-        let args = ArgumentsList { arguments: vec![] };
+        let args = ArgumentsList {
+            arguments: vec![],
+            paren_open_pos: 5,
+            paren_close_pos: 7,
+        };
 
         let fn_call = Expression::FunctionCall(FunctionCall {
             function: Box::new(fn_expr),
@@ -233,7 +241,11 @@ mod tests {
         let id_token = Token::new_identifier("print".into(), 0);
         let fn_expr = Expression::Identifier(&id_token);
 
-        let args = ArgumentsList { arguments: vec![] };
+        let args = ArgumentsList {
+            arguments: vec![],
+            paren_open_pos: 5,
+            paren_close_pos: 7,
+        };
 
         let fn_call = Expression::FunctionCall(FunctionCall {
             function: Box::new(fn_expr),

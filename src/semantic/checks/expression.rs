@@ -5,7 +5,7 @@ use crate::{
         symbol_table::SymbolTable,
         types::{Type, Typed},
     },
-    syntax::ast::Expression,
+    syntax::ast::{Expression, Positionable},
 };
 
 impl SemanticCheck for Expression<'_> {
@@ -20,12 +20,13 @@ impl SemanticCheck for Expression<'_> {
                     Type::Function(parameters, _return_type) => {
                         // Check parameters length
                         if parameters.len() != arguments.len() {
+                            let (error_start, error_end) = f.arguments.get_position();
+
                             return Err(MistiError::Semantic(SemanticError {
-                                // TODO: fix
-                                error_start: 0,
-                                error_end: 1,
+                                error_start,
+                                error_end,
                                 reason: format!(
-                                    "Expected {} arguments, found {}",
+                                    "Expected {} arguments, got {}",
                                     parameters.len(),
                                     arguments.len(),
                                 ),
@@ -54,10 +55,10 @@ impl SemanticCheck for Expression<'_> {
                         }
                     }
                     _ => {
+                        let (error_start, error_end) = fun.get_position();
                         return Err(MistiError::Semantic(SemanticError {
-                            // TODO: fix
-                            error_start: 0,
-                            error_end: 1,
+                            error_start,
+                            error_end,
                             reason: format!(
                                 "Expected a function type, got {:?}",
                                 function_datatype
@@ -94,7 +95,11 @@ mod tests {
         // source code: `print()`
         let expr_token = Token::new_identifier("print".into(), 0);
         let expr_function = Expression::Identifier(&expr_token);
-        let arguments = ArgumentsList { arguments: vec![] };
+        let arguments = ArgumentsList {
+            arguments: vec![],
+            paren_open_pos: 5,
+            paren_close_pos: 7,
+        };
 
         let expr = Expression::FunctionCall(FunctionCall {
             function: Box::new(expr_function),
@@ -128,6 +133,8 @@ mod tests {
         let arg_1 = Expression::Int(&arg_t);
         let arguments = ArgumentsList {
             arguments: vec![arg_1],
+            paren_open_pos: 5,
+            paren_close_pos: 10,
         };
 
         let expr = Expression::FunctionCall(FunctionCall {
@@ -141,6 +148,74 @@ mod tests {
                 assert_eq!(e.reason, "Expected a String, got Value(\"Int\")");
                 assert_eq!(e.error_start, 6);
                 assert_eq!(e.error_end, 9);
+            }
+            Err(e) => panic!("Expected semantic error, got {:?}", e),
+        }
+    }
+
+    #[test]
+    fn should_error_on_invalid_function_argument_count() {
+        // source code: `print()`
+        let mut scope = SymbolTable::new();
+        populate(&mut scope);
+
+        let expr_token = Token::new_identifier("print".into(), 0);
+        let expr_function = Expression::Identifier(&expr_token);
+
+        let arguments = ArgumentsList {
+            arguments: vec![],
+            paren_open_pos: 5,
+            paren_close_pos: 7,
+        };
+
+        let expr = Expression::FunctionCall(FunctionCall {
+            function: Box::new(expr_function),
+            arguments: Box::new(arguments),
+        });
+
+        match expr.check_semantics(&scope) {
+            Ok(_) => panic!("Expected semantic error, got ok"),
+            Err(MistiError::Semantic(e)) => {
+                assert_eq!(e.reason, "Expected 1 arguments, got 0");
+                assert_eq!(e.error_start, 5);
+                assert_eq!(e.error_end, 7);
+            }
+            Err(e) => panic!("Expected semantic error, got {:?}", e),
+        }
+    }
+
+    #[test]
+    fn should_error_on_invalid_function_argument_2() {
+        // source code: `print(322, 644)`
+        let mut scope = SymbolTable::new();
+        populate(&mut scope);
+
+        let expr_token = Token::new_identifier("print".into(), 0);
+        let expr_function = Expression::Identifier(&expr_token);
+
+        let arg_t = Token::new_int(String::from("322"), 6);
+        let arg_1 = Expression::Int(&arg_t);
+
+        let arg_t_2 = Token::new_int(String::from("644"), 11);
+        let arg_2 = Expression::Int(&arg_t_2);
+
+        let arguments = ArgumentsList {
+            arguments: vec![arg_1, arg_2],
+            paren_open_pos: 5,
+            paren_close_pos: 15,
+        };
+
+        let expr = Expression::FunctionCall(FunctionCall {
+            function: Box::new(expr_function),
+            arguments: Box::new(arguments),
+        });
+
+        match expr.check_semantics(&scope) {
+            Ok(_) => panic!("Expected semantic error, got ok"),
+            Err(MistiError::Semantic(e)) => {
+                assert_eq!(e.reason, "Expected 1 arguments, got 2");
+                assert_eq!(e.error_start, 5);
+                assert_eq!(e.error_end, 15);
             }
             Err(e) => panic!("Expected semantic error, got {:?}", e),
         }
