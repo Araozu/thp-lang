@@ -58,8 +58,9 @@ mod tests {
             value: "name".into(),
             position: 0,
         };
-        let expr_value = String::from("Hello");
-        let expression = Expression::String(&expr_value);
+
+        let t = Token::new_string("Hello".into(), 0);
+        let expression = Expression::String(&t);
         let binding = Statement::Binding(VariableBinding {
             datatype: None,
             identifier: &identifier_token,

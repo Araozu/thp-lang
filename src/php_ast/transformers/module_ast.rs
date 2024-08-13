@@ -37,7 +37,7 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                                         match e {
                                             Expression::String(v) => {
                                                 expressions.push(
-                                                    PhpExpression::Assignment(PhpAssignmentExpression::Primary(PhpPrimaryExpression::StringLiteral(v)))
+                                                    PhpExpression::Assignment(PhpAssignmentExpression::Primary(PhpPrimaryExpression::StringLiteral(&v.value)))
                                                 )
                                             },
                                             _ => todo!("Non string expressions not supported")
@@ -61,14 +61,14 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                         Expression::Float(value) => {
                             php_statements.push(PhpStatement::PhpExpressionStatement(
                                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                                    PhpPrimaryExpression::FloatingLiteral(value),
+                                    PhpPrimaryExpression::FloatingLiteral(&value.value),
                                 )),
                             ));
                         }
                         Expression::String(value) => {
                             php_statements.push(PhpStatement::PhpExpressionStatement(
                                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                                    PhpPrimaryExpression::StringLiteral(value),
+                                    PhpPrimaryExpression::StringLiteral(&value.value),
                                 )),
                             ));
                         }

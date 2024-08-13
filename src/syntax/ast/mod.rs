@@ -61,9 +61,9 @@ pub struct Parameter<'a> {
 #[derive(Debug)]
 pub enum Expression<'a> {
     Int(&'a Token),
-    Float(&'a String),
-    String(&'a String),
-    Boolean(bool),
+    Float(&'a Token),
+    String(&'a Token),
+    Boolean(&'a Token),
     Identifier(&'a Token),
     FunctionCall(FunctionCall<'a>),
     UnaryOperator(&'a String, Box<Expression<'a>>),
@@ -77,9 +77,9 @@ impl Expression<'_> {
         match self {
             Expression::Identifier(id) => (id.position, id.get_end_position()),
             Expression::Int(id) => (id.position, id.get_end_position()),
-            Expression::Float(_) => todo!(),
-            Expression::String(_) => todo!(),
-            Expression::Boolean(_) => todo!(),
+            Expression::Float(id) => (id.position, id.get_end_position()),
+            Expression::String(id) => (id.position, id.get_end_position()),
+            Expression::Boolean(id) => (id.position, id.get_end_position()),
             Expression::FunctionCall(_) => todo!(),
             Expression::UnaryOperator(_, _) => todo!(),
             Expression::BinaryOperator(_, _, _) => todo!(),

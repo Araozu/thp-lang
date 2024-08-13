@@ -14,10 +14,10 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     match tokens.get_significant(pos) {
         Some((token, token_pos)) => match token.token_type {
             TokenType::Int => Ok((Expression::Int(&token), token_pos + 1)),
-            TokenType::Float => Ok((Expression::Float(&token.value), token_pos + 1)),
-            TokenType::String => Ok((Expression::String(&token.value), token_pos + 1)),
+            TokenType::Float => Ok((Expression::Float(&token), token_pos + 1)),
+            TokenType::String => Ok((Expression::String(&token), token_pos + 1)),
             TokenType::Identifier if token.value == "true" || token.value == "false" => {
-                Ok((Expression::Boolean(token.value == "true"), token_pos + 1))
+                Ok((Expression::Boolean(&token), token_pos + 1))
             }
             TokenType::Identifier => Ok((Expression::Identifier(&token), token_pos + 1)),
             TokenType::LeftParen => parse_parenthesized_expression(tokens, token_pos),
@@ -66,7 +66,7 @@ mod tests {
 
         match expression {
             Ok((Expression::String(value), _)) => {
-                assert_eq!("Hello", format!("{}", value))
+                assert_eq!("Hello", format!("{}", value.value))
             }
             _ => panic!(),
         }
@@ -78,7 +78,7 @@ mod tests {
         let expression = try_parse(&tokens, 0);
 
         match expression {
-            Ok((Expression::Boolean(value), _)) => assert!(value),
+            Ok((Expression::Boolean(value), _)) => assert_eq!(value.value, "true"),
             _ => panic!(),
         }
     }

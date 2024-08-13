@@ -13,7 +13,7 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
     fn into_php_ast(&'a self) -> Self::Item {
         match self {
             Expression::String(value) => {
-                let expr = PhpPrimaryExpression::StringLiteral(value);
+                let expr = PhpPrimaryExpression::StringLiteral(&value.value);
                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr))
             }
             Expression::Int(value) => {
@@ -21,7 +21,7 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr))
             }
             Expression::Float(value) => {
-                let expr = PhpPrimaryExpression::FloatingLiteral(value);
+                let expr = PhpPrimaryExpression::FloatingLiteral(&value.value);
                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr))
             }
             _ => todo!("transformation for expression: {:?}", self),
@@ -42,8 +42,8 @@ mod tests {
 
     #[test]
     fn should_transform_string() {
-        let value = String::from("Hello");
-        let input = Expression::String(&value);
+        let t = Token::new_string("Hello".into(), 0);
+        let input = Expression::String(&t);
         let output = input.into_php_ast();
 
         match output {
@@ -74,8 +74,8 @@ mod tests {
 
     #[test]
     fn should_transform_float() {
-        let value = String::from("322.644");
-        let input = Expression::Float(&value);
+        let t = Token::new_float("322.644".into(), 0);
+        let input = Expression::Float(&t);
         let output = input.into_php_ast();
 
         match output {
