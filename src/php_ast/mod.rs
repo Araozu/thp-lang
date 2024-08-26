@@ -7,6 +7,8 @@ use crate::codegen::Transpilable;
 /// THP
 pub mod transformers;
 
+pub mod php_ast_2;
+
 type TranspilableBox<'a> = Box<(dyn Transpilable + 'a)>;
 
 /// Represents `statement-list` on the grammar,

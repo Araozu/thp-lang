@@ -1,6 +1,11 @@
 use super::super::PhpExpression;
 use crate::{
-    codegen::Transpilable, php_ast::{PhpAssignmentExpression, PhpPrimaryExpression}, syntax::ast::Expression
+    codegen::Transpilable,
+    php_ast::{
+        php_ast_2::{PExpresssion, PFunctionCall, PPrimary},
+        PhpAssignmentExpression, PhpPrimaryExpression,
+    },
+    syntax::ast::Expression,
 };
 
 // TODO: next rewrite the test to use the output of Transpilable?
@@ -9,19 +14,30 @@ use super::PHPTransformable;
 
 /// Transforms a THP expression into a PHP expression
 impl<'a> PHPTransformable<'a> for Expression<'_> {
-    fn into_php_ast(&'a self) -> Box<(dyn Transpilable + 'a)> {
+    type Item = PExpresssion<'a>;
+
+    fn into_php_ast(&'a self) -> PExpresssion<'a> {
         match self {
             Expression::String(value) => {
-                let expr = PhpPrimaryExpression::StringLiteral(&value.value);
-                Box::new(PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr)))
+                let expr = PPrimary::StringLiteral(&value.value);
+
+                PExpresssion::Primary(expr)
             }
             Expression::Int(value) => {
-                let expr = PhpPrimaryExpression::IntegerLiteral(&value.value);
-                Box::new(PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr)))
+                let expr = PPrimary::IntegerLiteral(&value.value);
+                PExpresssion::Primary(expr)
             }
             Expression::Float(value) => {
-                let expr = PhpPrimaryExpression::FloatingLiteral(&value.value);
-                Box::new(PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr)))
+                let expr = PPrimary::FloatingLiteral(&value.value);
+                PExpresssion::Primary(expr)
+            }
+            Expression::FunctionCall(f) => {
+                let fn_call_expr = f.into_php_ast();
+
+                PExpresssion::FunctionCall(fn_call_expr)
+            }
+            Expression::Identifier(i) => {
+                PExpresssion::Primary(PPrimary::Variable(&i.value))
             }
             _ => todo!("transformation for expression: {:?}", self),
         }

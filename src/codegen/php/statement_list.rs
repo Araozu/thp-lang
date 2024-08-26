@@ -1,6 +1,9 @@
-use crate::{codegen::Transpilable, php_ast::PhpAst};
+use crate::{
+    codegen::Transpilable,
+    php_ast::{php_ast_2::PFile, PhpAst},
+};
 
-impl Transpilable for PhpAst<'_> {
+impl Transpilable for PFile<'_> {
     fn transpile(&self) -> String {
         let mut fragments = vec![String::from("<?php\n")];
 
@@ -17,13 +20,14 @@ mod tests {
     use crate::{
         codegen::Transpilable,
         php_ast::{
-            PhpAssignmentExpression, PhpAst, PhpExpression, PhpPrimaryExpression, PhpStatement,
+            php_ast_2::PFile, PhpAssignmentExpression, PhpAst, PhpExpression, PhpPrimaryExpression,
+            PhpStatement,
         },
     };
 
     #[test]
     fn should_transpile_empty_file() {
-        let ast = PhpAst { statements: vec![] };
+        let ast = PFile { statements: vec![] };
         let output = ast.transpile();
 
         assert_eq!("<?php\n", output);

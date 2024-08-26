@@ -1,16 +1,14 @@
-use crate::{codegen::Transpilable, php_ast::PhpAssignmentExpression};
+use crate::{
+    codegen::Transpilable,
+    php_ast::{php_ast_2::PSimpleAssignment, PhpAssignmentExpression},
+};
 
-impl Transpilable for PhpAssignmentExpression<'_> {
+impl Transpilable for PSimpleAssignment<'_> {
     fn transpile(&self) -> String {
-        match self {
-            PhpAssignmentExpression::Primary(p) => p.transpile(),
-            PhpAssignmentExpression::SimpleAssignment(assignment) => {
-                let variable_name = &assignment.variable;
-                let expression_str = assignment.assignment.transpile();
+        let variable_name = self.variable;
+        let expression_str = self.assignment.transpile();
 
-                format!("${} = {}", variable_name, expression_str)
-            }
-        }
+        format!("${} = {}", variable_name, expression_str)
     }
 }
 

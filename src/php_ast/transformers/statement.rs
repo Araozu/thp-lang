@@ -1,38 +1,28 @@
 use super::super::PhpStatement;
 use crate::{
-    codegen::Transpilable, php_ast::{PhpAssignmentExpression, PhpExpression, PhpSimpleAssignment}, syntax::ast::Statement
+    codegen::Transpilable,
+    php_ast::{
+        php_ast_2::{PExpresssion, PSimpleAssignment, PStatement},
+        PhpAssignmentExpression, PhpExpression, PhpSimpleAssignment,
+    },
+    syntax::ast::Statement,
 };
 
 use super::PHPTransformable;
 
 /// Transforms a THP expression into a PHP expression
 impl<'a> PHPTransformable<'a> for Statement<'_> {
-    fn into_php_ast(&'a self) -> Box<(dyn Transpilable + 'a)>{
+    type Item = PStatement<'a>;
+
+    fn into_php_ast(&'a self) -> PStatement<'a> {
         match self {
             Statement::Binding(b) => {
-                // This is a PhpExpression, but a PhpPrimaryExpression is needed
                 let binding_expr = b.expression.into_php_ast();
 
-                /* 
-                // TODO: Somehow fix this...
-                // the function above `into_php_ast` should somehow
-                // return what I need? Or should return something general and
-                // then i decide how to transform it here?
-                // if it reaches this point in the pipeline, is it
-                // safe to assume that any AST is correct, since
-                // semantic analysis (supposedly) did its job?
-                let binding_primary_expr = match binding_expr {
-                    PhpExpression::Assignment(PhpAssignmentExpression::Primary(p)) => p,
-                    _ => unreachable!("Expected a PrimaryExpression during AST transformation"),
-                };
-                */
-
-                Box::new(PhpStatement::PhpExpressionStatement(PhpExpression::Assignment(
-                    PhpAssignmentExpression::SimpleAssignment(PhpSimpleAssignment {
-                        variable: b.identifier.value.clone(),
-                        assignment: binding_expr,
-                    }),
-                )))
+                PStatement::ExpressionStatement(PExpresssion::Assignment(PSimpleAssignment {
+                    variable: &b.identifier.value,
+                    assignment: Box::new(binding_expr),
+                }))
             }
             _ => todo!("transformation for statement: {:?}", self),
         }

@@ -1,26 +1,12 @@
-use crate::{codegen::Transpilable, php_ast::PhpStatement};
+use crate::{
+    codegen::Transpilable,
+    php_ast::{php_ast_2::PStatement, PhpStatement},
+};
 
-mod echo_statement;
-
-impl Transpilable for PhpStatement<'_> {
+impl Transpilable for PStatement<'_> {
     fn transpile(&self) -> String {
         match self {
-            PhpStatement::PhpEchoStatement(expr_list) => {
-                let expressions_vec = expr_list
-                    .expressions
-                    .iter()
-                    .map(|e| e.transpile())
-                    .collect::<Vec<_>>();
-
-                let expressions_str = if expressions_vec.is_empty() {
-                    "\"\"".into()
-                } else {
-                    expressions_vec.join(", ")
-                };
-
-                format!("echo {};", expressions_str)
-            }
-            PhpStatement::PhpExpressionStatement(expr) => {
+            PStatement::ExpressionStatement(expr) => {
                 let expr_str = expr.transpile();
                 format!("{};", expr_str)
             }
@@ -38,6 +24,7 @@ mod tests {
         },
     };
 
+    /*
     #[test]
     fn should_gen_empty_echo_statement() {
         let expressions = PhpExpressionList {
@@ -95,4 +82,5 @@ mod tests {
 
         assert_eq!("\"Hi!\";", output)
     }
+    */
 }
