@@ -61,7 +61,7 @@ fn parse_args() -> Result<(CommandType, Vec<String>), String> {
     // Remove the first argument, which is the path to the executable
     args.remove(0);
 
-    let command = match args.get(0) {
+    let command = match args.first() {
         Some(command) if !command.starts_with('-') => match command.as_str() {
             "c" | "compile" => CommandType::Compile,
             "f" | "format" => CommandType::Format,

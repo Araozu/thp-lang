@@ -17,14 +17,14 @@ params list = "("
 
 datatype pair = datatype, identifier;
  */
-pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<ParamsList> {
+pub fn parse_params_list(tokens: &Vec<Token>, pos: usize) -> ParsingResult<ParamsList> {
     let mut current_pos = pos;
 
     let (opening_paren, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::LeftParen) {
             Ok((t, next)) => (t, next),
             Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
-            Err(ParsingError::Mismatch(t)) => return Err(ParsingError::Mismatch(&t)),
+            Err(ParsingError::Mismatch(t)) => return Err(ParsingError::Mismatch(t)),
             Err(ParsingError::Unmatched) => return Err(ParsingError::Unmatched),
         };
     current_pos = next_pos;
@@ -91,7 +91,7 @@ pub fn parse_params_list<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResul
 /// - `Type identifier = default_value`
 /// - `FunctionType identifier`
 /// - `Pattern identifier` (e.g. `Some[String] value`)?
-fn parse_param_definition<'a>(tokens: &'a Vec<Token>, pos: usize) -> ParsingResult<Parameter> {
+fn parse_param_definition(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Parameter> {
     let mut current_pos = pos;
     let (datatype, next_pos) =
         match utils::parse_token_type(tokens, current_pos, TokenType::Datatype) {

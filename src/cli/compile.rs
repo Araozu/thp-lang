@@ -17,7 +17,7 @@ pub fn compile_command(arguments: Vec<String>) -> Result<(), ()> {
     }
 
     let argument = &arguments[0];
-    if argument.starts_with("-") {
+    if argument.starts_with('-') {
         let opt_str = argument.as_str();
 
         println!("{}", compile_help());

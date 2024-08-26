@@ -12,8 +12,6 @@ impl<'a> Parseable<'a> for VariableBinding<'a> {
     type Item = VariableBinding<'a>;
 
     fn try_parse(tokens: &'a Vec<Token>, current_pos: usize) -> ParsingResult<'a, Self::Item> {
-        let current_pos = current_pos;
-
         /*
          * val/var keyword
          */

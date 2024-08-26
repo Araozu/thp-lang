@@ -11,21 +11,23 @@ impl Transpilable for PSimpleAssignment<'_> {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        codegen::Transpilable,
+        php_ast::{PExpresssion, PPrimary, PSimpleAssignment},
+    };
 
-    /*
     #[test]
     fn should_gen_assignment() {
-        let variable = String::from("name");
+        let variable = &String::from("name");
         let value = String::from("John");
-        let assignment = PhpPrimaryExpression::StringLiteral(&value);
+        let assignment = PExpresssion::Primary(PPrimary::StringLiteral(&value));
 
-        let ast = PhpAssignmentExpression::SimpleAssignment(PhpSimpleAssignment {
+        let ast = PSimpleAssignment {
             variable,
-            assignment,
-        });
+            assignment: Box::new(assignment),
+        };
         let output = ast.transpile();
 
         assert_eq!("$name = \"John\"", output)
     }
-    */
 }

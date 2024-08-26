@@ -4,7 +4,7 @@ use colored::*;
 pub fn help_command(arguments: Vec<String>) -> Result<(), ()> {
     println!("{}", get_help_text());
 
-    if arguments.len() > 0 {
+    if !arguments.is_empty() {
         println!(
             "{}: {}",
             "warning".yellow(),

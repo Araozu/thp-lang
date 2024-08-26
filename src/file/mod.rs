@@ -67,7 +67,7 @@ fn compile(input: &String) -> Result<String, String> {
     let tokens = match lexic::get_tokens(input) {
         Ok(t) => t,
         Err(error) => {
-            let chars: Vec<char> = input.chars().into_iter().collect();
+            let chars: Vec<char> = input.chars().collect();
             return Err(error.get_error_str(&chars));
         }
     };
@@ -78,7 +78,7 @@ fn compile(input: &String) -> Result<String, String> {
     let ast = match syntax::build_ast(&tokens) {
         Ok(ast) => ast,
         Err(reason) => {
-            let chars: Vec<char> = input.chars().into_iter().collect();
+            let chars: Vec<char> = input.chars().collect();
             return Err(reason.get_error_str(&chars));
         }
     };
@@ -90,7 +90,7 @@ fn compile(input: &String) -> Result<String, String> {
     match res1 {
         Ok(_) => {}
         Err(reason) => {
-            let chars: Vec<char> = input.chars().into_iter().collect();
+            let chars: Vec<char> = input.chars().collect();
             let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
             return Err(error);
         }

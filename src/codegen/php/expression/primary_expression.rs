@@ -14,12 +14,12 @@ impl Transpilable for PPrimary<'_> {
 
 #[cfg(test)]
 mod tests {
+    use crate::{codegen::Transpilable, php_ast::PPrimary};
 
-    /*
     #[test]
     fn should_transpile_empty_string() {
         let input = String::from("");
-        let ast = PhpPrimaryExpression::StringLiteral(&input);
+        let ast = PPrimary::StringLiteral(&input);
         let output = ast.transpile();
 
         assert_eq!("\"\"", output)
@@ -28,7 +28,7 @@ mod tests {
     #[test]
     fn should_transpile_string() {
         let input = String::from("abc");
-        let ast = PhpPrimaryExpression::StringLiteral(&input);
+        let ast = PPrimary::StringLiteral(&input);
         let output = ast.transpile();
 
         assert_eq!("\"abc\"", output)
@@ -37,7 +37,7 @@ mod tests {
     #[test]
     fn should_transpile_string_with_quotes() {
         let input = String::from("a\\\"b\\\"c");
-        let ast = PhpPrimaryExpression::StringLiteral(&input);
+        let ast = PPrimary::StringLiteral(&input);
         let output = ast.transpile();
 
         assert_eq!("\"a\\\"b\\\"c\"", output)
@@ -46,7 +46,7 @@ mod tests {
     #[test]
     fn should_transpile_int() {
         let input = String::from("322");
-        let ast = PhpPrimaryExpression::IntegerLiteral(&input);
+        let ast = PPrimary::IntegerLiteral(&input);
         let output = ast.transpile();
 
         assert_eq!("322", output)
@@ -55,7 +55,7 @@ mod tests {
     #[test]
     fn should_transpile_floating() {
         let input = String::from("322.644");
-        let ast = PhpPrimaryExpression::FloatingLiteral(&input);
+        let ast = PPrimary::FloatingLiteral(&input);
         let output = ast.transpile();
 
         assert_eq!("322.644", output)
@@ -64,10 +64,9 @@ mod tests {
     #[test]
     fn should_transpile_variable() {
         let input = String::from("name");
-        let ast = PhpPrimaryExpression::Variable(&input);
+        let ast = PPrimary::Variable(&input);
         let output = ast.transpile();
 
         assert_eq!("$name", output)
     }
-    */
 }

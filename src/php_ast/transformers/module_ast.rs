@@ -19,68 +19,6 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                     let p_expression = expr.into_php_ast();
 
                     php_statements.push(PStatement::ExpressionStatement(p_expression));
-
-                    /*
-                    match expr {
-                        Expression::FunctionCall(fc) => {
-
-
-
-                            // TODO: This definitely needs refactoring
-                            let function_expr: &Expression = &*fc.function;
-                            match function_expr {
-                                Expression::Identifier(id) if id.value == "print" => {
-                                    // transform to print() expression
-                                    // no parameters supported
-
-                                    // transform parameters, expect them all to be strings
-
-                                    let mut expressions = Vec::<PhpExpression>::new();
-
-                                    for e in fc.arguments.arguments.iter() {
-                                        match e {
-                                            Expression::String(v) => {
-                                                expressions.push(
-                                                    PhpExpression::Assignment(PhpAssignmentExpression::Primary(PhpPrimaryExpression::StringLiteral(&v.value)))
-                                                )
-                                            },
-                                            _ => todo!("Non string expressions not supported")
-                                        }
-                                    }
-
-                                    php_statements.push(Box::new(PhpStatement::PhpEchoStatement(PhpExpressionList {
-                                        expressions
-                                    })));
-                                },
-                                _ => todo!("Not implemented: AST transformation for function call that is not an identifier")
-                            }
-                        }
-                        Expression::Int(value) => {
-                            php_statements.push(Box::new(PhpStatement::PhpExpressionStatement(
-                                PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                                    PhpPrimaryExpression::IntegerLiteral(&value.value),
-                                )),
-                            )));
-                        }
-                        Expression::Float(value) => {
-                            php_statements.push(Box::new(PhpStatement::PhpExpressionStatement(
-                                PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                                    PhpPrimaryExpression::FloatingLiteral(&value.value),
-                                )),
-                            )));
-                        }
-                        Expression::String(value) => {
-                            php_statements.push(Box::new(PhpStatement::PhpExpressionStatement(
-                                PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                                    PhpPrimaryExpression::StringLiteral(&value.value),
-                                )),
-                            )));
-                        }
-                        _ => {
-                            todo!("not implemented: AST transform for expression {:?}", expr)
-                        }
-                    }
-                    */
                 }
             }
         }
@@ -91,7 +29,6 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
     }
 }
 
-/*
 #[cfg(test)]
 mod tests {
     use crate::{php_ast::transformers::PHPTransformable, syntax::ast::ModuleAST};
@@ -106,4 +43,3 @@ mod tests {
         assert!(output.statements.is_empty())
     }
 }
-*/

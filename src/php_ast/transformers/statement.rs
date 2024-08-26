@@ -24,15 +24,11 @@ impl<'a> PHPTransformable<'a> for Statement<'_> {
     }
 }
 
-/*
 #[cfg(test)]
 mod tests {
     use crate::{
         lexic::token::{Token, TokenType},
-        php_ast::{
-            transformers::PHPTransformable, PhpAssignmentExpression, PhpExpression,
-            PhpPrimaryExpression, PhpStatement,
-        },
+        php_ast::{transformers::PHPTransformable, PExpresssion, PPrimary, PStatement},
         syntax::ast::{var_binding::VariableBinding, Expression, Statement},
     };
 
@@ -55,13 +51,11 @@ mod tests {
         let output = binding.into_php_ast();
 
         match output {
-            PhpStatement::PhpExpressionStatement(PhpExpression::Assignment(
-                PhpAssignmentExpression::SimpleAssignment(assignment),
-            )) => {
+            PStatement::ExpressionStatement(PExpresssion::Assignment(assignment)) => {
                 assert_eq!("name", assignment.variable);
 
-                match assignment.assignment {
-                    PhpPrimaryExpression::StringLiteral(value) => {
+                match *assignment.assignment {
+                    PExpresssion::Primary(PPrimary::StringLiteral(value)) => {
                         assert_eq!("Hello", value);
                     }
                     _ => panic!("Expected a String literal as the value of the assignment"),
@@ -71,4 +65,3 @@ mod tests {
         }
     }
 }
-*/

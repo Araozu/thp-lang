@@ -39,10 +39,10 @@ pub fn empty_command(arguments: Vec<String>) -> Result<(), ()> {
     Ok(())
 }
 
-fn expand_option(option: &String) -> Result<EmptyOptions, String> {
-    match option.as_str() {
+fn expand_option(option: &str) -> Result<EmptyOptions, String> {
+    match option {
         "-h" | "--help" => Ok(EmptyOptions::Help),
         "-v" | "--version" => Ok(EmptyOptions::Version),
-        _ => Err(option.clone()),
+        _ => Err(option.into()),
     }
 }

@@ -14,7 +14,10 @@ impl Transpilable for PFile<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{codegen::Transpilable, php_ast::PFile};
+    use crate::{
+        codegen::Transpilable,
+        php_ast::{PExpresssion, PFile, PPrimary, PStatement},
+    };
 
     #[test]
     fn should_transpile_empty_file() {
@@ -24,20 +27,16 @@ mod tests {
         assert_eq!("<?php\n", output);
     }
 
-    /*
     #[test]
     fn should_transpile_expr_statement() {
         let value = String::from("Hello world!");
-        let ast = PhpAst {
-            statements: vec![PhpStatement::PhpExpressionStatement(
-                PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                    PhpPrimaryExpression::StringLiteral(&value),
-                )),
-            )],
+        let ast = PFile {
+            statements: vec![PStatement::ExpressionStatement(PExpresssion::Primary(
+                PPrimary::StringLiteral(&value),
+            ))],
         };
         let output = ast.transpile();
 
         assert_eq!("<?php\n\"Hello world!\";", output);
     }
-    */
 }

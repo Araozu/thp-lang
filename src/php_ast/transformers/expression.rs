@@ -37,15 +37,11 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
     }
 }
 
-/*
 #[cfg(test)]
 mod tests {
     use crate::{
         lexic::token::Token,
-        php_ast::{
-            transformers::PHPTransformable, PhpAssignmentExpression, PhpExpression,
-            PhpPrimaryExpression,
-        },
+        php_ast::{transformers::PHPTransformable, PExpresssion, PPrimary},
         syntax::ast::Expression,
     };
 
@@ -56,9 +52,7 @@ mod tests {
         let output = input.into_php_ast();
 
         match output {
-            PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                PhpPrimaryExpression::StringLiteral(value),
-            )) => {
+            PExpresssion::Primary(PPrimary::StringLiteral(value)) => {
                 assert_eq!("Hello", value)
             }
             _ => panic!("Expected a String literal"),
@@ -72,9 +66,7 @@ mod tests {
         let output = input.into_php_ast();
 
         match output {
-            PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                PhpPrimaryExpression::IntegerLiteral(value),
-            )) => {
+            PExpresssion::Primary(PPrimary::IntegerLiteral(value)) => {
                 assert_eq!("322", value)
             }
             _ => panic!("Expected a Int literal"),
@@ -88,13 +80,10 @@ mod tests {
         let output = input.into_php_ast();
 
         match output {
-            PhpExpression::Assignment(PhpAssignmentExpression::Primary(
-                PhpPrimaryExpression::FloatingLiteral(value),
-            )) => {
+            PExpresssion::Primary(PPrimary::FloatingLiteral(value)) => {
                 assert_eq!("322.644", value)
             }
             _ => panic!("Expected a Float literal"),
         }
     }
 }
-*/
