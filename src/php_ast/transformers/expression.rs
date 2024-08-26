@@ -1,10 +1,5 @@
-use super::super::PhpExpression;
 use crate::{
-    codegen::Transpilable,
-    php_ast::{
-        php_ast_2::{PExpresssion, PFunctionCall, PPrimary},
-        PhpAssignmentExpression, PhpPrimaryExpression,
-    },
+    php_ast::{PExpresssion, PPrimary},
     syntax::ast::Expression,
 };
 
@@ -36,9 +31,7 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
 
                 PExpresssion::FunctionCall(fn_call_expr)
             }
-            Expression::Identifier(i) => {
-                PExpresssion::Primary(PPrimary::Variable(&i.value))
-            }
+            Expression::Identifier(i) => PExpresssion::Primary(PPrimary::Variable(&i.value)),
             _ => todo!("transformation for expression: {:?}", self),
         }
     }

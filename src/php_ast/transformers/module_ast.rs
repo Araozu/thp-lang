@@ -1,10 +1,5 @@
-use super::super::PhpAst;
-use crate::codegen::Transpilable;
-use crate::php_ast::php_ast_2::{PFile, PStatement};
-use crate::php_ast::{
-    PhpAssignmentExpression, PhpExpression, PhpExpressionList, PhpPrimaryExpression, PhpStatement,
-};
-use crate::syntax::ast::{Expression, ModuleAST, ModuleMembers};
+use crate::php_ast::{PFile, PStatement};
+use crate::syntax::ast::{ModuleAST, ModuleMembers};
 
 use super::PHPTransformable;
 

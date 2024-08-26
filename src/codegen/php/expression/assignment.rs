@@ -1,7 +1,4 @@
-use crate::{
-    codegen::Transpilable,
-    php_ast::{php_ast_2::PSimpleAssignment, PhpAssignmentExpression},
-};
+use crate::{codegen::Transpilable, php_ast::PSimpleAssignment};
 
 impl Transpilable for PSimpleAssignment<'_> {
     fn transpile(&self) -> String {
@@ -14,10 +11,6 @@ impl Transpilable for PSimpleAssignment<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        codegen::Transpilable,
-        php_ast::{PhpAssignmentExpression, PhpPrimaryExpression, PhpSimpleAssignment},
-    };
 
     /*
     #[test]

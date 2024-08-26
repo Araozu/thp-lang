@@ -1,7 +1,4 @@
-use crate::{
-    codegen::Transpilable,
-    php_ast::{php_ast_2::PFile, PhpAst},
-};
+use crate::{codegen::Transpilable, php_ast::PFile};
 
 impl Transpilable for PFile<'_> {
     fn transpile(&self) -> String {
@@ -17,13 +14,7 @@ impl Transpilable for PFile<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        codegen::Transpilable,
-        php_ast::{
-            php_ast_2::PFile, PhpAssignmentExpression, PhpAst, PhpExpression, PhpPrimaryExpression,
-            PhpStatement,
-        },
-    };
+    use crate::{codegen::Transpilable, php_ast::PFile};
 
     #[test]
     fn should_transpile_empty_file() {

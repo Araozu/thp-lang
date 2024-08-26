@@ -1,5 +1,3 @@
-use crate::codegen::Transpilable;
-
 /// This AST implements a subset of the PHP AST as defined
 /// by https://phplang.org/spec/19-grammar.html#syntactic-grammar
 ///
@@ -7,56 +5,59 @@ use crate::codegen::Transpilable;
 /// THP
 pub mod transformers;
 
-pub mod php_ast_2;
-
-type TranspilableBox<'a> = Box<(dyn Transpilable + 'a)>;
-
-/// Represents `statement-list` on the grammar,
-/// and thus a whole PHP source file
-pub struct PhpAst<'a> {
-    pub statements: Vec<TranspilableBox<'a>>,
+/// A single PHP source code file
+pub struct PFile<'a> {
+    pub statements: Vec<PStatement<'a>>,
 }
 
-/// https://phplang.org/spec/19-grammar.html#grammar-statement
+/// A PHP statement
+pub enum PStatement<'a> {
+    ExpressionStatement(PExpressionStatement<'a>),
+}
+
+/// A statement composed of a single expression,
+/// whose value is discarded
 ///
-/// Not fully implemented
+/// ## Examples
 ///
-/// statement:
-///   echo-statement
-pub enum PhpStatement<'a> {
-    PhpEchoStatement(PhpExpressionList<'a>),
-    PhpExpressionStatement(PhpExpression<'a>),
+/// ```php
+/// 10;
+/// "hello";
+/// ```
+pub type PExpressionStatement<'a> = PExpresssion<'a>;
+
+/// A generic PHP expression
+pub enum PExpresssion<'a> {
+    FunctionCall(PFunctionCall<'a>),
+    Primary(PPrimary<'a>),
+    /// This comes from a THP binding
+    Assignment(PSimpleAssignment<'a>),
 }
 
-pub struct PhpExpressionList<'a> {
-    pub expressions: Vec<PhpExpression<'a>>,
+pub struct PSimpleAssignment<'a> {
+    pub variable: &'a String,
+    pub assignment: Box<PExpresssion<'a>>,
 }
 
-pub enum PhpExpression<'a> {
-    Assignment(PhpAssignmentExpression<'a>),
+/// A function call as an expression
+pub struct PFunctionCall<'a> {
+    /// Arbitrary expressions that compute into
+    /// a function not supported
+    pub function_name: &'a String,
+    pub arguments: Vec<PExpresssion<'a>>,
 }
 
-pub enum PhpAssignmentExpression<'a> {
-    Primary(PhpPrimaryExpression<'a>),
-    SimpleAssignment(PhpSimpleAssignment<'a>),
-}
-
-pub struct PhpSimpleAssignment<'a> {
-    pub variable: String,
-    pub assignment: TranspilableBox<'a>,
-}
-
-/// https://phplang.org/spec/19-grammar.html#grammar-primary-expression
-///
-/// primary-expression:
-///     literal
-///     variable
-pub enum PhpPrimaryExpression<'a> {
+/// A Primary expression: literals and variables
+pub enum PPrimary<'a> {
     IntegerLiteral(&'a String),
     FloatingLiteral(&'a String),
     StringLiteral(&'a String),
     /// https://phplang.org/spec/19-grammar.html#grammar-variable
     ///
     /// Supports only variable -> callable-variable -> simple-variable -> variable-name
+    ///
+    /// This is a $variable
     Variable(&'a String),
+    /// This is a symbol, e.g. a function name
+    Symbol(&'a String),
 }

@@ -1,5 +1,5 @@
 use crate::{
-    php_ast::php_ast_2::PFunctionCall,
+    php_ast::PFunctionCall,
     syntax::ast::{functions::FunctionCall, Expression},
 };
 
@@ -11,7 +11,9 @@ impl<'a> PHPTransformable<'a> for FunctionCall<'a> {
     fn into_php_ast(&'a self) -> Self::Item {
         let function_expr = match *self.function {
             Expression::Identifier(i) => &i.value,
-            _ => panic!("Cannot use an arbitrary expression as a function, only identifiers (for now)"),
+            _ => panic!(
+                "Cannot use an arbitrary expression as a function, only identifiers (for now)"
+            ),
         };
 
         let expressions: Vec<_> = self

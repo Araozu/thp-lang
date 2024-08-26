@@ -1,7 +1,4 @@
-use crate::{
-    codegen::Transpilable,
-    php_ast::{php_ast_2::PPrimary, PhpPrimaryExpression},
-};
+use crate::{codegen::Transpilable, php_ast::PPrimary};
 
 impl Transpilable for PPrimary<'_> {
     fn transpile(&self) -> String {
@@ -17,7 +14,6 @@ impl Transpilable for PPrimary<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{codegen::Transpilable, php_ast::PhpPrimaryExpression};
 
     /*
     #[test]
