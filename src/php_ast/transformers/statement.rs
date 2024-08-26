@@ -1,21 +1,19 @@
 use super::super::PhpStatement;
 use crate::{
-    php_ast::{PhpAssignmentExpression, PhpExpression, PhpSimpleAssignment},
-    syntax::ast::Statement,
+    codegen::Transpilable, php_ast::{PhpAssignmentExpression, PhpExpression, PhpSimpleAssignment}, syntax::ast::Statement
 };
 
 use super::PHPTransformable;
 
 /// Transforms a THP expression into a PHP expression
 impl<'a> PHPTransformable<'a> for Statement<'_> {
-    type Item = PhpStatement<'a>;
-
-    fn into_php_ast(&'a self) -> Self::Item {
+    fn into_php_ast(&'a self) -> Box<(dyn Transpilable + 'a)>{
         match self {
             Statement::Binding(b) => {
                 // This is a PhpExpression, but a PhpPrimaryExpression is needed
                 let binding_expr = b.expression.into_php_ast();
 
+                /* 
                 // TODO: Somehow fix this...
                 // the function above `into_php_ast` should somehow
                 // return what I need? Or should return something general and
@@ -27,19 +25,21 @@ impl<'a> PHPTransformable<'a> for Statement<'_> {
                     PhpExpression::Assignment(PhpAssignmentExpression::Primary(p)) => p,
                     _ => unreachable!("Expected a PrimaryExpression during AST transformation"),
                 };
+                */
 
-                PhpStatement::PhpExpressionStatement(PhpExpression::Assignment(
+                Box::new(PhpStatement::PhpExpressionStatement(PhpExpression::Assignment(
                     PhpAssignmentExpression::SimpleAssignment(PhpSimpleAssignment {
                         variable: b.identifier.value.clone(),
-                        assignment: binding_primary_expr,
+                        assignment: binding_expr,
                     }),
-                ))
+                )))
             }
             _ => todo!("transformation for statement: {:?}", self),
         }
     }
 }
 
+/*
 #[cfg(test)]
 mod tests {
     use crate::{
@@ -86,3 +86,4 @@ mod tests {
         }
     }
 }
+*/

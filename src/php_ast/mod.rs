@@ -1,3 +1,5 @@
+use crate::codegen::Transpilable;
+
 /// This AST implements a subset of the PHP AST as defined
 /// by https://phplang.org/spec/19-grammar.html#syntactic-grammar
 ///
@@ -5,10 +7,12 @@
 /// THP
 pub mod transformers;
 
+type TranspilableBox<'a> = Box<(dyn Transpilable + 'a)>;
+
 /// Represents `statement-list` on the grammar,
 /// and thus a whole PHP source file
 pub struct PhpAst<'a> {
-    pub statements: Vec<PhpStatement<'a>>,
+    pub statements: Vec<TranspilableBox<'a>>,
 }
 
 /// https://phplang.org/spec/19-grammar.html#grammar-statement
@@ -37,7 +41,7 @@ pub enum PhpAssignmentExpression<'a> {
 
 pub struct PhpSimpleAssignment<'a> {
     pub variable: String,
-    pub assignment: PhpPrimaryExpression<'a>,
+    pub assignment: TranspilableBox<'a>,
 }
 
 /// https://phplang.org/spec/19-grammar.html#grammar-primary-expression

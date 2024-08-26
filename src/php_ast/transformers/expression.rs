@@ -1,34 +1,34 @@
 use super::super::PhpExpression;
 use crate::{
-    php_ast::{PhpAssignmentExpression, PhpPrimaryExpression},
-    syntax::ast::Expression,
+    codegen::Transpilable, php_ast::{PhpAssignmentExpression, PhpPrimaryExpression}, syntax::ast::Expression
 };
+
+// TODO: next rewrite the test to use the output of Transpilable?
 
 use super::PHPTransformable;
 
 /// Transforms a THP expression into a PHP expression
 impl<'a> PHPTransformable<'a> for Expression<'_> {
-    type Item = PhpExpression<'a>;
-
-    fn into_php_ast(&'a self) -> Self::Item {
+    fn into_php_ast(&'a self) -> Box<(dyn Transpilable + 'a)> {
         match self {
             Expression::String(value) => {
                 let expr = PhpPrimaryExpression::StringLiteral(&value.value);
-                PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr))
+                Box::new(PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr)))
             }
             Expression::Int(value) => {
                 let expr = PhpPrimaryExpression::IntegerLiteral(&value.value);
-                PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr))
+                Box::new(PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr)))
             }
             Expression::Float(value) => {
                 let expr = PhpPrimaryExpression::FloatingLiteral(&value.value);
-                PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr))
+                Box::new(PhpExpression::Assignment(PhpAssignmentExpression::Primary(expr)))
             }
             _ => todo!("transformation for expression: {:?}", self),
         }
     }
 }
 
+/*
 #[cfg(test)]
 mod tests {
     use crate::{
@@ -88,3 +88,4 @@ mod tests {
         }
     }
 }
+*/

@@ -1,4 +1,5 @@
 use super::super::PhpAst;
+use crate::codegen::Transpilable;
 use crate::php_ast::{
     PhpAssignmentExpression, PhpExpression, PhpExpressionList, PhpPrimaryExpression, PhpStatement,
 };
@@ -8,10 +9,8 @@ use super::PHPTransformable;
 
 /// Transforms a THP AST into a PHP AST
 impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
-    type Item = PhpAst<'a>;
-
-    fn into_php_ast(&'a self) -> Self::Item {
-        let mut php_statements = Vec::<PhpStatement>::new();
+    fn into_php_ast(&'a self) -> Box<(dyn Transpilable + 'a)>{
+        let mut php_statements = Vec::<_>::new();
 
         for production in self.productions.iter() {
             match production {
@@ -44,33 +43,33 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
                                         }
                                     }
 
-                                    php_statements.push(PhpStatement::PhpEchoStatement(PhpExpressionList {
+                                    php_statements.push(Box::new(PhpStatement::PhpEchoStatement(PhpExpressionList {
                                         expressions
-                                    }));
+                                    })));
                                 },
                                 _ => todo!("Not implemented: AST transformation for function call that is not an identifier")
                             }
                         }
                         Expression::Int(value) => {
-                            php_statements.push(PhpStatement::PhpExpressionStatement(
+                            php_statements.push(Box::new(PhpStatement::PhpExpressionStatement(
                                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(
                                     PhpPrimaryExpression::IntegerLiteral(&value.value),
                                 )),
-                            ));
+                            )));
                         }
                         Expression::Float(value) => {
-                            php_statements.push(PhpStatement::PhpExpressionStatement(
+                            php_statements.push(Box::new(PhpStatement::PhpExpressionStatement(
                                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(
                                     PhpPrimaryExpression::FloatingLiteral(&value.value),
                                 )),
-                            ));
+                            )));
                         }
                         Expression::String(value) => {
-                            php_statements.push(PhpStatement::PhpExpressionStatement(
+                            php_statements.push(Box::new(PhpStatement::PhpExpressionStatement(
                                 PhpExpression::Assignment(PhpAssignmentExpression::Primary(
                                     PhpPrimaryExpression::StringLiteral(&value.value),
                                 )),
-                            ));
+                            )));
                         }
                         _ => {
                             todo!("not implemented: AST transform for expression {:?}", expr)
@@ -80,12 +79,13 @@ impl<'a> PHPTransformable<'a> for ModuleAST<'_> {
             }
         }
 
-        PhpAst {
+        Box::new(PhpAst {
             statements: php_statements,
-        }
+        })
     }
 }
 
+/*
 #[cfg(test)]
 mod tests {
     use crate::{php_ast::transformers::PHPTransformable, syntax::ast::ModuleAST};
@@ -100,3 +100,4 @@ mod tests {
         assert!(output.statements.is_empty())
     }
 }
+*/

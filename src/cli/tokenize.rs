@@ -11,9 +11,9 @@ use std::io::{self, BufRead};
 #[derive(Serialize)]
 enum TokenizeResult {
     Ok(Vec<Token>),
-    SyntaxOnly(Vec<Token>, MistiError),
-    TokensOnly(Vec<Token>, MistiError),
-    Err(MistiError),
+    SemanticError(Vec<Token>, MistiError),
+    SyntaxError(Vec<Token>, MistiError),
+    LexError(MistiError),
 }
 
 pub fn tokenize_command(_options: Vec<String>) -> Result<(), ()> {
@@ -40,12 +40,12 @@ pub fn tokenize_command(_options: Vec<String>) -> Result<(), ()> {
             match ast_result {
                 Ok(ast) => match semantic::check_semantics(&ast) {
                     Ok(()) => TokenizeResult::Ok(tokens),
-                    Err(error) => TokenizeResult::SyntaxOnly(tokens, error),
+                    Err(error) => TokenizeResult::SemanticError(tokens, error),
                 },
-                Err(error) => TokenizeResult::TokensOnly(tokens, error),
+                Err(error) => TokenizeResult::SyntaxError(tokens, error),
             }
         }
-        Err(error) => TokenizeResult::Err(error),
+        Err(error) => TokenizeResult::LexError(error),
     };
 
     let json = serde_json::to_string(&result).unwrap();

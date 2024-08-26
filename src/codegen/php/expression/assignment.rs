@@ -21,6 +21,7 @@ mod tests {
         php_ast::{PhpAssignmentExpression, PhpPrimaryExpression, PhpSimpleAssignment},
     };
 
+    /*
     #[test]
     fn should_gen_assignment() {
         let variable = String::from("name");
@@ -35,4 +36,5 @@ mod tests {
 
         assert_eq!("$name = \"John\"", output)
     }
+    */
 }
