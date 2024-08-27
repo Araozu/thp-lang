@@ -37,14 +37,24 @@ impl SemanticCheck for FunctionDeclaration<'_> {
                         return Err(err);
                     }
                 }
-                BlockMember::Stmt(Statement::FnDecl(_)) => {
-                    todo!("Function declaration: semantic check not implemented")
+                BlockMember::Stmt(Statement::FnDecl(f)) => {
+                    // TODO: (for now) a function cannot be declared inside another function.
+                    let error = SemanticError {
+                        error_start: f.identifier.position,
+                        error_end: f.identifier.get_end_position(),
+                        reason: format!(
+                            "A function cannot be defined inside another function."
+                        ),
+                    };
+
+                    return Err(MistiError::Semantic(error));
                 }
-                _ => todo!("Expression: semantic check not implemented"),
+                BlockMember::Expr(e) => e.check_semantics(scope)?,
             }
         }
 
-        // TODO: Check the return type of the function
+        // TODO: Check that the return type of the function
+        // matches the return type of the last expression
 
         scope.insert(function_name, Type::Function(vec![], "Unit".into()));
 
