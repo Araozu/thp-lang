@@ -30,6 +30,7 @@
 - [x] Check for conflicting identifiers at the current scope
 - [x] Semantic check for unary operator
 - [x] Semantic check for binary operator
+- [x] Enforce new lines after every statement
 
 
 ## v0.1.0

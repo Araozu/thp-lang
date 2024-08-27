@@ -40,6 +40,32 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
             // Attempt to parse an expression
             match Expression::try_parse(tokens, current_pos) {
                 Ok((prod, next_pos)) => {
+                    // After a expression is parsed as an statement
+                    // there should be a delimiter (new line or EOF)
+                    match tokens.get(next_pos) {
+                        Some(t)
+                            if t.token_type == TokenType::NewLine
+                                || t.token_type == TokenType::EOF =>
+                        {
+                            // continue
+                        }
+                        Some(t) => {
+                            return Err(ParsingError::Err(SyntaxError {
+                                error_start: t.position,
+                                error_end: t.get_end_position(),
+                                reason: format!(
+                                    "Unexpected token `{}`, expected a new line",
+                                    t.value
+                                ),
+                            }))
+                        }
+                        _ => {
+                            // this should never happen, the lexer always appends
+                            // an EOF
+                            unreachable!("got to the final of a token stream without finding EOF")
+                        }
+                    }
+
                     productions.push(ModuleMembers::Expr(prod));
                     current_pos = next_pos;
                     continue;
@@ -120,6 +146,21 @@ mod test {
         match result {
             Ok(_) => panic!("Expected an error"),
             Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn should_fail_on_two_expressions_together() {
+        // TODO: enforce newlines after every statement
+        let tokens = get_tokens(&String::from("print print")).unwrap();
+        let result = ModuleAST::try_parse(&tokens, 0);
+
+        match result {
+            Ok(_) => panic!("Expected an error"),
+            Err(ParsingError::Err(err)) => {
+                assert_eq!("Unexpected token `print`, expected a new line", err.reason);
+            }
+            _ => panic!("Expected a parsing error"),
         }
     }
 }
