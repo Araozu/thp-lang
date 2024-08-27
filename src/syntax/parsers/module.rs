@@ -1,6 +1,6 @@
 use crate::{
     error_handling::SyntaxError,
-    lexic::token::Token,
+    lexic::token::{Token, TokenType},
     syntax::{
         ast::{Expression, ModuleAST, ModuleMembers, Statement},
         parseable::{Parseable, ParsingError, ParsingResult},
@@ -49,6 +49,16 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
                     return Err(ParsingError::Err(error));
                 }
                 _ => {}
+            }
+
+            // Ignore comments, if any
+            if let Some(s) = tokens.get(current_pos) {
+                if s.token_type == TokenType::Comment
+                || s.token_type == TokenType::MultilineComment
+                {
+                    current_pos += 1;
+                    continue;
+                }
             }
 
             // If we reached this point we didn't match any productions and fail

@@ -28,6 +28,7 @@
 - [x] Scan octal and binary numbers
 - [x] Simple type checking
 - [x] Check for conflicting identifiers at the current scope
+- [x] Semantic check for unary operator
 
 
 ## v0.1.0

@@ -32,7 +32,11 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
                 PExpresssion::FunctionCall(fn_call_expr)
             }
             Expression::Identifier(i) => PExpresssion::Primary(PPrimary::Variable(&i.value)),
-            _ => todo!("transformation for expression: {:?}", self),
+            Expression::Boolean(b) => {
+                PExpresssion::Primary(PPrimary::BoolLiteral(b.value == "true"))
+            }
+            Expression::UnaryOperator(_, _) => unimplemented!("transform unary op into php"),
+            Expression::BinaryOperator(_, _, _) => unimplemented!("transform binary op into php"),
         }
     }
 }

@@ -52,6 +52,7 @@ pub enum PPrimary<'a> {
     IntegerLiteral(&'a String),
     FloatingLiteral(&'a String),
     StringLiteral(&'a String),
+    BoolLiteral(bool),
     /// https://phplang.org/spec/19-grammar.html#grammar-variable
     ///
     /// Supports only variable -> callable-variable -> simple-variable -> variable-name

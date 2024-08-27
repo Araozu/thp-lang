@@ -8,6 +8,13 @@ impl Transpilable for PPrimary<'_> {
             PPrimary::StringLiteral(value) => format!("\"{}\"", value),
             PPrimary::Variable(name) => format!("${}", name),
             PPrimary::Symbol(name) => format!("{}", name),
+            PPrimary::BoolLiteral(bool) => {
+                if *bool {
+                    String::from("true")
+                } else {
+                    String::from("false")
+                }
+            }
         }
     }
 }

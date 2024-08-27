@@ -8,7 +8,7 @@ impl Transpilable for PFile<'_> {
             fragments.push(statement.transpile());
         }
 
-        fragments.join("")
+        fragments.join("\n")
     }
 }
 
@@ -37,6 +37,6 @@ mod tests {
         };
         let output = ast.transpile();
 
-        assert_eq!("<?php\n\"Hello world!\";", output);
+        assert_eq!("<?php\n\n\"Hello world!\";", output);
     }
 }

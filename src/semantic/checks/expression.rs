@@ -43,7 +43,6 @@ impl SemanticCheck for Expression<'_> {
                                 // The argument and the parameter have diferent types
                                 let (error_start, error_end) = argument.get_position();
                                 return Err(MistiError::Semantic(SemanticError {
-                                    // TODO: fix
                                     error_start,
                                     error_end,
                                     reason: format!(
@@ -67,11 +66,48 @@ impl SemanticCheck for Expression<'_> {
                     }
                 }
             }
+            // These are empty because they have nothing to check,
+            // their existance alone is correct
             Expression::Int(_) => {}
             Expression::Float(_) => {}
             Expression::String(_) => {}
             Expression::Boolean(_) => {}
-            _ => todo!("Check semantics for expression other than function call and primitive"),
+            Expression::Identifier(_) => {}
+            Expression::UnaryOperator(operator, expression) => {
+                // There are a limited amount of unary operators,
+                // so their checking is not generalized
+                let expr_type = expression.get_type(scope)?;
+                match (operator.value.as_str(), expr_type) {
+                    ("!", Type::Value(t)) => {
+                        if t == "Bool" {
+                            // Ok, empty
+                        } else {
+                            // Error: unary negation can only be applied to a Bool
+                            let (error_start, error_end) = expression.get_position();
+                            return Err(MistiError::Semantic(SemanticError {
+                                error_start,
+                                error_end,
+                                reason: format!("Expected a Bool, got a {}", t),
+                            }));
+                        }
+                    }
+                    ("!", Type::Function(_, _)) => {
+                        // Error: unary negation can only be applied to a Bool
+                        let (error_start, error_end) = expression.get_position();
+                        return Err(MistiError::Semantic(SemanticError {
+                            error_start,
+                            error_end,
+                            reason: format!("Expected a Bool, got a function",),
+                        }));
+                    }
+                    (op, _) => {
+                        // Compiler error: something that shouldn't be
+                        // parsed as a unary operator was found.
+                        unreachable!("Found a unary operator that shouldn't be: {}", op)
+                    }
+                }
+            }
+            Expression::BinaryOperator(_, _, _) => unimplemented!(),
         }
 
         Ok(())
