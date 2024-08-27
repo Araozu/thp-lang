@@ -7,6 +7,8 @@ fn str_is_keyword(s: &String) -> Option<TokenType> {
         "val" => Some(TokenType::VAL),
         "var" => Some(TokenType::VAR),
         "fun" => Some(TokenType::FUN),
+        "if" => Some(TokenType::IF),
+        "else" => Some(TokenType::ELSE),
         _ => None,
     }
 }

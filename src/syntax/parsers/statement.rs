@@ -1,15 +1,15 @@
-use crate::syntax::{
-    ast::{var_binding::VariableBinding, FunctionDeclaration, Statement},
-    parseable::{Parseable, ParsingError},
+use crate::{
+    lexic::token::Token,
+    syntax::{
+        ast::{var_binding::VariableBinding, Conditional, FunctionDeclaration, Statement},
+        parseable::{Parseable, ParsingError, ParsingResult},
+    },
 };
 
 impl<'a> Parseable<'a> for Statement<'a> {
     type Item = Statement<'a>;
 
-    fn try_parse(
-        tokens: &'a Vec<crate::lexic::token::Token>,
-        current_pos: usize,
-    ) -> crate::syntax::parseable::ParsingResult<'a, Self::Item> {
+    fn try_parse(tokens: &'a Vec<Token>, current_pos: usize) -> ParsingResult<'a, Self::Item> {
         // Try to parse a variable binding
         match VariableBinding::try_parse(tokens, current_pos) {
             Ok((prod, next)) => {
@@ -31,6 +31,13 @@ impl<'a> Parseable<'a> for Statement<'a> {
                 // TODO: Better error handling, write a better error message
                 return Err(ParsingError::Err(error));
             }
+            _ => {}
+        }
+
+        // Try to parse a conditional
+        match Conditional::try_parse(tokens, current_pos) {
+            Ok((prod, next)) => return Ok((Statement::Conditional(prod), next)),
+            Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
             _ => {}
         }
 

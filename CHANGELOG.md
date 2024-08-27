@@ -19,6 +19,10 @@
 - Begin work on the code formatter
 - Remove all panic! and todo!
 
+## v0.1.2
+
+- [x] Parse conditionals
+
 
 ## v0.1.1
 

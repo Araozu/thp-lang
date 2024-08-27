@@ -49,6 +49,7 @@ impl SemanticCheck for FunctionDeclaration<'_> {
 
                     return Err(MistiError::Semantic(error));
                 }
+                BlockMember::Stmt(Statement::Conditional(_)) => unimplemented!("check conditional"),
                 BlockMember::Expr(e) => e.check_semantics(scope)?,
             }
         }

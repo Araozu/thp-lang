@@ -24,6 +24,8 @@ pub enum TokenType {
     VAR,
     EOF,
     FUN,
+    IF,
+    ELSE,
 }
 
 #[derive(Serialize, Debug, Clone, PartialEq)]

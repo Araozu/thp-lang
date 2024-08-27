@@ -31,7 +31,23 @@ pub enum ModuleMembers<'a> {
 pub enum Statement<'a> {
     Binding(VariableBinding<'a>),
     FnDecl(FunctionDeclaration<'a>),
+    // TODO: Implement conditionals as expressions
+    Conditional(Conditional<'a>),
 }
+
+#[derive(Debug)]
+pub struct Conditional<'a> {
+    pub if_member: Condition<'a>,
+    pub else_if_members: Vec<Condition<'a>>,
+    pub else_block: Option<Block<'a>>
+}
+
+#[derive(Debug)]
+pub struct Condition<'a> {
+    pub condition: Expression<'a>,
+    pub body: Block<'a>,
+}
+
 
 #[derive(Debug)]
 pub struct FunctionDeclaration<'a> {
