@@ -4,6 +4,7 @@ use crate::{
     syntax::{
         ast::{Expression, ModuleAST, ModuleMembers, Statement},
         parseable::{Parseable, ParsingError, ParsingResult},
+        utils::parse_terminator,
     },
 };
 
@@ -42,14 +43,9 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
                 Ok((prod, next_pos)) => {
                     // After a expression is parsed as an statement
                     // there should be a delimiter (new line or EOF)
-                    match tokens.get(next_pos) {
-                        Some(t)
-                            if t.token_type == TokenType::NewLine
-                                || t.token_type == TokenType::EOF =>
-                        {
-                            // continue
-                        }
-                        Some(t) => {
+                    let next_pos = match parse_terminator(tokens, next_pos) {
+                        Ok((_, next)) => next,
+                        Err(ParsingError::Mismatch(t)) => {
                             return Err(ParsingError::Err(SyntaxError {
                                 error_start: t.position,
                                 error_end: t.get_end_position(),
@@ -59,12 +55,8 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
                                 ),
                             }))
                         }
-                        _ => {
-                            // this should never happen, the lexer always appends
-                            // an EOF
-                            unreachable!("got to the final of a token stream without finding EOF")
-                        }
-                    }
+                        _ => unreachable!(),
+                    };
 
                     productions.push(ModuleMembers::Expr(prod));
                     current_pos = next_pos;
@@ -135,7 +127,7 @@ mod test {
 
         let (_, next) = ModuleAST::try_parse(&tokens, 0).unwrap();
 
-        assert_eq!(next, 1);
+        assert_eq!(next, 2);
     }
 
     #[test]

@@ -80,6 +80,39 @@ pub fn parse_token_type(
     }
 }
 
+/// Expects the token at `pos` to be a terminator (newline or eof)
+///
+/// Ignores indentation, newlines and comments.
+///
+/// Only returns: Ok or Unmatched.
+pub fn parse_terminator(
+    tokens: &Vec<Token>,
+    pos: usize,
+) -> ParsingResult<()> {
+    let mut current_pos = pos;
+
+    // Ignore all whitespace, newlines and semicolons
+    while let Some(t) = tokens.get(current_pos) {
+        if t.token_type == TokenType::INDENT
+            || t.token_type == TokenType::DEDENT
+            || t.token_type == TokenType::Comment
+            || t.token_type == TokenType::MultilineComment
+        {
+            current_pos += 1;
+        } else {
+            break;
+        }
+    }
+
+    match tokens.get(current_pos) {
+        Some(t) if t.token_type == TokenType::EOF || t.token_type == TokenType::NewLine => {
+            Ok(((), current_pos + 1))
+        }
+        Some(t) => Err(ParsingError::Mismatch(t)),
+        None => unreachable!("Stream of tokens finished before getting an EOF"),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{

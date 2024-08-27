@@ -4,7 +4,7 @@ use crate::{
     syntax::{
         ast::{var_binding::VariableBinding, Expression},
         parseable::{Parseable, ParsingError, ParsingResult},
-        utils::{parse_token_type, try_operator},
+        utils::{parse_terminator, parse_token_type, try_operator},
     },
 };
 
@@ -127,23 +127,17 @@ impl<'a> Parseable<'a> for VariableBinding<'a> {
 
         // After the expression there should be a new line
         // to terminate the statement
-        match tokens.get(next_pos) {
-            Some(t) if t.token_type == TokenType::NewLine || t.token_type == TokenType::EOF => {
-                // continue
-            }
-            Some(t) => {
+        let next_pos = match parse_terminator(tokens, next_pos) {
+            Ok((_, next)) => next,
+            Err(ParsingError::Mismatch(t)) => {
                 return Err(ParsingError::Err(SyntaxError {
                     error_start: t.position,
                     error_end: t.get_end_position(),
                     reason: format!("Unexpected token `{}`, expected a new line", t.value),
                 }))
             }
-            _ => {
-                // this should never happen, the lexer always appends
-                // an EOF
-                unreachable!("got to the final of a token stream without finding EOF")
-            }
-        } 
+            _ => unreachable!(),
+        };
 
         let binding = VariableBinding {
             datatype,
