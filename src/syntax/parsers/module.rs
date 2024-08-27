@@ -53,8 +53,7 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
 
             // Ignore comments, if any
             if let Some(s) = tokens.get(current_pos) {
-                if s.token_type == TokenType::Comment
-                || s.token_type == TokenType::MultilineComment
+                if s.token_type == TokenType::Comment || s.token_type == TokenType::MultilineComment
                 {
                     current_pos += 1;
                     continue;

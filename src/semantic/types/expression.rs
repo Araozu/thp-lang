@@ -58,7 +58,7 @@ impl Typed for Expression<'_> {
                             })),
                         }
                     }
-                    _ => todo!("Get datatype of an expression that resolves into a function call"),
+                    _ => unimplemented!("Get datatype of an expression that resolves into a function call"),
                 }
             }
             Expression::UnaryOperator(op, exp) => {

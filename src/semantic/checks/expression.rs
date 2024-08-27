@@ -52,6 +52,8 @@ impl SemanticCheck for Expression<'_> {
                                 }));
                             }
                         }
+
+                        Ok(())
                     }
                     _ => {
                         let (error_start, error_end) = fun.get_position();
@@ -68,11 +70,11 @@ impl SemanticCheck for Expression<'_> {
             }
             // These are empty because they have nothing to check,
             // their existance alone is correct
-            Expression::Int(_) => {}
-            Expression::Float(_) => {}
-            Expression::String(_) => {}
-            Expression::Boolean(_) => {}
-            Expression::Identifier(_) => {}
+            Expression::Int(_) => Ok(()),
+            Expression::Float(_) => Ok(()),
+            Expression::String(_) => Ok(()),
+            Expression::Boolean(_) => Ok(()),
+            Expression::Identifier(_) => Ok(()),
             Expression::UnaryOperator(operator, expression) => {
                 // There are a limited amount of unary operators,
                 // so their checking is not generalized
@@ -81,6 +83,7 @@ impl SemanticCheck for Expression<'_> {
                     ("!", Type::Value(t)) => {
                         if t == "Bool" {
                             // Ok, empty
+                            return Ok(());
                         } else {
                             // Error: unary negation can only be applied to a Bool
                             let (error_start, error_end) = expression.get_position();
@@ -100,6 +103,29 @@ impl SemanticCheck for Expression<'_> {
                             reason: format!("Expected a Bool, got a function",),
                         }));
                     }
+                    ("-", Type::Value(t)) => {
+                        if t == "Int" || t == "Float" {
+                            // Ok, empty
+                            return Ok(());
+                        } else {
+                            // Error: unary negation can only be applied to a Number
+                            let (error_start, error_end) = expression.get_position();
+                            return Err(MistiError::Semantic(SemanticError {
+                                error_start,
+                                error_end,
+                                reason: format!("Expected a Float or Int, got a {}", t),
+                            }));
+                        }
+                    }
+                    ("-", Type::Function(_, _)) => {
+                        // Error: unary negation can only be applied to a Bool
+                        let (error_start, error_end) = expression.get_position();
+                        return Err(MistiError::Semantic(SemanticError {
+                            error_start,
+                            error_end,
+                            reason: format!("Expected a Float or Int, got a function",),
+                        }));
+                    }
                     (op, _) => {
                         // Compiler error: something that shouldn't be
                         // parsed as a unary operator was found.
@@ -107,10 +133,67 @@ impl SemanticCheck for Expression<'_> {
                     }
                 }
             }
-            Expression::BinaryOperator(_, _, _) => unimplemented!(),
-        }
+            Expression::BinaryOperator(left_expr, right_expr, op) => {
+                // Operators are treated as functions
+                let (op_params, _) = match scope.get_type(&op.value) {
+                    Some(Type::Function(params, return_t)) => (params, return_t),
+                    Some(Type::Value(v)) => {
+                        // If a operator is stored as a value,
+                        // it's a bug in the compiler
+                        unreachable!("Compiler bug: a binary operator was registered in the symbol table as a value of type {}", v)
+                    }
+                    None => {
+                        // If the operator is not found its a user error,
+                        // because we allow arbitrary operators
+                        let (error_start, error_end) = (op.position, op.get_end_position());
+                        return Err(MistiError::Semantic(SemanticError {
+                            error_start,
+                            error_end,
+                            reason: format!("The binary operator {} does not exist", op.value),
+                        }));
+                    }
+                };
 
-        Ok(())
+                if op_params.len() != 2 {
+                    // If an operator has any other number
+                    // of parameters, it's a bug in the compiler
+                    unreachable!(
+                        "Compiler bug: a binary operator didn't have 2 parameters: {:?}",
+                        op_params
+                    )
+                }
+
+                let left_expr_type = left_expr.get_type(scope)?;
+                let right_expr_type = right_expr.get_type(scope)?;
+
+                if !left_expr_type.is_value(&op_params[0]) {
+                    let (error_start, error_end) = left_expr.get_position();
+                    return Err(MistiError::Semantic(SemanticError {
+                        error_start,
+                        error_end,
+                        reason: format!(
+                            "Expected a {}, got a {:?} on the left side of the {} operator",
+                            op_params[0], left_expr_type, op.value
+                        ),
+                    }));
+                }
+
+                if !right_expr_type.is_value(&op_params[1]) {
+                    let (error_start, error_end) = right_expr.get_position();
+                    return Err(MistiError::Semantic(SemanticError {
+                        error_start,
+                        error_end,
+                        reason: format!(
+                            "Expected a {}, got a {:?} on the right side of the {} operator",
+                            op_params[1], left_expr_type, op.value
+                        ),
+                    }));
+                }
+
+                // After all these checks, we are ok
+                Ok(())
+            }
+        }
     }
 }
 

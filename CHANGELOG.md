@@ -29,6 +29,7 @@
 - [x] Simple type checking
 - [x] Check for conflicting identifiers at the current scope
 - [x] Semantic check for unary operator
+- [x] Semantic check for binary operator
 
 
 ## v0.1.0
