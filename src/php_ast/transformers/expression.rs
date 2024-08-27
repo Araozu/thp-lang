@@ -37,6 +37,7 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
             }
             Expression::UnaryOperator(_, _) => unimplemented!("transform unary op into php"),
             Expression::BinaryOperator(_, _, _) => unimplemented!("transform binary op into php"),
+            Expression::Array(_) => unimplemented!("transform array into php"),
         }
     }
 }

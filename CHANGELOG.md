@@ -22,6 +22,7 @@
 ## v0.1.2
 
 - [x] Parse conditionals
+- [x] Parse arrays
 
 
 ## v0.1.1

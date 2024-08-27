@@ -193,6 +193,7 @@ impl SemanticCheck for Expression<'_> {
                 // After all these checks, we are ok
                 Ok(())
             }
+            Expression::Array(_) => unimplemented!("check for array"),
         }
     }
 }

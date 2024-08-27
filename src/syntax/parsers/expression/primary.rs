@@ -1,16 +1,30 @@
 use crate::{
     lexic::token::{Token, TokenType},
     syntax::{
-        ast::Expression, parseable::Parseable, utils::Tokenizer, ParsingError, ParsingResult,
+        ast::{Array, Expression}, parseable::Parseable, utils::Tokenizer, ParsingError, ParsingResult,
     },
 };
 
 /// This grammar may not be up to date. Refer to the spec for the latest grammar.
 ///
 /// ```ebnf
-/// primary = number | string | boolean | identifier | ("(", expression, ")");
+/// primary = array
+///         | number 
+///         | string 
+///         | boolean 
+///         | identifier 
+///         | ("(", expression, ")");
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
+    // array
+    match Array::try_parse(tokens, pos) {
+        Ok((exp, next)) => {
+            return Ok((Expression::Array(exp), next))
+        },
+        Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
+        Err(_) => {},
+    }
+
     match tokens.get_significant(pos) {
         Some((token, token_pos)) => match token.token_type {
             TokenType::Int => Ok((Expression::Int(&token), token_pos + 1)),

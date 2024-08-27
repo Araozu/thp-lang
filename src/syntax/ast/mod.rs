@@ -92,6 +92,16 @@ pub enum Expression<'a> {
     UnaryOperator(&'a Token, Box<Expression<'a>>),
     /// left expression, right expression, operator
     BinaryOperator(Box<Expression<'a>>, Box<Expression<'a>>, &'a Token),
+    Array(Array<'a>),
+}
+
+#[derive(Debug)]
+pub struct Array<'a> {
+    pub exps: Vec<Expression<'a>>,
+    /// The position of the open bracket [
+    pub start: usize,
+    /// The position of the closed bracket ]
+    pub end: usize,
 }
 
 impl Positionable for Expression<'_> {
@@ -114,6 +124,9 @@ impl Positionable for Expression<'_> {
                 let (start, _) = left_expr.get_position();
                 let (_, end) = right_expr.get_position();
                 (start, end)
+            }
+            Expression::Array(Array {start, end, exps: _}) => {
+                (*start, *end)
             }
         }
     }

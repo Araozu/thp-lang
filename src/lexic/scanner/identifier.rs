@@ -9,6 +9,12 @@ fn str_is_keyword(s: &String) -> Option<TokenType> {
         "fun" => Some(TokenType::FUN),
         "if" => Some(TokenType::IF),
         "else" => Some(TokenType::ELSE),
+        "for" => Some(TokenType::FOR),
+        "in" => Some(TokenType::IN),
+        "while" => Some(TokenType::WHILE),
+        "loop" => Some(TokenType::LOOP),
+        "match" => Some(TokenType::MATCH),
+        "case" => Some(TokenType::CASE),
         _ => None,
     }
 }

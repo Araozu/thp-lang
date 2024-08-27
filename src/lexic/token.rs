@@ -26,6 +26,12 @@ pub enum TokenType {
     FUN,
     IF,
     ELSE,
+    FOR,
+    IN,
+    WHILE,
+    LOOP,
+    MATCH,
+    CASE,
 }
 
 #[derive(Serialize, Debug, Clone, PartialEq)]

@@ -122,6 +122,7 @@ impl Typed for Expression<'_> {
                     ),
                 }));
             }
+            Expression::Array(_) => unimplemented!("get type of array"),
         }
     }
 }
