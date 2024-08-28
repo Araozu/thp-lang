@@ -23,6 +23,7 @@
 
 - [x] Parse conditionals
 - [x] Parse arrays
+- [x] Parse for loops
 
 
 ## v0.1.1

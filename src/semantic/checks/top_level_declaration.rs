@@ -23,6 +23,7 @@ impl SemanticCheck for Statement<'_> {
             Statement::Binding(b) => b.check_semantics(scope),
             Statement::FnDecl(f) => f.check_semantics(scope),
             Statement::Conditional(_) => unimplemented!("check conditional"),
+            Statement::ForLoop(_) => unimplemented!("check for loop"),
         }
     }
 }

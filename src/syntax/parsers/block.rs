@@ -44,6 +44,7 @@ impl<'a> Parseable<'a> for Block<'a> {
                 Ok((prod, next_pos)) => {
                     members.push(BlockMember::Expr(prod));
                     current_pos = next_pos;
+                    continue;
                 }
                 Err(ParsingError::Err(error)) => {
                     // TODO: Better error handling, write a better error message
@@ -59,7 +60,7 @@ impl<'a> Parseable<'a> for Block<'a> {
         }
 
         // Parse closing brace
-        let (_closing_brace, next_pos) =
+        let (closing_brace, next_pos) =
             match parse_token_type(tokens, current_pos, TokenType::RightBrace) {
                 Ok((t, next)) => (t, next),
                 Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
@@ -82,7 +83,11 @@ impl<'a> Parseable<'a> for Block<'a> {
             };
         current_pos = next_pos;
 
-        let block = Block { members };
+        let block = Block {
+            members,
+            start: opening_brace.position,
+            end: closing_brace.position,
+        };
         Ok((block, current_pos))
     }
 }
@@ -152,24 +157,23 @@ mod tests {
         assert_eq!(block.members.len(), 1);
     }
 
-    /*
     #[test]
     fn test_parse_block_2() {
         let tokens = get_tokens(&String::from("{f()\ng()}")).unwrap();
-        let block = parse_block(&tokens, 0);
+        let block = Block::try_parse(&tokens, 0);
 
         let block = match block {
             ParsingResult::Ok((p, _)) => p,
             _ => panic!("Expected a block, got: {:?}", block),
         };
 
-        assert_eq!(block.statements.len(), 2);
+        assert_eq!(block.members.len(), 2);
     }
 
     #[test]
     fn test_parse_block_3() {
         let tokens = get_tokens(&String::from("{\n    f()\n}")).unwrap();
-        let block = parse_block(&tokens, 0);
+        let block = Block::try_parse(&tokens, 0);
 
         let block = match block {
             ParsingResult::Ok((p, _)) => p,
@@ -178,7 +182,6 @@ mod tests {
             }
         };
 
-        assert_eq!(block.statements.len(), 1);
+        assert_eq!(block.members.len(), 1);
     }
-    */
 }

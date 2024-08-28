@@ -141,18 +141,14 @@ impl<'a> Parseable<'a> for Conditional<'a> {
                         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
                         Err(ParsingError::Mismatch(wrong_token)) => {
                             return Err(ParsingError::Err(SyntaxError {
-                                reason: String::from(
-                                    "Expected a block after the else keyword",
-                                ),
+                                reason: String::from("Expected a block after the else keyword"),
                                 error_start: wrong_token.position,
                                 error_end: wrong_token.get_end_position(),
                             }));
                         }
                         Err(ParsingError::Unmatched) => {
                             return Err(ParsingError::Err(SyntaxError {
-                                reason: String::from(
-                                    "Expected a block after the else keyword",
-                                ),
+                                reason: String::from("Expected a block after the else keyword"),
                                 error_start: else_token.position,
                                 error_end: else_token.get_end_position(),
                             }));

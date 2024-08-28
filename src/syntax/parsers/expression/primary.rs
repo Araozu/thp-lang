@@ -1,7 +1,10 @@
 use crate::{
     lexic::token::{Token, TokenType},
     syntax::{
-        ast::{Array, Expression}, parseable::Parseable, utils::Tokenizer, ParsingError, ParsingResult,
+        ast::{Array, Expression},
+        parseable::Parseable,
+        utils::Tokenizer,
+        ParsingError, ParsingResult,
     },
 };
 
@@ -9,20 +12,18 @@ use crate::{
 ///
 /// ```ebnf
 /// primary = array
-///         | number 
-///         | string 
-///         | boolean 
-///         | identifier 
+///         | number
+///         | string
+///         | boolean
+///         | identifier
 ///         | ("(", expression, ")");
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     // array
     match Array::try_parse(tokens, pos) {
-        Ok((exp, next)) => {
-            return Ok((Expression::Array(exp), next))
-        },
+        Ok((exp, next)) => return Ok((Expression::Array(exp), next)),
         Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
-        Err(_) => {},
+        Err(_) => {}
     }
 
     match tokens.get_significant(pos) {

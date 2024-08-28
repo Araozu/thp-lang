@@ -85,10 +85,7 @@ pub fn parse_token_type(
 /// Ignores indentation, newlines and comments.
 ///
 /// Only returns: Ok or Unmatched.
-pub fn parse_terminator(
-    tokens: &Vec<Token>,
-    pos: usize,
-) -> ParsingResult<()> {
+pub fn parse_terminator(tokens: &Vec<Token>, pos: usize) -> ParsingResult<()> {
     let mut current_pos = pos;
 
     // Ignore all whitespace, newlines and semicolons

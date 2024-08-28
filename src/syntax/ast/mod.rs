@@ -1,9 +1,11 @@
 use crate::lexic::token::Token;
 
 use self::functions::FunctionCall;
+use loops::ForLoop;
 use var_binding::VariableBinding;
 
 pub mod functions;
+pub mod loops;
 pub mod var_binding;
 
 /// Trait that allows nodes to inform
@@ -33,13 +35,14 @@ pub enum Statement<'a> {
     FnDecl(FunctionDeclaration<'a>),
     // TODO: Implement conditionals as expressions
     Conditional(Conditional<'a>),
+    ForLoop(ForLoop<'a>),
 }
 
 #[derive(Debug)]
 pub struct Conditional<'a> {
     pub if_member: Condition<'a>,
     pub else_if_members: Vec<Condition<'a>>,
-    pub else_block: Option<Block<'a>>
+    pub else_block: Option<Block<'a>>,
 }
 
 #[derive(Debug)]
@@ -47,7 +50,6 @@ pub struct Condition<'a> {
     pub condition: Expression<'a>,
     pub body: Block<'a>,
 }
-
 
 #[derive(Debug)]
 pub struct FunctionDeclaration<'a> {
@@ -59,7 +61,15 @@ pub struct FunctionDeclaration<'a> {
 
 #[derive(Debug)]
 pub struct Block<'a> {
+    pub start: usize,
+    pub end: usize,
     pub members: Vec<BlockMember<'a>>,
+}
+
+impl Positionable for Block<'_> {
+    fn get_position(&self) -> (usize, usize) {
+        (self.start, self.end)
+    }
 }
 
 /// Enum for productions available at the block level
@@ -125,9 +135,11 @@ impl Positionable for Expression<'_> {
                 let (_, end) = right_expr.get_position();
                 (start, end)
             }
-            Expression::Array(Array {start, end, exps: _}) => {
-                (*start, *end)
-            }
+            Expression::Array(Array {
+                start,
+                end,
+                exps: _,
+            }) => (*start, *end),
         }
     }
 }

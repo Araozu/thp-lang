@@ -1,7 +1,10 @@
 use crate::{
     lexic::token::Token,
     syntax::{
-        ast::{var_binding::VariableBinding, Conditional, FunctionDeclaration, Statement},
+        ast::{
+            loops::ForLoop, var_binding::VariableBinding, Conditional, FunctionDeclaration,
+            Statement,
+        },
         parseable::{Parseable, ParsingError, ParsingResult},
     },
 };
@@ -37,6 +40,13 @@ impl<'a> Parseable<'a> for Statement<'a> {
         // Try to parse a conditional
         match Conditional::try_parse(tokens, current_pos) {
             Ok((prod, next)) => return Ok((Statement::Conditional(prod), next)),
+            Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
+            _ => {}
+        }
+
+        // Try to parse a for loop
+        match ForLoop::try_parse(tokens, current_pos) {
+            Ok((prod, next)) => return Ok((Statement::ForLoop(prod), next)),
             Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
             _ => {}
         }

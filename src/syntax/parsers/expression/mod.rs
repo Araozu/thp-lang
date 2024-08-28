@@ -1,6 +1,7 @@
 use super::super::{ast::Expression, ParsingResult};
 use crate::{lexic::token::Token, syntax::parseable::Parseable};
 
+mod array;
 mod comparison;
 mod equality;
 mod factor;
@@ -9,7 +10,6 @@ mod primary;
 mod term;
 mod unary;
 mod utils;
-mod array;
 
 impl<'a> Parseable<'a> for Expression<'a> {
     type Item = Expression<'a>;
