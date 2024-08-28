@@ -29,7 +29,6 @@ pub enum TokenType {
     FOR,
     IN,
     WHILE,
-    LOOP,
     MATCH,
     CASE,
 }

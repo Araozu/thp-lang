@@ -1,7 +1,7 @@
 use crate::lexic::token::Token;
 
 use self::functions::FunctionCall;
-use loops::ForLoop;
+use loops::{ForLoop, WhileLoop};
 use var_binding::VariableBinding;
 
 pub mod functions;
@@ -36,6 +36,7 @@ pub enum Statement<'a> {
     // TODO: Implement conditionals as expressions
     Conditional(Conditional<'a>),
     ForLoop(ForLoop<'a>),
+    WhileLoop(WhileLoop<'a>),
 }
 
 #[derive(Debug)]

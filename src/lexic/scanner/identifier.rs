@@ -12,7 +12,6 @@ fn str_is_keyword(s: &String) -> Option<TokenType> {
         "for" => Some(TokenType::FOR),
         "in" => Some(TokenType::IN),
         "while" => Some(TokenType::WHILE),
-        "loop" => Some(TokenType::LOOP),
         "match" => Some(TokenType::MATCH),
         "case" => Some(TokenType::CASE),
         _ => None,

@@ -24,6 +24,7 @@
 - [x] Parse conditionals
 - [x] Parse arrays
 - [x] Parse for loops
+- [x] Parse while loops
 
 
 ## v0.1.1
