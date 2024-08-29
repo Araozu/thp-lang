@@ -2,8 +2,9 @@ use crate::{
     lexic::token::Token,
     syntax::{
         ast::{
-            loops::{ForLoop, WhileLoop}, var_binding::VariableBinding, Conditional, FunctionDeclaration,
-            Statement,
+            loops::{ForLoop, WhileLoop},
+            var_binding::VariableBinding,
+            Conditional, FunctionDeclaration, Statement,
         },
         parseable::{Parseable, ParsingError, ParsingResult},
     },

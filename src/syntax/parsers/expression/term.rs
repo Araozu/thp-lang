@@ -7,7 +7,7 @@ use crate::{
 /// Parses a factor expression.
 ///
 /// ```ebnf
-/// term = factor, (("-" | "+"), factor)*;
+/// term = factor, (("-" | "+" | "++"), factor)*;
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     let (factor, next_pos) = match super::factor::try_parse(tokens, pos) {
@@ -24,13 +24,13 @@ fn parse_many<'a>(
     prev_expr: Expression<'a>,
     indentation_level: u32,
 ) -> ParsingResult<'a, Expression<'a>> {
-    // term = factor, (("-" | "+"), factor)*;
+    // term = factor, (("-" | "+" | "++"), factor)*;
 
     try_binary_op(
         tokens,
         pos,
         prev_expr,
-        vec!["+", "-"],
+        vec!["+", "-", "++"],
         indentation_level,
         |tokens, pos, prev_expr, token, indent_count: u32| {
             // Parse the next factor

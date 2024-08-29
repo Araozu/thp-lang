@@ -137,10 +137,10 @@ impl SemanticCheck for Expression<'_> {
                 // Operators are treated as functions
                 let (op_params, _) = match scope.get_type(&op.value) {
                     Some(Type::Function(params, return_t)) => (params, return_t),
-                    Some(Type::Value(v)) => {
-                        // If a operator is stored as a value,
+                    Some(t) => {
+                        // If a operator is stored as anything else
                         // it's a bug in the compiler
-                        unreachable!("Compiler bug: a binary operator was registered in the symbol table as a value of type {}", v)
+                        unreachable!("Compiler bug: a binary operator was registered in the symbol table as a value of type {:?}", t)
                     }
                     None => {
                         // If the operator is not found its a user error,

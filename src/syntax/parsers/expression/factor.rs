@@ -8,7 +8,7 @@ use crate::{
 /// Parses a factor expression.
 ///
 /// ```ebnf
-/// factor = unary, (("/" | "*"), unary)*;
+/// factor = unary, (("/" | "*", "%"), unary)*;
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     let (unary, next_pos) = match super::unary::try_parse(tokens, pos) {
@@ -25,12 +25,12 @@ fn parse_many<'a>(
     prev_expr: Expression<'a>,
     indentation_level: u32,
 ) -> ParsingResult<'a, Expression<'a>> {
-    // (("/" | "*"), unary)*
+    // (("/" | "*" | "%"), unary)*
     try_binary_op(
         tokens,
         pos,
         prev_expr,
-        vec!["/", "*"],
+        vec!["/", "*", "%"],
         indentation_level,
         |tokens, next_pos, prev_expr, token, indent_count: u32| {
             // match next

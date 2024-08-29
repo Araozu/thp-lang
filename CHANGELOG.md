@@ -25,6 +25,7 @@
 - [x] Parse arrays
 - [x] Parse for loops
 - [x] Parse while loops
+- [x] Typecheck arrays
 
 
 ## v0.1.1

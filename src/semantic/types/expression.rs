@@ -1,7 +1,7 @@
 use crate::{
     error_handling::{semantic_error::SemanticError, MistiError},
     semantic::symbol_table::SymbolTable,
-    syntax::ast::Expression,
+    syntax::ast::{Expression, Positionable},
 };
 
 use super::{Type, Typed};
@@ -31,12 +31,9 @@ impl Typed for Expression<'_> {
                 Ok(datatype)
             }
             Expression::FunctionCall(f) => {
-                // TODO: Must implement functions as first class citizens
-                // for this to work with any arbitrary expression.
-                // for now it justs expects an identifier
-
-                // TODO: Should this check that the type signature is correct?
-                // or is this done elsewhere?
+                // TODO: allow arbitrary expressions and
+                // check that they resolve into a function
+                // (e.g. object.member)
 
                 match &*f.function {
                     Expression::Identifier(id) => {
@@ -115,6 +112,7 @@ impl Typed for Expression<'_> {
                 }
 
                 return Err(MistiError::Semantic(SemanticError {
+                    // TODO: fix positions
                     error_start: 0,
                     error_end: 1,
                     reason: format!(
@@ -122,7 +120,51 @@ impl Typed for Expression<'_> {
                     ),
                 }));
             }
-            Expression::Array(_) => unimplemented!("get type of array"),
+            Expression::Array(arr) => {
+                // The first expression found determines the
+                // type of the array
+
+                // TODO: for now an array must have at least 1 element,
+                // if the array is empty there is no way to know its type.
+                // TODO: if the array is empty then its
+                // datatype should be determined by its usage.
+                if arr.exps.is_empty() {
+                    return Err(MistiError::Semantic(SemanticError {
+                        error_start: arr.start,
+                        error_end: arr.end,
+                        reason: format!(
+                            "An array must have at least 1 element to determine its type. This will be fixed later."
+                        ),
+                    }));
+                }
+
+                let mut expressions = arr.exps.iter();
+                let first_expr = expressions.next().unwrap();
+                let first_type = first_expr.get_type(scope)?;
+
+                // then check that every expression has the same type
+                for exp in expressions {
+                    let exp_type = exp.get_type(scope)?;
+                    if !exp_type.equals(&first_type) {
+                        // TODO: subtyping
+
+                        // error, found an item with a diferent datatype
+                        let (error_start, error_end) = exp.get_position();
+                        return Err(MistiError::Semantic(SemanticError {
+                            error_start,
+                            error_end,
+                            reason: format!(
+                                "All elements of an array must have the same datatype. Expected {:?}, got {:?}",
+                                first_type,
+                                exp_type,
+                            ),
+                        }));
+                    }
+                }
+
+                // return the Array type
+                Ok(Type::Generic("Array".into(), vec![first_type]))
+            }
         }
     }
 }

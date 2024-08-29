@@ -1,8 +1,11 @@
 use crate::{
-    error_handling::SyntaxError, lexic::token::{Token, TokenType}, syntax::{
+    error_handling::SyntaxError,
+    lexic::token::{Token, TokenType},
+    syntax::{
         ast::{loops::WhileLoop, Block, Expression, Positionable},
-        parseable::{Parseable, ParsingError, ParsingResult}, utils::parse_token_type,
-    }
+        parseable::{Parseable, ParsingError, ParsingResult},
+        utils::parse_token_type,
+    },
 };
 
 impl<'a> Parseable<'a> for WhileLoop<'a> {
@@ -46,10 +49,7 @@ impl<'a> Parseable<'a> for WhileLoop<'a> {
                 return Err(ParsingError::Err(SyntaxError {
                     error_start: e.position,
                     error_end: e.get_end_position(),
-                    reason: format!(
-                        "Expected a block after the condition, found {}",
-                        e.value
-                    ),
+                    reason: format!("Expected a block after the condition, found {}", e.value),
                 }))
             }
             Err(ParsingError::Unmatched) => {

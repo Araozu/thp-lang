@@ -24,4 +24,3 @@ pub struct WhileLoop<'a> {
     pub condition: Expression<'a>,
     pub body: Block<'a>,
 }
-
