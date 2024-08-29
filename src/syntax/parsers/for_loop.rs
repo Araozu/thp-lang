@@ -145,6 +145,7 @@ impl<'a> Parseable<'a> for ForLoop<'a> {
             loop_end,
             key,
             value,
+            collection: expr,
             body: block,
         };
         Ok((for_loop, next))

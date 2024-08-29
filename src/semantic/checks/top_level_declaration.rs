@@ -22,8 +22,8 @@ impl SemanticCheck for Statement<'_> {
         match self {
             Statement::Binding(b) => b.check_semantics(scope),
             Statement::FnDecl(f) => f.check_semantics(scope),
-            Statement::Conditional(_) => unimplemented!("check conditional"),
-            Statement::ForLoop(_) => unimplemented!("check for for loop"),
+            Statement::Conditional(c) => c.check_semantics(scope),
+            Statement::ForLoop(f) => f.check_semantics(scope),
             Statement::WhileLoop(_) => unimplemented!("check for while loop"),
         }
     }

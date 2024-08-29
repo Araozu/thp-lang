@@ -11,6 +11,7 @@ pub struct ForLoop<'a> {
     pub loop_end: usize,
     pub key: Option<&'a Token>,
     pub value: &'a Token,
+    pub collection: Expression<'a>,
     pub body: Block<'a>,
 }
 
