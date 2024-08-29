@@ -24,7 +24,7 @@ impl SemanticCheck for Statement<'_> {
             Statement::FnDecl(f) => f.check_semantics(scope),
             Statement::Conditional(c) => c.check_semantics(scope),
             Statement::ForLoop(f) => f.check_semantics(scope),
-            Statement::WhileLoop(_) => unimplemented!("check for while loop"),
+            Statement::WhileLoop(w) => w.check_semantics(scope),
         }
     }
 }

@@ -28,6 +28,7 @@
 - [x] Typecheck arrays
 - [x] Typecheck if/else if/else
 - [x] Typecheck for loops
+- [x] Typecheck while loops
 
 
 ## v0.1.1

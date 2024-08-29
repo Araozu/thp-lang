@@ -138,31 +138,10 @@ impl Typed for Expression<'_> {
                     }));
                 }
 
-                let mut expressions = arr.exps.iter();
-                let first_expr = expressions.next().unwrap();
-                let first_type = first_expr.get_type(scope)?;
-
-                // then check that every expression has the same type
-                for exp in expressions {
-                    let exp_type = exp.get_type(scope)?;
-                    if !exp_type.equals(&first_type) {
-                        // TODO: subtyping
-
-                        // error, found an item with a diferent datatype
-                        let (error_start, error_end) = exp.get_position();
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start,
-                            error_end,
-                            reason: format!(
-                                "All elements of an array must have the same datatype. Expected {:?}, got {:?}",
-                                first_type,
-                                exp_type,
-                            ),
-                        }));
-                    }
-                }
-
-                // return the Array type
+                // Just get the first type and use it
+                // Checking of the types of every element in the array
+                // is done by SemanticCheck
+                let first_type = arr.exps[0].get_type(scope)?;
                 Ok(Type::Generic("Array".into(), vec![first_type]))
             }
         }
