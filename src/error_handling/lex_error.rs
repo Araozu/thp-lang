@@ -1,3 +1,5 @@
+use ariadne::{Color, Label, Report, ReportKind, Source};
+
 use super::{LexError, PrintableError};
 use std::collections::VecDeque;
 
@@ -19,6 +21,17 @@ impl PrintableError for LexError {
 
 {reason} at line {line_number}:{column_number}"#,
         )
+    }
+
+    fn print_ariadne(&self, source: &String) {
+        let report = Report::build(ReportKind::Error, "sample.thp", self.position)
+            .with_label(
+                Label::new(("sample.thp", self.position..self.end_position))
+                    .with_message(self.reason.clone())
+                    .with_color(Color::Red),
+            )
+            .finish();
+        report.eprint(("sample.thp", Source::from(source)));
     }
 }
 

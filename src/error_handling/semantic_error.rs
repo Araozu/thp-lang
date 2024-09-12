@@ -1,3 +1,4 @@
+use ariadne::{Color, Label, Report, ReportKind, Source};
 use serde::Serialize;
 
 use super::utils::{get_line, get_line_number};
@@ -29,5 +30,17 @@ impl PrintableError for SemanticError {
 
 {reason} at line {line_number}:{before}"#,
         )
+    }
+
+    fn print_ariadne(&self, source: &String) {
+        let report = Report::build(ReportKind::Error, "sample.thp", self.error_start)
+            .with_label(
+                Label::new(("sample.thp", self.error_start..self.error_end))
+                    .with_message(self.reason.clone())
+                    .with_color(Color::Red),
+            )
+            .finish();
+
+        report.eprint(("sample.thp", Source::from(source)));
     }
 }

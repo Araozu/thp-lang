@@ -46,8 +46,7 @@ fn compile(input: &String) {
     let tokens = match lexic::get_tokens(input) {
         Ok(t) => t,
         Err(error) => {
-            let chars: Vec<char> = input.chars().collect();
-            eprintln!("{}", error.get_error_str(&chars));
+            error.print_ariadne(input);
             return;
         }
     };
@@ -57,9 +56,8 @@ fn compile(input: &String) {
     //
     let ast = match syntax::build_ast(&tokens) {
         Ok(ast) => ast,
-        Err(reason) => {
-            let chars: Vec<char> = input.chars().collect();
-            eprintln!("{}", reason.get_error_str(&chars));
+        Err(error) => {
+            error.print_ariadne(input);
             return;
         }
     };
@@ -70,10 +68,8 @@ fn compile(input: &String) {
     let res1 = crate::semantic::check_semantics(&ast);
     match res1 {
         Ok(_) => {}
-        Err(reason) => {
-            let chars: Vec<char> = input.chars().collect();
-            let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
-            eprintln!("{}", error);
+        Err(error) => {
+            error.print_ariadne(input);
             return;
         }
     }

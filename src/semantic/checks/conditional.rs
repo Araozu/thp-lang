@@ -40,7 +40,10 @@ impl SemanticCheck for Conditional<'_> {
                 return Err(MistiError::Semantic(SemanticError {
                     error_start,
                     error_end,
-                    reason: format!("Expected a condition of type Bool, found {:?}", condition_type),
+                    reason: format!(
+                        "Expected a condition of type Bool, found {:?}",
+                        condition_type
+                    ),
                 }));
             }
 

@@ -240,7 +240,7 @@ impl SemanticCheck for Expression<'_> {
                 }
 
                 Ok(())
-            },
+            }
         }
     }
 }

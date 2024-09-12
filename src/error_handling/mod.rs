@@ -9,6 +9,7 @@ mod utils;
 
 pub trait PrintableError {
     fn get_error_str(&self, chars: &Vec<char>) -> String;
+    fn print_ariadne(&self, source: &String);
 }
 
 #[derive(Serialize, Debug)]
@@ -39,6 +40,14 @@ impl PrintableError for MistiError {
             Self::Lex(err) => err.get_error_str(chars),
             Self::Syntax(err) => err.get_error_str(chars),
             Self::Semantic(err) => err.get_error_str(chars),
+        }
+    }
+
+    fn print_ariadne(&self, source: &String) {
+        match self {
+            Self::Lex(err) => err.print_ariadne(source),
+            Self::Syntax(err) => err.print_ariadne(source),
+            Self::Semantic(err) => err.print_ariadne(source),
         }
     }
 }
