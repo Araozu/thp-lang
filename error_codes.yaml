@@ -1,0 +1,4 @@
+-- A map of error codes to error messages
+
+0x000001: Incomplete string
+

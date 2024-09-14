@@ -7,14 +7,33 @@ pub mod semantic_error;
 mod syntax_error;
 mod utils;
 
+pub mod error_messages;
+
 pub trait PrintableError {
     fn get_error_str(&self, chars: &Vec<char>) -> String;
     fn print_ariadne(&self, source: &String);
 }
 
 #[derive(Serialize, Debug)]
+pub struct ErrorContainer {
+    pub error_code: u32,
+    pub error_offset: usize,
+    pub labels: Vec<ErrorLabel>,
+    pub note: Option<String>,
+    pub help: Option<String>,
+}
+
+/// Mirrors ariadne's Label
+#[derive(Serialize, Debug)]
+pub struct ErrorLabel {
+    pub message: String,
+    pub start: usize,
+    pub end: usize,
+}
+
+#[derive(Serialize, Debug)]
 pub enum MistiError {
-    Lex(LexError),
+    Lex(ErrorContainer),
     Syntax(SyntaxError),
     Semantic(SemanticError),
 }
@@ -37,7 +56,7 @@ pub struct SyntaxError {
 impl PrintableError for MistiError {
     fn get_error_str(&self, chars: &Vec<char>) -> String {
         match self {
-            Self::Lex(err) => err.get_error_str(chars),
+            Self::Lex(err) => panic!("REMOVED: manually generating an error message"),
             Self::Syntax(err) => err.get_error_str(chars),
             Self::Semantic(err) => err.get_error_str(chars),
         }

@@ -3,7 +3,7 @@ mod utils;
 
 pub mod token;
 
-use crate::error_handling::{LexError, MistiError};
+use crate::error_handling::{ErrorContainer, ErrorLabel, LexError, MistiError};
 use token::Token;
 
 use self::token::TokenType;
@@ -36,7 +36,7 @@ pub enum LexResult {
     /// Contains the last position, which should be the input lenght - 1
     None(usize),
     /// An error was found while scanning.
-    Err(LexError),
+    Err(ErrorContainer),
 }
 
 /// Scans and returns all the tokens in the input String
@@ -151,16 +151,20 @@ fn next_token(
             }
         })
         .unwrap_or_else(|| {
-            let error = LexError {
-                position: current_pos,
-                end_position: current_pos + 1,
-                reason: format!(
-                    "Illegal character `{}` (escaped: {})",
-                    next_char,
-                    next_char.escape_default().to_string(),
-                ),
+            let label = ErrorLabel {
+                message: String::from("This character is not allowed"),
+                start: current_pos,
+                end: current_pos + 1,
             };
-            LexResult::Err(error)
+            let error_container = ErrorContainer {
+                error_offset: current_pos,
+                error_code: 0x010001,
+                labels: vec![label],
+                note: None,
+                help: Some(String::from("Remove this character")),
+            };
+
+            LexResult::Err(error_container)
         })
 }
 
@@ -196,15 +200,15 @@ fn handle_indentation(
                 break;
             } else {
                 // Illegal state: Indentation error
-                let error = LexError {
-                    position: current_pos,
-                    end_position: current_pos + 1,
-                    reason: format!(
-                        "Indentation error: expected {} spaces, found {}",
-                        new_top, spaces
-                    ),
+                let econtaner = ErrorContainer {
+                    error_code: 0,
+                    error_offset: current_pos,
+                    labels: vec![],
+                    note: None,
+                    help: None,
                 };
-                return LexResult::Err(error);
+
+                return LexResult::Err(econtaner);
             }
         }
 

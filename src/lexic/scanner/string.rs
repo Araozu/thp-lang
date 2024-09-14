@@ -1,4 +1,5 @@
-use crate::error_handling::LexError;
+use crate::error_handling::error_messages::LEX_INCOMPLETE_STRING;
+use crate::error_handling::{ErrorContainer, ErrorLabel};
 use crate::lexic::token::Token;
 use crate::lexic::{utils, LexResult};
 
@@ -26,11 +27,27 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
                 start_pos + 1,
             )
         }
-        Some(c) if *c == '\n' => LexResult::Err(LexError {
-            position: start_pos,
-            end_position: start_pos + 1,
-            reason: String::from("Unexpected new line inside a string."),
-        }),
+        Some(c) if *c == '\n' => {
+            let string_start_pos = start_pos - (current.len() + 1);
+            let label_2 = ErrorLabel {
+                message: String::from("The line ends here"),
+                start: start_pos,
+                end: start_pos + 1,
+            };
+            let label_1 = ErrorLabel {
+                message: String::from("The string starts here"),
+                start: string_start_pos,
+                end: string_start_pos + 1,
+            };
+            let econtainer = ErrorContainer {
+                error_code: LEX_INCOMPLETE_STRING,
+                error_offset: start_pos,
+                labels: vec![label_1, label_2],
+                note: Some(String::from("Strings cannot have newlines")),
+                help: None,
+            };
+            LexResult::Err(econtainer)
+        }
         Some(c) if *c == '\\' => {
             if let Some(escape) = test_escape_char(chars, start_pos + 1) {
                 // This should only detect an escaped `"`
@@ -40,11 +57,28 @@ pub fn scan_impl(chars: &Vec<char>, start_pos: usize, current: String) -> LexRes
             }
         }
         Some(c) => scan_impl(chars, start_pos + 1, utils::str_append(current, *c)),
-        None => LexResult::Err(LexError {
-            position: start_pos,
-            end_position: start_pos + 1,
-            reason: String::from("Incomplete string found"),
-        }),
+        None => {
+            let string_start_pos = start_pos - (current.len() + 1);
+            let label_1 = ErrorLabel {
+                message: String::from("The string starts here"),
+                start: string_start_pos,
+                end: string_start_pos + 1,
+            };
+            let label_2 = ErrorLabel {
+                message: String::from("The code ends here"),
+                start: start_pos,
+                end: start_pos + 1,
+            };
+            let econtainer = ErrorContainer {
+                error_code: LEX_INCOMPLETE_STRING,
+                error_offset: start_pos,
+                labels: vec![label_1, label_2],
+                note: None,
+                help: None,
+            };
+
+            LexResult::Err(econtainer)
+        }
     }
 }
 
@@ -107,8 +141,8 @@ mod tests {
     fn should_not_scan_a_new_line() {
         let input = str_to_vec("\"Hello,\nworld!\"");
         let start_pos = 1;
-        if let LexResult::Err(reason) = scan(&input, start_pos) {
-            assert_eq!("Unexpected new line inside a string.", reason.reason)
+        if let LexResult::Err(err) = scan(&input, start_pos) {
+            assert_eq!(LEX_INCOMPLETE_STRING, err.error_code)
         } else {
             panic!()
         }
@@ -204,8 +238,8 @@ mod tests {
         let result = scan(&input, start_pos);
 
         match result {
-            LexResult::Err(reason) => {
-                assert_eq!("Incomplete string found", reason.reason)
+            LexResult::Err(err) => {
+                assert_eq!(LEX_INCOMPLETE_STRING, err.error_code)
             }
             _ => panic!("expected an error"),
         }
@@ -217,8 +251,8 @@ mod tests {
         let result = scan(&input, 1);
 
         match result {
-            LexResult::Err(reason) => {
-                assert_eq!("Incomplete string found", reason.reason)
+            LexResult::Err(err) => {
+                assert_eq!(LEX_INCOMPLETE_STRING, err.error_code)
             }
             _ => panic!("expected an error"),
         }
