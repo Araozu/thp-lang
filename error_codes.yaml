@@ -1,4 +1,9 @@
 -- A map of error codes to error messages
-
-0x000001: Incomplete string
+0x000000: Incomplete string
+0x000001: Invalid hex number
+0x000002: Invalid octal number
+0x000003: Invalid binary number
+0x000004: Invalid floating point number
+0x000005: Invalid scientific number
+0x000006: Incomplete multiline comment
 

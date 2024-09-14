@@ -31,7 +31,7 @@ impl PrintableError for LexError {
                     .with_color(Color::Red),
             )
             .finish();
-        report.eprint(("sample.thp", Source::from(source)));
+        report.eprint(("sample.thp", Source::from(source))).unwrap();
     }
 }
 

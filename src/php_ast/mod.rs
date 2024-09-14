@@ -59,6 +59,6 @@ pub enum PPrimary<'a> {
     ///
     /// This is a $variable
     Variable(&'a String),
-    /// This is a symbol, e.g. a function name
-    Symbol(&'a String),
+    // This is a symbol, e.g. a function name
+    // Symbol(&'a String),
 }

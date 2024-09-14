@@ -1,3 +1,6 @@
+use std::ops::Range;
+
+use ariadne::{Label, Report, ReportKind, Source};
 use serde::Serialize;
 
 use self::semantic_error::SemanticError;
@@ -56,7 +59,7 @@ pub struct SyntaxError {
 impl PrintableError for MistiError {
     fn get_error_str(&self, chars: &Vec<char>) -> String {
         match self {
-            Self::Lex(err) => panic!("REMOVED: manually generating an error message"),
+            Self::Lex(_) => panic!("REMOVED: manually generating an error message"),
             Self::Syntax(err) => err.get_error_str(chars),
             Self::Semantic(err) => err.get_error_str(chars),
         }
@@ -68,5 +71,28 @@ impl PrintableError for MistiError {
             Self::Syntax(err) => err.print_ariadne(source),
             Self::Semantic(err) => err.print_ariadne(source),
         }
+    }
+}
+
+impl PrintableError for ErrorContainer {
+    fn get_error_str(&self, _: &Vec<char>) -> String {
+        panic!("REMOVED: manually generating an error message")
+    }
+
+    fn print_ariadne(&self, source: &String) {
+        let mut report: ariadne::ReportBuilder<'_, (&str, Range<usize>)> =
+            Report::build(ReportKind::Error, "sample.thp", self.error_offset);
+
+        for label in self.labels.iter() {
+            let l = Label::new(("sample.thp", label.start..label.end))
+                .with_message(label.message.clone());
+            report = report.with_label(l)
+        }
+
+        report
+            .with_code(self.error_code)
+            .finish()
+            .eprint(("sample.thp", Source::from(source)))
+            .unwrap()
     }
 }

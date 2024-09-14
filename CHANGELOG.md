@@ -29,6 +29,7 @@
 - [x] Typecheck for loops
 - [x] Typecheck while loops
 - [x] Include Ariadne for error reporting
+- [x] Migrate lexic errors to new error interface
 
 
 ## v0.1.1

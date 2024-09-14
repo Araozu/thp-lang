@@ -3,7 +3,7 @@ mod utils;
 
 pub mod token;
 
-use crate::error_handling::{ErrorContainer, ErrorLabel, LexError, MistiError};
+use crate::error_handling::{ErrorContainer, ErrorLabel, MistiError};
 use token::Token;
 
 use self::token::TokenType;

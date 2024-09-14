@@ -1,7 +1,7 @@
 use crate::{
     error_handling::{semantic_error::SemanticError, MistiError},
     semantic::symbol_table::SymbolTable,
-    syntax::ast::{Expression, Positionable},
+    syntax::ast::Expression,
 };
 
 use super::{Type, Typed};

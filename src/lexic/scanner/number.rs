@@ -1,4 +1,8 @@
-use crate::error_handling::LexError;
+use crate::error_handling::error_messages::{
+    LEX_INVALID_BINARY_NUMBER, LEX_INVALID_FLOATING_NUMBER, LEX_INVALID_HEX_NUMBER,
+    LEX_INVALID_OCTAL_NUMBER, LEX_INVALID_SCIENTIFIC_NUMBER,
+};
+use crate::error_handling::{ErrorContainer, ErrorLabel};
 use crate::lexic::{token::Token, utils, LexResult};
 
 /// Function to scan an int/float
@@ -57,11 +61,22 @@ fn scan_hex(chars: &[char], start_pos: usize, current: String) -> LexResult {
             let (t, next) = scan_hex_digits(chars, start_pos + 1, utils::str_append(current, *c));
             LexResult::Some(t, next)
         }
-        _ => LexResult::Err(LexError {
-            position: start_pos,
-            end_position: start_pos + 1,
-            reason: String::from("Tried to scan an incomplete hex value"),
-        }),
+        _ => {
+            let label = ErrorLabel {
+                message: String::from("The hex number ends here, without any digit"),
+                start: start_pos,
+                end: start_pos + 1,
+            };
+            let econtainer = ErrorContainer {
+                error_code: LEX_INVALID_HEX_NUMBER,
+                error_offset: start_pos,
+                labels: vec![label],
+                note: None,
+                help: None,
+            };
+
+            LexResult::Err(econtainer)
+        }
     }
 }
 
@@ -82,12 +97,21 @@ fn scan_octal(chars: &[char], start_pos: usize) -> LexResult {
     }
 
     if token_vec.is_empty() {
-        LexResult::Err(LexError {
+        let label = ErrorLabel {
+            message: String::from("The octal number ends here, without any digit"),
+            start: current_pos,
+            end: current_pos + 1,
+        };
+        let econtainer = ErrorContainer {
+            error_code: LEX_INVALID_OCTAL_NUMBER,
             // minus 2 to account for the opening '0o'
-            position: start_pos - 2,
-            end_position: current_pos,
-            reason: String::from("Found an incomplete octal number"),
-        })
+            error_offset: current_pos - 2,
+            labels: vec![label],
+            note: None,
+            help: None,
+        };
+
+        LexResult::Err(econtainer)
     } else {
         let octal_numbers = format!("0o{}", token_vec.iter().collect::<String>());
         let new_token = Token::new_int(octal_numbers, start_pos - 2);
@@ -113,12 +137,21 @@ fn scan_binary(chars: &[char], start_pos: usize) -> LexResult {
     }
 
     if token_vec.is_empty() {
-        LexResult::Err(LexError {
+        let label = ErrorLabel {
+            message: String::from("The binary number ends here, without any digit"),
+            start: current_pos,
+            end: current_pos + 1,
+        };
+        let econtainer = ErrorContainer {
+            error_code: LEX_INVALID_BINARY_NUMBER,
             // minus 2 to account for the opening '0b'
-            position: start_pos - 2,
-            end_position: current_pos,
-            reason: String::from("Found an incomplete binary number"),
-        })
+            error_offset: current_pos - 2,
+            labels: vec![label],
+            note: None,
+            help: None,
+        };
+
+        LexResult::Err(econtainer)
     } else {
         let octal_numbers = format!("0b{}", token_vec.iter().collect::<String>());
         let new_token = Token::new_int(octal_numbers, start_pos - 2);
@@ -135,18 +168,45 @@ fn scan_binary(chars: &[char], start_pos: usize) -> LexResult {
 fn scan_double(chars: &Vec<char>, start_pos: usize, current: String) -> LexResult {
     match chars.get(start_pos) {
         Some(c) if utils::is_digit(*c) => scan_double_impl(chars, start_pos, current),
-        Some(_) => LexResult::Err(LexError {
-            position: start_pos,
-            end_position: start_pos + 1,
-            reason: String::from(
-                "The character after the dot when scanning a double is not a number.",
-            ),
-        }),
-        _ => LexResult::Err(LexError {
-            position: start_pos,
-            end_position: start_pos + 1,
-            reason: String::from("EOF when scanning a double number."),
-        }),
+        Some(_) => {
+            let label = ErrorLabel {
+                message: String::from("The floating number ends here, without any digit"),
+                start: start_pos,
+                end: start_pos + 1,
+            };
+            let econtainer = ErrorContainer {
+                error_code: LEX_INVALID_FLOATING_NUMBER,
+                // minus 2 to account for the opening '0b'
+                error_offset: start_pos,
+                labels: vec![label],
+                note: Some(String::from(
+                    "Floating point numbers must always have at least 1 digit after the period",
+                )),
+                help: None,
+            };
+
+            LexResult::Err(econtainer)
+        }
+        _ => {
+            let label = ErrorLabel {
+                message: String::from(
+                    "The code ends here, without completing the floating point number",
+                ),
+                start: start_pos,
+                end: start_pos + 1,
+            };
+            let econtainer = ErrorContainer {
+                error_code: LEX_INVALID_FLOATING_NUMBER,
+                error_offset: start_pos,
+                labels: vec![label],
+                note: Some(String::from(
+                    "Floating point numbers must always have at least 1 digit after the period",
+                )),
+                help: None,
+            };
+
+            LexResult::Err(econtainer)
+        }
     }
 }
 
@@ -190,13 +250,24 @@ fn scan_scientific(chars: &Vec<char>, start_pos: usize, current: String) -> LexR
             let (t, next) = scan_digits(chars, start_pos + 2, new_value);
             LexResult::Some(t, next)
         }
-        _ => LexResult::Err(LexError {
-            position: start_pos,
-            end_position: start_pos + 1,
-            reason: String::from(
-                "The characters after 'e' are not + or -, or are not followed by a number",
-            ),
-        }),
+        _ => {
+            let label = ErrorLabel {
+                message: String::from("The scientific number ends here, incorrectly"),
+                start: start_pos,
+                end: start_pos + 1,
+            };
+            let econtainer = ErrorContainer {
+                error_code: LEX_INVALID_SCIENTIFIC_NUMBER,
+                error_offset: start_pos,
+                labels: vec![label],
+                note: Some(String::from(
+                    "Scientific numbers must always have a sign (+ or -) and a digit afterwards: `3.22e+2`"
+                )),
+                help: None,
+            };
+
+            LexResult::Err(econtainer)
+        }
     }
 }
 
@@ -334,7 +405,7 @@ mod tests {
 
         match scan(&input, start_pos) {
             LexResult::Err(reason) => {
-                assert_eq!("Tried to scan an incomplete hex value", reason.reason)
+                assert_eq!(reason.error_code, LEX_INVALID_HEX_NUMBER)
             }
             _ => panic!(),
         }
@@ -383,9 +454,8 @@ mod tests {
         let result = scan(&input, 0);
         match result {
             LexResult::Err(error) => {
-                assert_eq!(error.position, 0);
-                assert_eq!(error.end_position, 2);
-                assert_eq!(error.reason, "Found an incomplete octal number");
+                assert_eq!(error.error_offset, 0);
+                assert_eq!(error.error_code, LEX_INVALID_OCTAL_NUMBER)
             }
             _ => panic!("Expected an error, got {:?}", result),
         }
@@ -412,9 +482,8 @@ mod tests {
         let result = scan(&input, 0);
         match result {
             LexResult::Err(error) => {
-                assert_eq!(error.position, 0);
-                assert_eq!(error.end_position, 2);
-                assert_eq!(error.reason, "Found an incomplete binary number");
+                assert_eq!(error.error_offset, 0);
+                assert_eq!(error.error_code, LEX_INVALID_BINARY_NUMBER)
             }
             _ => panic!("Expected an error, got {:?}", result),
         }
@@ -453,10 +522,7 @@ mod tests {
         let start_pos = 0;
 
         match scan(&input, start_pos) {
-            LexResult::Err(reason) => assert_eq!(
-                "The character after the dot when scanning a double is not a number.",
-                reason.reason
-            ),
+            LexResult::Err(reason) => assert_eq!(reason.error_code, LEX_INVALID_FLOATING_NUMBER),
             _ => panic!(),
         }
 
@@ -464,9 +530,7 @@ mod tests {
         let start_pos = 0;
 
         match scan(&input, start_pos) {
-            LexResult::Err(reason) => {
-                assert_eq!("EOF when scanning a double number.", reason.reason)
-            }
+            LexResult::Err(reason) => assert_eq!(reason.error_code, LEX_INVALID_FLOATING_NUMBER),
             _ => panic!(),
         }
     }
@@ -567,10 +631,7 @@ mod tests {
 
         match scan(&input, start_pos) {
             LexResult::Err(reason) => {
-                assert_eq!(
-                    "The characters after 'e' are not + or -, or are not followed by a number",
-                    reason.reason
-                )
+                assert_eq!(reason.error_code, LEX_INVALID_SCIENTIFIC_NUMBER)
             }
             _ => panic!("Expected an error"),
         }
@@ -583,10 +644,7 @@ mod tests {
 
         match scan(&input, start_pos) {
             LexResult::Err(reason) => {
-                assert_eq!(
-                    "The characters after 'e' are not + or -, or are not followed by a number",
-                    reason.reason
-                )
+                assert_eq!(reason.error_code, LEX_INVALID_SCIENTIFIC_NUMBER)
             }
             _ => panic!("Expected an error"),
         }

@@ -1,7 +1,5 @@
 use std::io::{self, Write};
 
-use colored::Colorize;
-
 use crate::codegen::Transpilable;
 use crate::error_handling::PrintableError;
 

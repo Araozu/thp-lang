@@ -33,7 +33,7 @@ impl PrintableError for SyntaxError {
             )
             .finish();
 
-        report.eprint(("sample.thp", Source::from(source)));
+        report.eprint(("sample.thp", Source::from(source))).unwrap();
     }
 }
 

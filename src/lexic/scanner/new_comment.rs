@@ -1,6 +1,8 @@
 use super::token::Token;
 use crate::{
-    error_handling::LexError,
+    error_handling::{
+        error_messages::LEX_INCOMPLETE_MULTILINE_COMMENT, ErrorContainer, ErrorLabel,
+    },
     lexic::{utils, LexResult},
 };
 
@@ -40,12 +42,21 @@ pub fn scan_multiline(chars: &Vec<char>, start_pos: usize) -> LexResult {
         ),
         Err(last_position) => {
             // Throw an error: Incomplete multiline comment
-            LexResult::Err(LexError {
-                position: start_pos,
-                // TODO: add an end_position
-                end_position: last_position,
-                reason: "Unfinished multiline commend".into(),
-            })
+            let label = ErrorLabel {
+                message: String::from("The code ends here without closing the multiline comment"),
+                // This is minus 1 so we are pointing at something, and not at EOF
+                start: last_position - 1,
+                end: last_position,
+            };
+            let econtainer = ErrorContainer {
+                error_code: LEX_INCOMPLETE_MULTILINE_COMMENT,
+                error_offset: last_position,
+                labels: vec![label],
+                note: None,
+                help: Some(String::from("End the multiline comment with `*/`")),
+            };
+
+            LexResult::Err(econtainer)
         }
     }
 }
@@ -228,7 +239,7 @@ mod tests {
         let result = scan_multiline(&input, 0);
         match result {
             LexResult::Err(error) => {
-                assert_eq!(0, error.position)
+                assert_eq!(error.error_code, LEX_INCOMPLETE_MULTILINE_COMMENT);
             }
             _ => {
                 panic!("Expected an error scannning an incomplete multiline comment")

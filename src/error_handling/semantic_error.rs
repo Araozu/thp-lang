@@ -41,6 +41,6 @@ impl PrintableError for SemanticError {
             )
             .finish();
 
-        report.eprint(("sample.thp", Source::from(source)));
+        report.eprint(("sample.thp", Source::from(source))).unwrap();
     }
 }
