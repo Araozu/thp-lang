@@ -37,7 +37,7 @@ pub struct ErrorLabel {
 #[derive(Serialize, Debug)]
 pub enum MistiError {
     Lex(ErrorContainer),
-    Syntax(SyntaxError),
+    Syntax(ErrorContainer),
     Semantic(SemanticError),
 }
 
@@ -87,6 +87,14 @@ impl PrintableError for ErrorContainer {
             let l = Label::new(("sample.thp", label.start..label.end))
                 .with_message(label.message.clone());
             report = report.with_label(l)
+        }
+
+        if let Some(help) = &self.help {
+            report = report.with_help(help);
+        }
+
+        if let Some(note) = &self.note {
+            report = report.with_help(note);
         }
 
         report

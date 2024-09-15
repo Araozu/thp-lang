@@ -1,8 +1,10 @@
 use crate::{
-    error_handling::SyntaxError,
+    error_handling::{
+        error_messages::SYNTAX_INVALID_FUNCTION_DECLARATION, ErrorContainer, ErrorLabel,
+    },
     lexic::token::{Token, TokenType},
     syntax::{
-        ast::{Block, FunctionDeclaration},
+        ast::{Block, FunctionDeclaration, Positionable},
         functions::params_list::parse_params_list,
         parseable::{Parseable, ParsingError, ParsingResult},
         utils::{parse_token_type, try_operator},
@@ -28,18 +30,34 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
                 Ok((id, next)) => (id, next),
                 Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
                 Err(ParsingError::Mismatch(wrong_token)) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected an identifier after the `fun` keyword."),
-                        error_start: wrong_token.position,
-                        error_end: wrong_token.get_end_position(),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected an identifier here"),
+                        start: wrong_token.position,
+                        end: wrong_token.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_FUNCTION_DECLARATION,
+                        error_offset: wrong_token.position,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
                 Err(ParsingError::Unmatched) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected an identifier after the `fun` keyword."),
-                        error_start: fun_keyword.position,
-                        error_end: fun_keyword.get_end_position(),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected an identifier after this `fun` keyword"),
+                        start: fun_keyword.position,
+                        end: fun_keyword.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_FUNCTION_DECLARATION,
+                        error_offset: fun_keyword.position,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
             };
         current_pos = next_pos;
@@ -50,22 +68,38 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
             Ok((params, next_pos)) => (params, next_pos),
             Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(wrong_token)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from(
-                        "Expected an opening paren after the function identifier.",
-                    ),
-                    error_start: wrong_token.position,
-                    error_end: wrong_token.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected a parameter list here"),
+                    start: wrong_token.position,
+                    end: wrong_token.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FUNCTION_DECLARATION,
+                    error_offset: wrong_token.get_end_position(),
+                    labels: vec![label],
+                    note: Some(String::from(
+                        "If this function doesn't take any parameter, use an empty list `()`",
+                    )),
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from(
-                        "Expected an opening paren after the function identifier.",
-                    ),
-                    error_start: identifier.position,
-                    error_end: identifier.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected a parameter list after this identifier"),
+                    start: identifier.position,
+                    end: identifier.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FUNCTION_DECLARATION,
+                    error_offset: identifier.get_end_position(),
+                    labels: vec![label],
+                    note: Some(String::from(
+                        "If this function doesn't take any parameter, use an empty list `()`",
+                    )),
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
         current_pos = next_pos;
@@ -83,18 +117,38 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
                 Ok((t, next)) => (Some(t), next),
                 Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
                 Err(ParsingError::Mismatch(wrong_token)) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected a datatype after the arrow operator."),
-                        error_start: wrong_token.position,
-                        error_end: wrong_token.get_end_position(),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected a Datatype here"),
+                        start: wrong_token.position,
+                        end: wrong_token.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_FUNCTION_DECLARATION,
+                        error_offset: wrong_token.position,
+                        labels: vec![label],
+                        note: Some(String::from(
+                            "If you want a function without a return type, omit the arrow as well",
+                        )),
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
                 Err(ParsingError::Unmatched) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected a datatype after the arrow operator."),
-                        error_start: arrow_op.position,
-                        error_end: arrow_op.get_end_position(),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected a Datatype after this arrow `->` operator"),
+                        start: arrow_op.position,
+                        end: arrow_op.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_FUNCTION_DECLARATION,
+                        error_offset: arrow_op.position,
+                        labels: vec![label],
+                        note: Some(String::from(
+                            "If you want a function without a return type, omit the arrow as well",
+                        )),
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
             }
         };
@@ -107,18 +161,41 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
                 return Err(ParsingError::Err(error));
             }
             Err(ParsingError::Mismatch(wrong_token)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a block after the function declaration."),
-                    error_start: wrong_token.position,
-                    error_end: wrong_token.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected a block here, after the function declaration"),
+                    start: wrong_token.position,
+                    end: wrong_token.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FUNCTION_DECLARATION,
+                    error_offset: wrong_token.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a block after the function declaration."),
-                    error_start: identifier.position,
-                    error_end: identifier.get_end_position(),
-                }));
+                let (error_start, error_end) = {
+                    if let Some(return_type) = return_type {
+                        (return_type.position, return_type.get_end_position())
+                    } else {
+                        params_list.get_position()
+                    }
+                };
+                let label = ErrorLabel {
+                    message: String::from("Expected a block here, after the function declaration"),
+                    start: error_start,
+                    end: error_end,
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FUNCTION_DECLARATION,
+                    error_offset: error_start,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
         current_pos = next_pos;
@@ -159,12 +236,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected an identifier after the `fun` keyword."
-                );
-                assert_eq!(err.error_start, 4);
-                assert_eq!(err.error_end, 5);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 4);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -173,12 +246,8 @@ mod tests {
         let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected an identifier after the `fun` keyword."
-                );
-                assert_eq!(err.error_start, 0);
-                assert_eq!(err.error_end, 3);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 0);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -191,12 +260,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected an opening paren after the function identifier."
-                );
-                assert_eq!(err.error_start, 7);
-                assert_eq!(err.error_end, 8);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 7);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -205,12 +270,8 @@ mod tests {
         let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected an opening paren after the function identifier."
-                );
-                assert_eq!(err.error_start, 4);
-                assert_eq!(err.error_end, 6);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 4);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -223,12 +284,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected a closing paren after the function identifier."
-                );
-                assert_eq!(err.error_start, 7);
-                assert_eq!(err.error_end, 8);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 7);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -237,12 +294,8 @@ mod tests {
         let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected a closing paren after the function identifier."
-                );
-                assert_eq!(err.error_start, 6);
-                assert_eq!(err.error_end, 7);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 6);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -255,12 +308,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected an identifier after the `fun` keyword."
-                );
-                assert_eq!(err.error_start, 0);
-                assert_eq!(err.error_end, 3);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 0);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -271,12 +320,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected an identifier after the `fun` keyword."
-                );
-                assert_eq!(err.error_start, 0);
-                assert_eq!(err.error_end, 3);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 0);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -289,12 +334,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected a block after the function declaration."
-                );
-                assert_eq!(err.error_start, 9);
-                assert_eq!(err.error_end, 10);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 9);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -303,12 +344,8 @@ mod tests {
         let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(
-                    err.reason,
-                    "Expected a block after the function declaration."
-                );
-                assert_eq!(err.error_start, 4);
-                assert_eq!(err.error_end, 6);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 4);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -321,9 +358,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(err.reason, "Expected a closing brace after the block body.");
-                assert_eq!(err.error_start, 9);
-                assert_eq!(err.error_end, 10);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 9);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -333,9 +369,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(err.reason, "Expected a closing brace after the block body.");
-                assert_eq!(err.error_start, 9);
-                assert_eq!(err.error_end, 10);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 9);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -369,9 +404,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(err.reason, "Expected a datatype after the arrow operator.");
-                assert_eq!(err.error_start, 12);
-                assert_eq!(err.error_end, 13);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 9);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -384,9 +418,8 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(err.reason, "Expected a datatype after the arrow operator.");
-                assert_eq!(err.error_start, 9);
-                assert_eq!(err.error_end, 11);
+                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_offset, 9);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }

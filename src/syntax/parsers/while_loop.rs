@@ -1,5 +1,5 @@
 use crate::{
-    error_handling::SyntaxError,
+    error_handling::{error_messages::SYNTAX_INVALID_WHILE_LOOP, ErrorContainer, ErrorLabel},
     lexic::token::{Token, TokenType},
     syntax::{
         ast::{loops::WhileLoop, Block, Expression, Positionable},
@@ -23,21 +23,34 @@ impl<'a> Parseable<'a> for WhileLoop<'a> {
             Ok(t) => t,
             Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
             Err(ParsingError::Mismatch(e)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: e.position,
-                    error_end: e.get_end_position(),
-                    reason: format!(
-                        "Expected an expression after the `while` keyword, found {}",
-                        e.value
-                    ),
-                }))
+                let label = ErrorLabel {
+                    message: String::from("Expected a Bool expression here"),
+                    start: e.position,
+                    end: e.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_WHILE_LOOP,
+                    error_offset: e.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: while_keyword.position,
-                    error_end: while_keyword.get_end_position(),
-                    reason: format!("Expected an identifier after the `while` keyword"),
-                }))
+                let label = ErrorLabel {
+                    message: String::from("Expected a Bool expression after this `while` keyword"),
+                    start: while_keyword.position,
+                    end: while_keyword.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_WHILE_LOOP,
+                    error_offset: while_keyword.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 
@@ -46,18 +59,36 @@ impl<'a> Parseable<'a> for WhileLoop<'a> {
             Ok(t) => t,
             Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
             Err(ParsingError::Mismatch(e)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: e.position,
-                    error_end: e.get_end_position(),
-                    reason: format!("Expected a block after the condition, found {}", e.value),
-                }))
+                let label = ErrorLabel {
+                    message: String::from("Expected a block here, after the condition"),
+                    start: e.position,
+                    end: e.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_WHILE_LOOP,
+                    error_offset: e.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: while_keyword.position,
-                    error_end: while_keyword.get_end_position(),
-                    reason: format!("Expected a block after the condition"),
-                }))
+                let (error_start, error_end) = condition.get_position();
+
+                let label = ErrorLabel {
+                    message: String::from("Expected a block after this condition"),
+                    start: error_start,
+                    end: error_end,
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_WHILE_LOOP,
+                    error_offset: error_start,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 

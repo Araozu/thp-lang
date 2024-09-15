@@ -1,5 +1,5 @@
 use crate::{
-    error_handling::SyntaxError,
+    error_handling::{error_messages::SYNTAX_INVALID_FOR_LOOP, ErrorContainer, ErrorLabel},
     lexic::token::{Token, TokenType},
     syntax::{
         ast::{loops::ForLoop, Block, Expression, Positionable},
@@ -23,21 +23,34 @@ impl<'a> Parseable<'a> for ForLoop<'a> {
             Ok(t) => t,
             Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
             Err(ParsingError::Mismatch(e)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: e.position,
-                    error_end: e.get_end_position(),
-                    reason: format!(
-                        "Expected an identifier after the `for` keyword, found {}",
-                        e.value
-                    ),
-                }))
+                let label = ErrorLabel {
+                    message: String::from("Expected an identifier here, after the `for` keyword"),
+                    start: e.position,
+                    end: e.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FOR_LOOP,
+                    error_offset: e.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: for_keyword.position,
-                    error_end: for_keyword.get_end_position(),
-                    reason: format!("Expected an identifier after the `for` keyword"),
-                }))
+                let label = ErrorLabel {
+                    message: String::from("Expected an identifier after this `for` keyword"),
+                    start: for_keyword.position,
+                    end: for_keyword.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FOR_LOOP,
+                    error_offset: for_keyword.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 
@@ -55,21 +68,38 @@ impl<'a> Parseable<'a> for ForLoop<'a> {
                 Ok((second_id, next)) => (Some(second_id), next),
                 Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
                 Err(ParsingError::Mismatch(t)) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        error_start: t.position,
-                        error_end: t.get_end_position(),
-                        reason: format!(
-                            "Expected an identifier after the comma, found `{}`",
-                            t.value
-                        ),
-                    }))
+                    let label = ErrorLabel {
+                        message: String::from("Expected an identifier here, after the comma"),
+                        start: t.position,
+                        end: t.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_FOR_LOOP,
+                        error_offset: t.position,
+                        labels: vec![label],
+                        note: Some(String::from(
+                            "To iterate only over values, use `for identifier in ...`",
+                        )),
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
                 Err(ParsingError::Unmatched) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        error_start: comma.position,
-                        error_end: comma.get_end_position(),
-                        reason: format!("Expected an identifier after the comma"),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected an identifier after this comma"),
+                        start: comma.position,
+                        end: comma.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_FOR_LOOP,
+                        error_offset: comma.position,
+                        labels: vec![label],
+                        note: Some(String::from(
+                            "To iterate only over values, use `for identifier in ...`",
+                        )),
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
             }
         };
@@ -79,11 +109,19 @@ impl<'a> Parseable<'a> for ForLoop<'a> {
             Ok(tuple) => tuple,
             Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
             Err(ParsingError::Mismatch(t)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: t.position,
-                    error_end: t.get_end_position(),
-                    reason: format!("Expected the `in` keyword, found `{}`", t.value),
-                }))
+                let label = ErrorLabel {
+                    message: String::from("Expected the `in` keyword here"),
+                    start: t.position,
+                    end: t.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FOR_LOOP,
+                    error_offset: t.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
                 let previous_token = if second_id.is_none() {
@@ -91,11 +129,19 @@ impl<'a> Parseable<'a> for ForLoop<'a> {
                 } else {
                     second_id.unwrap()
                 };
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: previous_token.position,
-                    error_end: previous_token.get_end_position(),
-                    reason: format!("Expected the `in` keyword"),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected the `in` keyword after this identifier"),
+                    start: previous_token.position,
+                    end: previous_token.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FOR_LOOP,
+                    error_offset: previous_token.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 
@@ -104,11 +150,19 @@ impl<'a> Parseable<'a> for ForLoop<'a> {
             Ok(t) => t,
             Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
             Err(_) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: in_keyword.position,
-                    error_end: in_keyword.get_end_position(),
-                    reason: format!("Expected an expression after the `in` keyword"),
-                }))
+                let label = ErrorLabel {
+                    message: String::from("Expected an expression after this `in` keyword"),
+                    start: in_keyword.position,
+                    end: in_keyword.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FOR_LOOP,
+                    error_offset: in_keyword.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 
@@ -117,19 +171,35 @@ impl<'a> Parseable<'a> for ForLoop<'a> {
             Ok(t) => t,
             Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(wrong_token)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a block after the collection"),
-                    error_start: wrong_token.position,
-                    error_end: wrong_token.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected a block here"),
+                    start: wrong_token.position,
+                    end: wrong_token.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FOR_LOOP,
+                    error_offset: wrong_token.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
                 let (error_start, error_end) = expr.get_position();
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a block after the collection"),
-                    error_start,
-                    error_end,
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected a block here, after the collection"),
+                    start: error_start,
+                    end: error_end,
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_FOR_LOOP,
+                    error_offset: error_start,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 

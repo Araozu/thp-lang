@@ -1,4 +1,4 @@
-use crate::{error_handling::SyntaxError, lexic::token::Token};
+use crate::{error_handling::ErrorContainer, lexic::token::Token};
 
 /// The result of a parsing operation.
 /// On success, it contains the item and the position of the next token
@@ -15,7 +15,7 @@ pub enum ParsingError<'a> {
     ///
     /// For example, when parsing a function declaration
     /// the `fun` token is found, but then no identifier
-    Err(SyntaxError),
+    Err(ErrorContainer),
 }
 
 /// Represents a type that can be parsed using Recursive Descent

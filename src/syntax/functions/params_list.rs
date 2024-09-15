@@ -1,5 +1,8 @@
 use crate::{
-    error_handling::SyntaxError,
+    error_handling::{
+        error_messages::{SYNTAX_INCOMPLETE_PARAMETER_LIST, SYNTAX_INVALID_PARAMETER_DECLARATION},
+        ErrorContainer, ErrorLabel,
+    },
     lexic::token::{Token, TokenType},
     syntax::{utils::parse_token_type, ParsingError, ParsingResult},
 };
@@ -60,28 +63,61 @@ pub fn parse_params_list(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Param
     }
 
     // Parse closing paren
-    let (_closing_paren, next_pos) =
+    let (closing_paren, next_pos) =
         match parse_token_type(tokens, current_pos, TokenType::RightParen) {
             Ok((t, next)) => (t, next),
             Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(t)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a closing paren after the function identifier."),
-                    error_start: t.position,
-                    error_end: t.get_end_position(),
-                }));
+                let label_1 = ErrorLabel {
+                    message: String::from("The parameter list starts here"),
+                    start: opening_paren.position,
+                    end: opening_paren.get_end_position(),
+                };
+                let label = ErrorLabel {
+                    message: String::from("Expected a closing paren `)` here"),
+                    start: t.position,
+                    end: t.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INCOMPLETE_PARAMETER_LIST,
+                    error_offset: t.position,
+                    labels: vec![label_1, label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a closing paren after the function identifier."),
-                    error_start: opening_paren.position,
-                    error_end: opening_paren.get_end_position(),
-                }));
+                let label_1 = ErrorLabel {
+                    message: String::from("The parameter list starts here"),
+                    start: opening_paren.position,
+                    end: opening_paren.get_end_position(),
+                };
+                let label_2 = ErrorLabel {
+                    message: String::from("The code ends here without closing the parameter list"),
+                    start: current_pos,
+                    end: current_pos + 1,
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INCOMPLETE_PARAMETER_LIST,
+                    error_offset: current_pos,
+                    labels: vec![label_1, label_2],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
     current_pos = next_pos;
 
-    Ok((ParamsList { parameters }, current_pos))
+    Ok((
+        ParamsList {
+            parameters,
+            start: opening_paren.position,
+            end: closing_paren.get_end_position(),
+        },
+        current_pos,
+    ))
 }
 
 /// Parse a single parameter definition of the form:
@@ -112,19 +148,36 @@ fn parse_param_definition(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Para
                 return Err(ParsingError::Err(err));
             }
             // However, if we fail to parse an identifier, it's an error
-            Err(ParsingError::Mismatch(_)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected an identifier for the parameter."),
-                    error_start: tokens[pos].position,
-                    error_end: tokens[pos].get_end_position(),
-                }));
+            Err(ParsingError::Mismatch(t)) => {
+                let label = ErrorLabel {
+                    message: String::from("Expected an identifier here, found this instead"),
+                    start: t.position,
+                    end: t.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_PARAMETER_DECLARATION,
+                    error_offset: t.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected an identifier for the parameter."),
-                    error_start: tokens[pos].position,
-                    error_end: tokens[pos].get_end_position(),
-                }))
+                let datatype_token = &tokens[pos];
+                let label = ErrorLabel {
+                    message: String::from("Expected an identifier after this datatype"),
+                    start: datatype_token.position,
+                    end: datatype_token.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_PARAMETER_DECLARATION,
+                    error_offset: datatype_token.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 

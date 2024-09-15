@@ -83,6 +83,14 @@ pub enum BlockMember<'a> {
 #[derive(Debug)]
 pub struct ParamsList<'a> {
     pub parameters: Vec<Parameter<'a>>,
+    pub start: usize,
+    pub end: usize,
+}
+
+impl Positionable for ParamsList<'_> {
+    fn get_position(&self) -> (usize, usize) {
+        todo!()
+    }
 }
 
 #[derive(Debug)]

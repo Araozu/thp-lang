@@ -1,5 +1,8 @@
 use crate::{
-    error_handling::SyntaxError,
+    error_handling::{
+        error_messages::{SYNTAX_INCOMPLETE_STATEMENT, SYNTAX_UNEXPECTED_TOKENS},
+        ErrorContainer, ErrorLabel,
+    },
     lexic::token::{Token, TokenType},
     syntax::{
         ast::{Expression, ModuleAST, ModuleMembers, Statement},
@@ -46,14 +49,23 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
                     let next_pos = match parse_terminator(tokens, next_pos) {
                         Ok((_, next)) => next,
                         Err(ParsingError::Mismatch(t)) => {
-                            return Err(ParsingError::Err(SyntaxError {
-                                error_start: t.position,
-                                error_end: t.get_end_position(),
-                                reason: format!(
-                                    "Unexpected token `{}`, expected a new line",
-                                    t.value
+                            let label = ErrorLabel {
+                                message: String::from(
+                                    "Expected a new line here, found another token",
                                 ),
-                            }))
+                                start: t.position,
+                                end: t.get_end_position(),
+                            };
+                            let econtainer = ErrorContainer {
+                                error_code: SYNTAX_INCOMPLETE_STATEMENT,
+                                error_offset: t.position,
+                                labels: vec![label],
+                                note: Some(String::from(
+                                    "There may only be one statement per line",
+                                )),
+                                help: None,
+                            };
+                            return Err(ParsingError::Err(econtainer));
                         }
                         _ => unreachable!(),
                     };
@@ -78,14 +90,22 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
                 }
             }
 
-            // If we reached this point we didn't match any productions and fail
+            // If we reached this point we didn't match any productions and should fail
             let t = &tokens[current_pos];
 
-            return Err(ParsingError::Err(SyntaxError {
-                error_start: t.position,
-                error_end: t.get_end_position(),
-                reason: "Expected an statement or an expresion at the top level.".into(),
-            }));
+            let label = ErrorLabel {
+                message: String::from("This sequence of tokens couldn't be parsed"),
+                start: t.position,
+                end: t.get_end_position(),
+            };
+            let econtainer = ErrorContainer {
+                error_code: SYNTAX_UNEXPECTED_TOKENS,
+                error_offset: t.position,
+                labels: vec![label],
+                note: None,
+                help: None,
+            };
+            return Err(ParsingError::Err(econtainer));
         }
 
         Ok((ModuleAST { productions }, current_pos))
@@ -150,7 +170,7 @@ mod test {
         match result {
             Ok(_) => panic!("Expected an error"),
             Err(ParsingError::Err(err)) => {
-                assert_eq!("Unexpected token `print`, expected a new line", err.reason);
+                assert_eq!(err.error_code, SYNTAX_INCOMPLETE_STATEMENT)
             }
             _ => panic!("Expected a parsing error"),
         }

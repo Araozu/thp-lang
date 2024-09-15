@@ -1,5 +1,5 @@
 use crate::{
-    error_handling::SyntaxError,
+    error_handling::{error_messages::SYNTAX_INCOMPLETE_BLOCK, ErrorContainer, ErrorLabel},
     lexic::token::{Token, TokenType},
     syntax::{
         ast::{Block, BlockMember, Expression, Statement},
@@ -65,20 +65,34 @@ impl<'a> Parseable<'a> for Block<'a> {
                 Ok((t, next)) => (t, next),
                 Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
                 Err(ParsingError::Mismatch(t)) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected a closing brace after the block body."),
-                        error_start: t.position,
-                        error_end: t.get_end_position(),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected a closing brace `}` here"),
+                        start: t.position,
+                        end: t.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INCOMPLETE_BLOCK,
+                        error_offset: t.position,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
                 Err(ParsingError::Unmatched) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected a closing brace after the block body."),
-                        // TODO: use the last token (at pos current_pos) as guide for the error
-                        // msg position
-                        error_start: opening_brace.position,
-                        error_end: opening_brace.get_end_position(),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected a closing brace `}` here"),
+                        start: current_pos,
+                        end: current_pos + 1,
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INCOMPLETE_BLOCK,
+                        error_offset: current_pos,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
             };
         current_pos = next_pos;

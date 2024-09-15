@@ -1,5 +1,5 @@
 use crate::{
-    error_handling::SyntaxError,
+    error_handling::{error_messages::SYNTAX_INCOMPLETE_ARGUMENT_LIST, ErrorContainer, ErrorLabel},
     lexic::token::{Token, TokenType},
     syntax::{
         ast::{functions::ArgumentsList, Expression},
@@ -58,18 +58,44 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<ArgumentsList
             Ok((t, next)) => (t, next),
             Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(t)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a closing paren after the function identifier."),
-                    error_start: t.position,
-                    error_end: t.get_end_position(),
-                }));
+                let label_1 = ErrorLabel {
+                    message: String::from("The argument list starts here"),
+                    start: opening_paren.position,
+                    end: opening_paren.get_end_position(),
+                };
+                let label = ErrorLabel {
+                    message: String::from("Expected a closing paren `)` here"),
+                    start: t.position,
+                    end: t.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INCOMPLETE_ARGUMENT_LIST,
+                    error_offset: t.position,
+                    labels: vec![label_1, label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a closing paren after the function identifier."),
-                    error_start: opening_paren.position,
-                    error_end: opening_paren.get_end_position(),
-                }));
+                let label_1 = ErrorLabel {
+                    message: String::from("The argument list starts here"),
+                    start: opening_paren.position,
+                    end: opening_paren.get_end_position(),
+                };
+                let label_2 = ErrorLabel {
+                    message: String::from("The code ends here without closing the argument list"),
+                    start: current_pos,
+                    end: current_pos + 1,
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INCOMPLETE_ARGUMENT_LIST,
+                    error_offset: current_pos,
+                    labels: vec![label_1, label_2],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
     current_pos = next_pos;

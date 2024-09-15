@@ -72,6 +72,8 @@ pub fn parse_token_type(
 
     match tokens.get(current_pos) {
         Some(t) if t.token_type == token_type => Ok((t, current_pos + 1)),
+        // TODO: Why are we checking if the token is NewLine here? Arent all newlines filtered
+        // above?
         Some(t) if t.token_type == TokenType::EOF || t.token_type == TokenType::NewLine => {
             Err(ParsingError::Unmatched)
         }

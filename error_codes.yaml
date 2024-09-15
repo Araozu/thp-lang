@@ -6,4 +6,15 @@
 0x000004: Invalid floating point number
 0x000005: Invalid scientific number
 0x000006: Incomplete multiline comment
+0x000007: Unfinished statement
+0x000008: Unexpected tokens
+0x000009: Incomplete arguments list
+0x000010: Invalid variable declaration
+0x000011: Incomplete parameter list
+0x000012: Invalid parameter declaration
+0x000013: Invalid while loop
+0x000014: Invalid function declaration
+0x000015: Invalid for loop
+0x000016: Invalid if condition
+0x000017: Incomplete block
 

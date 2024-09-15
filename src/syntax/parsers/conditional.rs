@@ -1,5 +1,5 @@
 use crate::{
-    error_handling::SyntaxError,
+    error_handling::{error_messages::SYNTAX_INVALID_IF_CONDITION, ErrorContainer, ErrorLabel},
     lexic::token::{Token, TokenType},
     syntax::{
         ast::{Block, Condition, Conditional, Expression, Positionable},
@@ -23,18 +23,34 @@ impl<'a> Parseable<'a> for Conditional<'a> {
             Ok(tuple) => tuple,
             Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(wrong_token)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected an expression after the if token"),
-                    error_start: wrong_token.position,
-                    error_end: wrong_token.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected a Bool expression here"),
+                    start: wrong_token.position,
+                    end: wrong_token.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_IF_CONDITION,
+                    error_offset: wrong_token.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected an expression after the if token"),
-                    error_start: if_token.position,
-                    error_end: if_token.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected a Bool expression after this `if` keyword"),
+                    start: if_token.position,
+                    end: if_token.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_IF_CONDITION,
+                    error_offset: if_token.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 
@@ -43,19 +59,35 @@ impl<'a> Parseable<'a> for Conditional<'a> {
             Ok(t) => t,
             Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
             Err(ParsingError::Mismatch(wrong_token)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a block after the condition"),
-                    error_start: wrong_token.position,
-                    error_end: wrong_token.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected a block here, after the condition"),
+                    start: wrong_token.position,
+                    end: wrong_token.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_IF_CONDITION,
+                    error_offset: wrong_token.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             Err(ParsingError::Unmatched) => {
                 let (error_start, error_end) = if_expression.get_position();
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected a block after the condition"),
-                    error_start,
-                    error_end,
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected a block after this condition"),
+                    start: error_start,
+                    end: error_end,
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_IF_CONDITION,
+                    error_offset: error_start,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 
@@ -87,18 +119,34 @@ impl<'a> Parseable<'a> for Conditional<'a> {
                 Ok(tuple) => tuple,
                 Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
                 Err(ParsingError::Mismatch(wrong_token)) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected an expression after the if token"),
-                        error_start: wrong_token.position,
-                        error_end: wrong_token.get_end_position(),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected a Bool expression here"),
+                        start: wrong_token.position,
+                        end: wrong_token.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_IF_CONDITION,
+                        error_offset: wrong_token.position,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
                 Err(ParsingError::Unmatched) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected an expression after the if token"),
-                        error_start: if_token.position,
-                        error_end: if_token.get_end_position(),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected a Bool expression after this `if` keyword"),
+                        start: if_token.position,
+                        end: if_token.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_IF_CONDITION,
+                        error_offset: if_token.position,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
             };
 
@@ -107,19 +155,35 @@ impl<'a> Parseable<'a> for Conditional<'a> {
                 Ok(t) => t,
                 Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
                 Err(ParsingError::Mismatch(wrong_token)) => {
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected a block after the condition"),
-                        error_start: wrong_token.position,
-                        error_end: wrong_token.get_end_position(),
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected a block here, after the condition"),
+                        start: wrong_token.position,
+                        end: wrong_token.get_end_position(),
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_IF_CONDITION,
+                        error_offset: wrong_token.position,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
                 Err(ParsingError::Unmatched) => {
                     let (error_start, error_end) = condition.get_position();
-                    return Err(ParsingError::Err(SyntaxError {
-                        reason: String::from("Expected a block after the condition"),
-                        error_start,
-                        error_end,
-                    }));
+                    let label = ErrorLabel {
+                        message: String::from("Expected a block after this condition"),
+                        start: error_start,
+                        end: error_end,
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SYNTAX_INVALID_IF_CONDITION,
+                        error_offset: error_start,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(ParsingError::Err(econtainer));
                 }
             };
 
@@ -140,18 +204,36 @@ impl<'a> Parseable<'a> for Conditional<'a> {
                         Ok(t) => t,
                         Err(ParsingError::Err(err)) => return Err(ParsingError::Err(err)),
                         Err(ParsingError::Mismatch(wrong_token)) => {
-                            return Err(ParsingError::Err(SyntaxError {
-                                reason: String::from("Expected a block after the else keyword"),
-                                error_start: wrong_token.position,
-                                error_end: wrong_token.get_end_position(),
-                            }));
+                            let label = ErrorLabel {
+                                message: String::from("Expected a block here, after the condition"),
+                                start: wrong_token.position,
+                                end: wrong_token.get_end_position(),
+                            };
+                            let econtainer = ErrorContainer {
+                                error_code: SYNTAX_INVALID_IF_CONDITION,
+                                error_offset: wrong_token.position,
+                                labels: vec![label],
+                                note: None,
+                                help: None,
+                            };
+                            return Err(ParsingError::Err(econtainer));
                         }
                         Err(ParsingError::Unmatched) => {
-                            return Err(ParsingError::Err(SyntaxError {
-                                reason: String::from("Expected a block after the else keyword"),
-                                error_start: else_token.position,
-                                error_end: else_token.get_end_position(),
-                            }));
+                            let label = ErrorLabel {
+                                message: String::from(
+                                    "Expected a block here, after this `else` keyword",
+                                ),
+                                start: else_token.position,
+                                end: else_token.get_end_position(),
+                            };
+                            let econtainer = ErrorContainer {
+                                error_code: SYNTAX_INVALID_IF_CONDITION,
+                                error_offset: else_token.position,
+                                labels: vec![label],
+                                note: None,
+                                help: None,
+                            };
+                            return Err(ParsingError::Err(econtainer));
                         }
                     };
 

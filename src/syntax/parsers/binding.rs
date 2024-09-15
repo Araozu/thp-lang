@@ -1,5 +1,8 @@
 use crate::{
-    error_handling::SyntaxError,
+    error_handling::{
+        error_messages::{SYNTAX_INCOMPLETE_STATEMENT, SYNTAX_INVALID_VARIABLE_DECLARATION},
+        ErrorContainer, ErrorLabel,
+    },
     lexic::token::{Token, TokenType},
     syntax::{
         ast::{var_binding::VariableBinding, Expression},
@@ -52,31 +55,57 @@ impl<'a> Parseable<'a> for VariableBinding<'a> {
             Ok((t, n)) => (t, n),
             Err(ParsingError::Mismatch(token)) => {
                 // The parser found a token, but it's not an identifier
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: token.position,
-                    error_end: token.get_end_position(),
-                    reason: "There should be an identifier after a binding".into(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected an identifier here"),
+                    start: token.position,
+                    end: token.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_VARIABLE_DECLARATION,
+                    error_offset: token.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             _ => {
                 // The parser didn't find an Identifier after VAL/VAR or the Datatype
                 match (binding_token, datatype) {
                     (Some(binding_token), None) => {
-                        return Err(ParsingError::Err(SyntaxError {
-                            reason: format!(
-                                "There should be an identifier after a `{}` token",
+                        let label = ErrorLabel {
+                            message: format!(
+                                "There should be an identifier after this `{}` token",
                                 if is_var { "var" } else { "val" }
                             ),
-                            error_start: binding_token.position,
-                            error_end: binding_token.get_end_position(),
-                        }));
+                            start: binding_token.position,
+                            end: binding_token.get_end_position(),
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SYNTAX_INVALID_VARIABLE_DECLARATION,
+                            error_offset: binding_token.position,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(ParsingError::Err(econtainer));
                     }
                     (_, Some(datatype_token)) => {
-                        return Err(ParsingError::Err(SyntaxError {
-                            reason: "There should be an identifier after the datatype".into(),
-                            error_start: datatype_token.position,
-                            error_end: datatype_token.get_end_position(),
-                        }));
+                        let label = ErrorLabel {
+                            message: String::from(
+                                "There should be an identifier after this datatype",
+                            ),
+                            start: datatype_token.position,
+                            end: datatype_token.get_end_position(),
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SYNTAX_INVALID_VARIABLE_DECLARATION,
+                            error_offset: datatype_token.position,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(ParsingError::Err(econtainer));
                     }
                     _ => {
                         unreachable!(
@@ -94,19 +123,37 @@ impl<'a> Parseable<'a> for VariableBinding<'a> {
             Ok((t, _)) => t,
             Err(ParsingError::Mismatch(t)) => {
                 // The parser found a token, but it's not the `=` operator
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: format!("There should be an equal sign `=` after the identifier"),
-                    error_start: t.position,
-                    error_end: t.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from(
+                        "Expected an equal sign `=` here, after the variable identifier",
+                    ),
+                    start: t.position,
+                    end: t.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_VARIABLE_DECLARATION,
+                    error_offset: t.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             _ => {
                 // The parser didn't find the `=` operator after the identifier
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: format!("There should be an equal sign `=` after the identifier",),
-                    error_start: identifier.position,
-                    error_end: identifier.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected an equal sign `=` after this identifier"),
+                    start: identifier.position,
+                    end: identifier.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_VARIABLE_DECLARATION,
+                    error_offset: identifier.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
         let next_pos = next_pos + 1;
@@ -117,11 +164,19 @@ impl<'a> Parseable<'a> for VariableBinding<'a> {
         let (expression, next_pos) = match Expression::try_parse(tokens, next_pos) {
             Ok((exp, next)) => (exp, next),
             _ => {
-                return Err(ParsingError::Err(SyntaxError {
-                    reason: String::from("Expected an expression after the equal `=` operator"),
-                    error_start: equal_operator.position,
-                    error_end: equal_operator.get_end_position(),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Expected an expression after this equal `=` operator"),
+                    start: equal_operator.position,
+                    end: equal_operator.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INVALID_VARIABLE_DECLARATION,
+                    error_offset: equal_operator.position,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
         };
 
@@ -130,11 +185,19 @@ impl<'a> Parseable<'a> for VariableBinding<'a> {
         let next_pos = match parse_terminator(tokens, next_pos) {
             Ok((_, next)) => next,
             Err(ParsingError::Mismatch(t)) => {
-                return Err(ParsingError::Err(SyntaxError {
-                    error_start: t.position,
-                    error_end: t.get_end_position(),
-                    reason: format!("Unexpected token `{}`, expected a new line", t.value),
-                }))
+                let label = ErrorLabel {
+                    message: String::from("Expected a new line here, found another token"),
+                    start: t.position,
+                    end: t.get_end_position(),
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SYNTAX_INCOMPLETE_STATEMENT,
+                    error_offset: t.position,
+                    labels: vec![label],
+                    note: Some(String::from("There may only be one statement per line")),
+                    help: None,
+                };
+                return Err(ParsingError::Err(econtainer));
             }
             _ => unreachable!(),
         };
@@ -229,8 +292,7 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(4, error.error_start);
-                assert_eq!(6, error.error_end);
+                assert_eq!(4, error.error_offset);
             }
             _ => panic!("Error expected"),
         }
@@ -245,8 +307,7 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(0, error.error_start);
-                assert_eq!(3, error.error_end);
+                assert_eq!(0, error.error_offset);
             }
             _ => panic!("Error expected"),
         }
@@ -261,8 +322,7 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(4, error.error_start);
-                assert_eq!(7, error.error_end);
+                assert_eq!(4, error.error_offset);
             }
             _ => panic!("Error expected"),
         }
@@ -272,12 +332,8 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(4, error.error_start);
-                assert_eq!(11, error.error_end);
-                assert_eq!(
-                    "There should be an identifier after a binding",
-                    error.reason
-                );
+                assert_eq!(4, error.error_offset);
+                assert_eq!(error.error_code, SYNTAX_INVALID_VARIABLE_DECLARATION)
             }
             _ => panic!("Error expected"),
         }
@@ -290,8 +346,7 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(7, error.error_start);
-                assert_eq!(14, error.error_end);
+                assert_eq!(7, error.error_offset);
             }
             _ => panic!("Error expected"),
         }
@@ -304,12 +359,8 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(4, error.error_start);
-                assert_eq!(10, error.error_end);
-                assert_eq!(
-                    "There should be an identifier after the datatype",
-                    error.reason
-                );
+                assert_eq!(4, error.error_offset);
+                assert_eq!(error.error_code, SYNTAX_INVALID_VARIABLE_DECLARATION)
             }
             _ => panic!("Error expected"),
         }
@@ -322,12 +373,8 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(0, error.error_start);
-                assert_eq!(3, error.error_end);
-                assert_eq!(
-                    "There should be an identifier after a `val` token",
-                    error.reason
-                );
+                assert_eq!(0, error.error_offset);
+                assert_eq!(error.error_code, SYNTAX_INVALID_VARIABLE_DECLARATION)
             }
             _ => panic!("Error expected"),
         }
@@ -340,12 +387,8 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(4, error.error_start);
-                assert_eq!(14, error.error_end);
-                assert_eq!(
-                    "There should be an equal sign `=` after the identifier",
-                    error.reason
-                );
+                assert_eq!(4, error.error_offset);
+                assert_eq!(error.error_code, SYNTAX_INVALID_VARIABLE_DECLARATION)
             }
             _ => panic!("Error expected"),
         }
@@ -358,12 +401,8 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(15, error.error_start);
-                assert_eq!(16, error.error_end);
-                assert_eq!(
-                    "Expected an expression after the equal `=` operator",
-                    error.reason
-                );
+                assert_eq!(15, error.error_offset);
+                assert_eq!(error.error_code, SYNTAX_INVALID_VARIABLE_DECLARATION)
             }
             _ => panic!("Error expected"),
         }
@@ -376,12 +415,8 @@ mod tests {
 
         match binding {
             Err(ParsingError::Err(error)) => {
-                assert_eq!(21, error.error_start);
-                assert_eq!(26, error.error_end);
-                assert_eq!(
-                    "Unexpected token `print`, expected a new line",
-                    error.reason
-                );
+                assert_eq!(21, error.error_offset);
+                assert_eq!(error.error_code, SYNTAX_INCOMPLETE_STATEMENT)
             }
             _ => panic!("Error expected"),
         }
