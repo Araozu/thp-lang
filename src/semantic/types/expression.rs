@@ -1,5 +1,11 @@
 use crate::{
-    error_handling::{semantic_error::SemanticError, MistiError},
+    error_handling::{
+        error_messages::{
+            COMPILER_TODO, SEMANTIC_INVALID_REFERENCE, SEMANTIC_MISMATCHED_TYPES,
+            SEMANTIC_MISSING_REFERENCE,
+        },
+        ErrorContainer, ErrorLabel, MistiError,
+    },
     semantic::symbol_table::SymbolTable,
     syntax::ast::Expression,
 };
@@ -19,11 +25,19 @@ impl Typed for Expression<'_> {
                 let datatype = match scope.get_type(&identifier.value) {
                     Some(x) => x,
                     None => {
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start: identifier.position,
-                            error_end: identifier.get_end_position(),
-                            reason: format!("Cannot find `{}` in this scope.", identifier.value),
-                        }))
+                        let label = ErrorLabel {
+                            message: String::from("Cannot find this identifier in this scope"),
+                            start: identifier.position,
+                            end: identifier.get_end_position(),
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SEMANTIC_MISSING_REFERENCE,
+                            error_offset: identifier.position,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(MistiError::Semantic(econtainer));
                     }
                 };
 
@@ -43,20 +57,44 @@ impl Typed for Expression<'_> {
                                 // not the function itself
                                 Ok(Type::Value(return_type))
                             }
-                            Some(_) => Err(MistiError::Semantic(SemanticError {
-                                error_start: id.position,
-                                error_end: id.get_end_position(),
-                                reason: format!("Expected `{}` to be a function", &id.value),
-                            })),
-                            None => Err(MistiError::Semantic(SemanticError {
-                                error_start: id.position,
-                                error_end: id.get_end_position(),
-                                reason: format!("Cannot find `{}` in this scope.", id.value),
-                            })),
+                            Some(_) => {
+                                let label = ErrorLabel {
+                                    message: String::from(
+                                        "Expected this identifier to be a function",
+                                    ),
+                                    start: id.position,
+                                    end: id.get_end_position(),
+                                };
+                                let econtainer = ErrorContainer {
+                                    error_code: SEMANTIC_INVALID_REFERENCE,
+                                    error_offset: id.position,
+                                    labels: vec![label],
+                                    note: None,
+                                    help: None,
+                                };
+                                return Err(MistiError::Semantic(econtainer));
+                            }
+                            None => {
+                                let label = ErrorLabel {
+                                    message: String::from(
+                                        "Cannot find this identifier in this scope",
+                                    ),
+                                    start: id.position,
+                                    end: id.get_end_position(),
+                                };
+                                let econtainer = ErrorContainer {
+                                    error_code: SEMANTIC_INVALID_REFERENCE,
+                                    error_offset: id.position,
+                                    labels: vec![label],
+                                    note: None,
+                                    help: None,
+                                };
+                                return Err(MistiError::Semantic(econtainer));
+                            }
                         }
                     }
                     _ => unimplemented!(
-                        "Get datatype of an expression that resolves into a function call"
+                        "Get datatype of an expression that may resolve into a function call"
                     ),
                 }
             }
@@ -64,35 +102,59 @@ impl Typed for Expression<'_> {
                 let expr_type = match exp.get_type(scope) {
                     Ok(t) => t,
                     Err(_reason) => {
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start: 0,
-                            error_end: 1,
-                            reason: format!("Error getting type of expression"),
-                        }))
+                        let label = ErrorLabel {
+                            message: String::from("Error getting type of this expression"),
+                            // TODO: Fix these positions
+                            start: 0,
+                            end: 1,
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: COMPILER_TODO,
+                            error_offset: 0,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(MistiError::Semantic(econtainer));
                     }
                 };
 
                 // Only supported unary operator: - & !
                 if op.value == "-" {
                     if !expr_type.is_value("Int") && !expr_type.is_value("Float") {
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start: 0,
-                            error_end: 1,
-                            reason: format!(
-                                "Expected a Int or Float after unary `-`, got {:?}",
-                                expr_type
-                            ),
-                        }));
+                        let label = ErrorLabel {
+                            message: format!("Expected an `Int` or `Float`, got {:?}", expr_type),
+                            // TODO: Fix positioning
+                            start: 0,
+                            end: 1,
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SEMANTIC_MISMATCHED_TYPES,
+                            error_offset: 0,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(MistiError::Semantic(econtainer));
                     } else {
                         return Ok(Type::Value("Int".into()));
                     }
                 } else if op.value == "!" {
                     if !expr_type.is_value("Bool") {
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start: 0,
-                            error_end: 1,
-                            reason: format!("Expected a Bool after unary `!`, got {:?}", expr_type),
-                        }));
+                        let label = ErrorLabel {
+                            message: format!("Expected a `Bool`, got {:?}", expr_type),
+                            // TODO: Fix positioning
+                            start: 0,
+                            end: 1,
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SEMANTIC_MISMATCHED_TYPES,
+                            error_offset: 0,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(MistiError::Semantic(econtainer));
                     } else {
                         return Ok(Type::Value("Bool".into()));
                     }
@@ -105,20 +167,27 @@ impl Typed for Expression<'_> {
                 let t2 = exp2.get_type(scope)?;
 
                 // TODO: There's definitely a better way to do this
+                // maybe store operators as functions?
                 if operator.value == "+" && t1.is_value("Int") && t2.is_value("Int") {
                     return Ok(Type::Value("Int".into()));
                 } else if operator.value == "-" && t1.is_value("Int") && t2.is_value("Int") {
                     return Ok(Type::Value("Int".into()));
                 }
 
-                return Err(MistiError::Semantic(SemanticError {
-                    // TODO: fix positions
-                    error_start: 0,
-                    error_end: 1,
-                    reason: format!(
-                        "Unsupported binary operator or invalid arguments to the operator."
-                    ),
-                }));
+                let label = ErrorLabel {
+                    message: format!("Unsupported binary operator"),
+                    // TODO: Fix positioning
+                    start: 0,
+                    end: 1,
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SEMANTIC_MISMATCHED_TYPES,
+                    error_offset: 0,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(MistiError::Semantic(econtainer));
             }
             Expression::Array(arr) => {
                 // The first expression found determines the
@@ -129,13 +198,20 @@ impl Typed for Expression<'_> {
                 // TODO: if the array is empty then its
                 // datatype should be determined by its usage.
                 if arr.exps.is_empty() {
-                    return Err(MistiError::Semantic(SemanticError {
-                        error_start: arr.start,
-                        error_end: arr.end,
-                        reason: format!(
-                            "An array must have at least 1 element to determine its type. This will be fixed later."
-                        ),
-                    }));
+                    let label = ErrorLabel {
+                    message: format!("Compiler limit: Arrays must have at least 1 element to determine their type"),
+                    // TODO: Fix positioning
+                    start: arr.start,
+                    end: arr.end,
+                };
+                    let econtainer = ErrorContainer {
+                        error_code: SEMANTIC_MISMATCHED_TYPES,
+                        error_offset: 0,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(MistiError::Semantic(econtainer));
                 }
 
                 // Just get the first type and use it

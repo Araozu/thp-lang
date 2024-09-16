@@ -1,5 +1,7 @@
 use crate::{
-    error_handling::{semantic_error::SemanticError, MistiError},
+    error_handling::{
+        error_messages::SEMANTIC_MISMATCHED_TYPES, ErrorContainer, ErrorLabel, MistiError,
+    },
     semantic::{
         impls::SemanticCheck,
         symbol_table::SymbolTable,
@@ -30,11 +32,19 @@ impl SemanticCheck for ForLoop<'_> {
             _ => {
                 // error, types other than an Array are not supported
                 let (error_start, error_end) = self.collection.get_position();
-                return Err(MistiError::Semantic(SemanticError {
-                    error_start,
-                    error_end,
-                    reason: format!("Only Array[T] are allowed as a for-loop collection."),
-                }));
+                let label = ErrorLabel {
+                    message: String::from("Only Arrays are allowed here"),
+                    start: error_start,
+                    end: error_end,
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SEMANTIC_MISMATCHED_TYPES,
+                    error_offset: error_start,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(MistiError::Semantic(econtainer));
             }
         };
         let item_type = &item_type[0];

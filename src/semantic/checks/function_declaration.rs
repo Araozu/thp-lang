@@ -1,5 +1,7 @@
 use crate::{
-    error_handling::{semantic_error::SemanticError, MistiError},
+    error_handling::{
+        error_messages::SEMANTIC_DUPLICATED_REFERENCE, ErrorContainer, ErrorLabel, MistiError,
+    },
     semantic::{impls::SemanticCheck, symbol_table::SymbolTable, types::Type},
     syntax::ast::FunctionDeclaration,
 };
@@ -13,16 +15,24 @@ impl SemanticCheck for FunctionDeclaration<'_> {
 
         // Check that the function is not already defined
         if scope.test(&function_name) {
-            let error = SemanticError {
-                error_start: self.identifier.position,
-                error_end: self.identifier.get_end_position(),
-                reason: format!(
-                    "Duplicated: A symbol with name {} was already defined",
-                    function_name
+            let (error_start, error_end) =
+                (self.identifier.position, self.identifier.get_end_position());
+            let label = ErrorLabel {
+                message: format!(
+                    "A symbol with name {} was already defined at this scope",
+                    function_name,
                 ),
+                start: error_start,
+                end: error_end,
             };
-
-            return Err(MistiError::Semantic(error));
+            let econtainer = ErrorContainer {
+                error_code: SEMANTIC_DUPLICATED_REFERENCE,
+                error_offset: error_start,
+                labels: vec![label],
+                note: None,
+                help: None,
+            };
+            return Err(MistiError::Semantic(econtainer));
         }
 
         // Create a new scope and use it in the function block

@@ -1,5 +1,8 @@
 use crate::{
-    error_handling::{semantic_error::SemanticError, MistiError},
+    error_handling::{
+        error_messages::SEMANTIC_DUPLICATED_REFERENCE, semantic_error::SemanticError,
+        ErrorContainer, ErrorLabel, MistiError,
+    },
     semantic::{
         impls::SemanticCheck,
         types::{Type, Typed},
@@ -17,16 +20,19 @@ impl SemanticCheck for VariableBinding<'_> {
         // TODO: Define if variables can be redeclared.
         //       If so, it is irrelevant to check if the variable is already defined
         if scope.test(binding_name) {
-            let error = SemanticError {
-                error_start: self.identifier.position,
-                error_end: self.identifier.get_end_position(),
-                reason: format!(
-                    "Duplicated: A symbol with name {} was already defined",
-                    binding_name
-                ),
+            let label = ErrorLabel {
+                message: String::from("A reference with this name was already defined"),
+                start: self.identifier.position,
+                end: self.identifier.get_end_position(),
             };
-
-            return Err(MistiError::Semantic(error));
+            let econtainer = ErrorContainer {
+                error_code: SEMANTIC_DUPLICATED_REFERENCE,
+                error_offset: self.identifier.position,
+                labels: vec![label],
+                note: None,
+                help: None,
+            };
+            return Err(MistiError::Semantic(econtainer));
         }
 
         // This gets the datatype of the assigned expression,
@@ -41,16 +47,22 @@ impl SemanticCheck for VariableBinding<'_> {
 
         // Both the declared & actual datatypes must be the same
         if datatype != expression_datatype {
-            let error = SemanticError {
-                error_start: self.identifier.position,
-                error_end: self.identifier.get_end_position(),
-                reason: format!(
+            let label = ErrorLabel {
+                message: format!(
                     "The variable `{}` was declared as `{:?}` but its expression has type `{:?}`",
                     binding_name, datatype, expression_datatype
                 ),
+                start: self.identifier.position,
+                end: self.identifier.get_end_position(),
             };
-
-            return Err(MistiError::Semantic(error));
+            let econtainer = ErrorContainer {
+                error_code: SEMANTIC_DUPLICATED_REFERENCE,
+                error_offset: self.identifier.position,
+                labels: vec![label],
+                note: None,
+                help: None,
+            };
+            return Err(MistiError::Semantic(econtainer));
         }
 
         scope.insert(binding_name.clone(), datatype);

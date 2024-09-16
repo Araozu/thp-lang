@@ -17,4 +17,10 @@
 0x000015: Invalid for loop
 0x000016: Invalid if condition
 0x000017: Incomplete block
+0x000018: Missing reference
+0x000019: Invalid reference
+0x000020: Unknown error (compiler todo)
+0x000021: Mismatched types
+0x000022: Duplicated reference
+0x000023: Mismatched argument count
 

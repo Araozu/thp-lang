@@ -1,5 +1,7 @@
 use crate::{
-    error_handling::{semantic_error::SemanticError, MistiError},
+    error_handling::{
+        error_messages::SEMANTIC_MISMATCHED_TYPES, ErrorContainer, ErrorLabel, MistiError,
+    },
     semantic::{
         impls::SemanticCheck,
         symbol_table::SymbolTable,
@@ -16,14 +18,23 @@ impl SemanticCheck for WhileLoop<'_> {
 
         if !condition_type.equals(&Type::Value("Bool".into())) {
             let (error_start, error_end) = condition.get_position();
-            return Err(MistiError::Semantic(SemanticError {
-                error_start,
-                error_end,
-                reason: format!(
+
+            let label = ErrorLabel {
+                message: format!(
                     "Expected a condition of type Bool, found {:?}",
                     condition_type
                 ),
-            }));
+                start: error_start,
+                end: error_end,
+            };
+            let econtainer = ErrorContainer {
+                error_code: SEMANTIC_MISMATCHED_TYPES,
+                error_offset: error_start,
+                labels: vec![label],
+                note: Some(String::from("THP does not have truthy/falsey values.")),
+                help: None,
+            };
+            return Err(MistiError::Semantic(econtainer));
         }
 
         // TODO: Define scoping rules for while loops

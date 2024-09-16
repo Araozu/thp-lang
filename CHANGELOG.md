@@ -30,6 +30,8 @@
 - [x] Typecheck while loops
 - [x] Include Ariadne for error reporting
 - [x] Migrate lexic errors to new error interface
+- [x] Migrate syntax errors to new error interface
+- [x] Migrate semantic errors to new error interface
 
 
 ## v0.1.1

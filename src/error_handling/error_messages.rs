@@ -18,6 +18,12 @@ pub const SYNTAX_INVALID_FUNCTION_DECLARATION: u32 = 14;
 pub const SYNTAX_INVALID_FOR_LOOP: u32 = 15;
 pub const SYNTAX_INVALID_IF_CONDITION: u32 = 16;
 pub const SYNTAX_INCOMPLETE_BLOCK: u32 = 17;
+pub const SEMANTIC_MISSING_REFERENCE: u32 = 18;
+pub const SEMANTIC_INVALID_REFERENCE: u32 = 19;
+pub const COMPILER_TODO: u32 = 20;
+pub const SEMANTIC_MISMATCHED_TYPES: u32 = 21;
+pub const SEMANTIC_DUPLICATED_REFERENCE: u32 = 22;
+pub const SEMANTIC_MISMATCHED_ARGUMENT_COUNT: u32 = 23;
 
 /// Reads the error codes from the error code list
 pub fn error_code_to_string() -> String {

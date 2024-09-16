@@ -1,5 +1,11 @@
 use crate::{
-    error_handling::{semantic_error::SemanticError, MistiError},
+    error_handling::{
+        error_messages::{
+            COMPILER_TODO, SEMANTIC_INVALID_REFERENCE, SEMANTIC_MISMATCHED_ARGUMENT_COUNT,
+            SEMANTIC_MISMATCHED_TYPES,
+        },
+        ErrorContainer, ErrorLabel, MistiError,
+    },
     semantic::{
         impls::SemanticCheck,
         symbol_table::SymbolTable,
@@ -22,15 +28,23 @@ impl SemanticCheck for Expression<'_> {
                         if parameters.len() != arguments.len() {
                             let (error_start, error_end) = f.arguments.get_position();
 
-                            return Err(MistiError::Semantic(SemanticError {
-                                error_start,
-                                error_end,
-                                reason: format!(
+                            let label = ErrorLabel {
+                                message: format!(
                                     "Expected {} arguments, got {}",
                                     parameters.len(),
                                     arguments.len(),
                                 ),
-                            }));
+                                start: error_start,
+                                end: error_end,
+                            };
+                            let econtainer = ErrorContainer {
+                                error_code: SEMANTIC_MISMATCHED_ARGUMENT_COUNT,
+                                error_offset: error_start,
+                                labels: vec![label],
+                                note: None,
+                                help: None,
+                            };
+                            return Err(MistiError::Semantic(econtainer));
                         }
 
                         // Check that each argument matches the required datatype
@@ -42,14 +56,22 @@ impl SemanticCheck for Expression<'_> {
                             if !argument_datatype.is_value(parameter) {
                                 // The argument and the parameter have diferent types
                                 let (error_start, error_end) = argument.get_position();
-                                return Err(MistiError::Semantic(SemanticError {
-                                    error_start,
-                                    error_end,
-                                    reason: format!(
+                                let label = ErrorLabel {
+                                    message: format!(
                                         "Expected a {}, got {:?}",
                                         parameter, argument_datatype
                                     ),
-                                }));
+                                    start: error_start,
+                                    end: error_end,
+                                };
+                                let econtainer = ErrorContainer {
+                                    error_code: SEMANTIC_MISMATCHED_TYPES,
+                                    error_offset: error_start,
+                                    labels: vec![label],
+                                    note: None,
+                                    help: None,
+                                };
+                                return Err(MistiError::Semantic(econtainer));
                             }
                         }
 
@@ -57,14 +79,22 @@ impl SemanticCheck for Expression<'_> {
                     }
                     _ => {
                         let (error_start, error_end) = fun.get_position();
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start,
-                            error_end,
-                            reason: format!(
+                        let label = ErrorLabel {
+                            message: format!(
                                 "Expected a function type, got {:?}",
                                 function_datatype
                             ),
-                        }));
+                            start: error_start,
+                            end: error_end,
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SEMANTIC_MISMATCHED_TYPES,
+                            error_offset: error_start,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(MistiError::Semantic(econtainer));
                     }
                 }
             }
@@ -87,21 +117,37 @@ impl SemanticCheck for Expression<'_> {
                         } else {
                             // Error: unary negation can only be applied to a Bool
                             let (error_start, error_end) = expression.get_position();
-                            return Err(MistiError::Semantic(SemanticError {
-                                error_start,
-                                error_end,
-                                reason: format!("Expected a Bool, got a {}", t),
-                            }));
+                            let label = ErrorLabel {
+                                message: format!("Expected a Bool, got {}", t),
+                                start: error_start,
+                                end: error_end,
+                            };
+                            let econtainer = ErrorContainer {
+                                error_code: SEMANTIC_MISMATCHED_TYPES,
+                                error_offset: error_start,
+                                labels: vec![label],
+                                note: None,
+                                help: None,
+                            };
+                            return Err(MistiError::Semantic(econtainer));
                         }
                     }
                     ("!", Type::Function(_, _)) => {
                         // Error: unary negation can only be applied to a Bool
                         let (error_start, error_end) = expression.get_position();
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start,
-                            error_end,
-                            reason: format!("Expected a Bool, got a function",),
-                        }));
+                        let label = ErrorLabel {
+                            message: format!("Expected a Bool, got a function"),
+                            start: error_start,
+                            end: error_end,
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SEMANTIC_MISMATCHED_TYPES,
+                            error_offset: error_start,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(MistiError::Semantic(econtainer));
                     }
                     ("-", Type::Value(t)) => {
                         if t == "Int" || t == "Float" {
@@ -110,21 +156,37 @@ impl SemanticCheck for Expression<'_> {
                         } else {
                             // Error: unary negation can only be applied to a Number
                             let (error_start, error_end) = expression.get_position();
-                            return Err(MistiError::Semantic(SemanticError {
-                                error_start,
-                                error_end,
-                                reason: format!("Expected a Float or Int, got a {}", t),
-                            }));
+                            let label = ErrorLabel {
+                                message: format!("Expected a Float or Int, got a {}", t),
+                                start: error_start,
+                                end: error_end,
+                            };
+                            let econtainer = ErrorContainer {
+                                error_code: SEMANTIC_MISMATCHED_TYPES,
+                                error_offset: error_start,
+                                labels: vec![label],
+                                note: None,
+                                help: None,
+                            };
+                            return Err(MistiError::Semantic(econtainer));
                         }
                     }
                     ("-", Type::Function(_, _)) => {
                         // Error: unary negation can only be applied to a Bool
                         let (error_start, error_end) = expression.get_position();
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start,
-                            error_end,
-                            reason: format!("Expected a Float or Int, got a function",),
-                        }));
+                        let label = ErrorLabel {
+                            message: format!("Expected a Float or Int, got a function"),
+                            start: error_start,
+                            end: error_end,
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SEMANTIC_MISMATCHED_TYPES,
+                            error_offset: error_start,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(MistiError::Semantic(econtainer));
                     }
                     (op, _) => {
                         // Compiler error: something that shouldn't be
@@ -146,11 +208,19 @@ impl SemanticCheck for Expression<'_> {
                         // If the operator is not found its a user error,
                         // because we allow arbitrary operators
                         let (error_start, error_end) = (op.position, op.get_end_position());
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start,
-                            error_end,
-                            reason: format!("The binary operator {} does not exist", op.value),
-                        }));
+                        let label = ErrorLabel {
+                            message: format!("The binary operator {} does not exist", op.value),
+                            start: error_start,
+                            end: error_end,
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SEMANTIC_INVALID_REFERENCE,
+                            error_offset: error_start,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(MistiError::Semantic(econtainer));
                     }
                 };
 
@@ -168,26 +238,42 @@ impl SemanticCheck for Expression<'_> {
 
                 if !left_expr_type.is_value(&op_params[0]) {
                     let (error_start, error_end) = left_expr.get_position();
-                    return Err(MistiError::Semantic(SemanticError {
-                        error_start,
-                        error_end,
-                        reason: format!(
+                    let label = ErrorLabel {
+                        message: format!(
                             "Expected a {}, got a {:?} on the left side of the {} operator",
                             op_params[0], left_expr_type, op.value
                         ),
-                    }));
+                        start: error_start,
+                        end: error_end,
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SEMANTIC_MISMATCHED_TYPES,
+                        error_offset: error_start,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(MistiError::Semantic(econtainer));
                 }
 
                 if !right_expr_type.is_value(&op_params[1]) {
                     let (error_start, error_end) = right_expr.get_position();
-                    return Err(MistiError::Semantic(SemanticError {
-                        error_start,
-                        error_end,
-                        reason: format!(
+                    let label = ErrorLabel {
+                        message: format!(
                             "Expected a {}, got a {:?} on the right side of the {} operator",
                             op_params[1], left_expr_type, op.value
                         ),
-                    }));
+                        start: error_start,
+                        end: error_end,
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: SEMANTIC_MISMATCHED_TYPES,
+                        error_offset: error_start,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(MistiError::Semantic(econtainer));
                 }
 
                 // After all these checks, we are ok
@@ -206,13 +292,21 @@ impl SemanticCheck for Expression<'_> {
                 // TODO: if the array is empty then its
                 // datatype should be determined by its usage.
                 if arr.exps.is_empty() {
-                    return Err(MistiError::Semantic(SemanticError {
-                        error_start: arr.start,
-                        error_end: arr.end,
-                        reason: format!(
+                    let label = ErrorLabel {
+                        message: format!(
                             "An array must have at least 1 element to determine its type. This will be fixed later."
                         ),
-                    }));
+                        start: arr.start,
+                        end: arr.end,
+                    };
+                    let econtainer = ErrorContainer {
+                        error_code: COMPILER_TODO,
+                        error_offset: arr.start,
+                        labels: vec![label],
+                        note: None,
+                        help: None,
+                    };
+                    return Err(MistiError::Semantic(econtainer));
                 }
 
                 let mut expressions = arr.exps.iter();
@@ -227,15 +321,23 @@ impl SemanticCheck for Expression<'_> {
 
                         // error, found an item with a diferent datatype
                         let (error_start, error_end) = exp.get_position();
-                        return Err(MistiError::Semantic(SemanticError {
-                            error_start,
-                            error_end,
-                            reason: format!(
+                        let label = ErrorLabel {
+                        message: format!(
                                 "All elements of an array must have the same datatype. Expected {:?}, got {:?}",
                                 first_type,
                                 exp_type,
-                            ),
-                        }));
+                        ),
+                        start: error_start,
+                        end: error_end,
+                    };
+                        let econtainer = ErrorContainer {
+                            error_code: COMPILER_TODO,
+                            error_offset: error_start,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(MistiError::Semantic(econtainer));
                     }
                 }
 

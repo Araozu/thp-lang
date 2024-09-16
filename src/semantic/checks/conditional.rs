@@ -1,5 +1,8 @@
 use crate::{
-    error_handling::{semantic_error::SemanticError, MistiError},
+    error_handling::{
+        error_messages::SEMANTIC_MISMATCHED_TYPES, semantic_error::SemanticError, ErrorContainer,
+        ErrorLabel, MistiError,
+    },
     semantic::{
         impls::SemanticCheck,
         symbol_table::SymbolTable,
@@ -17,14 +20,22 @@ impl SemanticCheck for Conditional<'_> {
         let if_condition_type = if_condition.get_type(scope)?;
         if !if_condition_type.equals(&bool_type) {
             let (error_start, error_end) = if_condition.get_position();
-            return Err(MistiError::Semantic(SemanticError {
-                error_start,
-                error_end,
-                reason: format!(
+            let label = ErrorLabel {
+                message: format!(
                     "Expected a condition of type Bool, found {:?}",
                     if_condition_type
                 ),
-            }));
+                start: error_start,
+                end: error_end,
+            };
+            let econtainer = ErrorContainer {
+                error_code: SEMANTIC_MISMATCHED_TYPES,
+                error_offset: error_start,
+                labels: vec![label],
+                note: None,
+                help: None,
+            };
+            return Err(MistiError::Semantic(econtainer));
         }
 
         // Check if block
@@ -37,14 +48,22 @@ impl SemanticCheck for Conditional<'_> {
             let condition_type = condition.get_type(scope)?;
             if !condition_type.equals(&bool_type) {
                 let (error_start, error_end) = condition.get_position();
-                return Err(MistiError::Semantic(SemanticError {
-                    error_start,
-                    error_end,
-                    reason: format!(
+                let label = ErrorLabel {
+                    message: format!(
                         "Expected a condition of type Bool, found {:?}",
                         condition_type
                     ),
-                }));
+                    start: error_start,
+                    end: error_end,
+                };
+                let econtainer = ErrorContainer {
+                    error_code: SEMANTIC_MISMATCHED_TYPES,
+                    error_offset: error_start,
+                    labels: vec![label],
+                    note: None,
+                    help: None,
+                };
+                return Err(MistiError::Semantic(econtainer));
             }
 
             else_if_member.body.check_semantics(scope)?;

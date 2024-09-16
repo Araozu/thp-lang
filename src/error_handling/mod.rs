@@ -5,9 +5,7 @@ use serde::Serialize;
 
 use self::semantic_error::SemanticError;
 
-mod lex_error;
 pub mod semantic_error;
-mod syntax_error;
 mod utils;
 
 pub mod error_messages;
@@ -38,22 +36,7 @@ pub struct ErrorLabel {
 pub enum MistiError {
     Lex(ErrorContainer),
     Syntax(ErrorContainer),
-    Semantic(SemanticError),
-}
-
-#[derive(Serialize, Debug)]
-pub struct LexError {
-    pub position: usize,
-    // TODO: Add and end position
-    pub end_position: usize,
-    pub reason: String,
-}
-
-#[derive(Serialize, Debug)]
-pub struct SyntaxError {
-    pub error_start: usize,
-    pub error_end: usize,
-    pub reason: String,
+    Semantic(ErrorContainer),
 }
 
 impl PrintableError for MistiError {
