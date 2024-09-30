@@ -37,7 +37,7 @@ impl Typed for Expression<'_> {
                             note: None,
                             help: None,
                         };
-                        return Err(MistiError::Semantic(econtainer));
+                        return Err(econtainer);
                     }
                 };
 
@@ -72,7 +72,7 @@ impl Typed for Expression<'_> {
                                     note: None,
                                     help: None,
                                 };
-                                return Err(MistiError::Semantic(econtainer));
+                                return Err(econtainer);
                             }
                             None => {
                                 let label = ErrorLabel {
@@ -89,7 +89,7 @@ impl Typed for Expression<'_> {
                                     note: None,
                                     help: None,
                                 };
-                                return Err(MistiError::Semantic(econtainer));
+                                return Err(econtainer);
                             }
                         }
                     }
@@ -115,7 +115,7 @@ impl Typed for Expression<'_> {
                             note: None,
                             help: None,
                         };
-                        return Err(MistiError::Semantic(econtainer));
+                        return Err(econtainer);
                     }
                 };
 
@@ -135,7 +135,7 @@ impl Typed for Expression<'_> {
                             note: None,
                             help: None,
                         };
-                        return Err(MistiError::Semantic(econtainer));
+                        return Err(econtainer);
                     } else {
                         return Ok(Type::Value("Int".into()));
                     }
@@ -154,7 +154,7 @@ impl Typed for Expression<'_> {
                             note: None,
                             help: None,
                         };
-                        return Err(MistiError::Semantic(econtainer));
+                        return Err(econtainer);
                     } else {
                         return Ok(Type::Value("Bool".into()));
                     }
@@ -187,7 +187,7 @@ impl Typed for Expression<'_> {
                     note: None,
                     help: None,
                 };
-                return Err(MistiError::Semantic(econtainer));
+                return Err(econtainer);
             }
             Expression::Array(arr) => {
                 // The first expression found determines the
@@ -211,7 +211,7 @@ impl Typed for Expression<'_> {
                         note: None,
                         help: None,
                     };
-                    return Err(MistiError::Semantic(econtainer));
+                    return Err(econtainer);
                 }
 
                 // Just get the first type and use it

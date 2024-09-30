@@ -16,7 +16,7 @@ use self::parseable::{Parseable, ParsingError, ParsingResult};
 pub fn build_ast<'a>(tokens: &'a Vec<Token>) -> Result<ModuleAST, MistiError> {
     match ModuleAST::try_parse(tokens, 0) {
         Ok((module, _)) => Ok(module),
-        Err(ParsingError::Err(error)) => Err(MistiError::Syntax(error)),
+        Err(ParsingError::Err(error)) => Err(error),
         _ => {
             // This shouldn't happen. The module parser returns an error if it finds nothing to parse.
             unreachable!("Illegal state during parsing: The Module parse should always return a result or error")

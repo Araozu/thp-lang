@@ -44,7 +44,7 @@ impl SemanticCheck for Expression<'_> {
                                 note: None,
                                 help: None,
                             };
-                            return Err(MistiError::Semantic(econtainer));
+                            return Err(econtainer);
                         }
 
                         // Check that each argument matches the required datatype
@@ -71,7 +71,7 @@ impl SemanticCheck for Expression<'_> {
                                     note: None,
                                     help: None,
                                 };
-                                return Err(MistiError::Semantic(econtainer));
+                                return Err(econtainer);
                             }
                         }
 
@@ -94,7 +94,7 @@ impl SemanticCheck for Expression<'_> {
                             note: None,
                             help: None,
                         };
-                        return Err(MistiError::Semantic(econtainer));
+                        return Err(econtainer);
                     }
                 }
             }
@@ -129,7 +129,7 @@ impl SemanticCheck for Expression<'_> {
                                 note: None,
                                 help: None,
                             };
-                            return Err(MistiError::Semantic(econtainer));
+                            return Err(econtainer);
                         }
                     }
                     ("!", Type::Function(_, _)) => {
@@ -147,7 +147,7 @@ impl SemanticCheck for Expression<'_> {
                             note: None,
                             help: None,
                         };
-                        return Err(MistiError::Semantic(econtainer));
+                        return Err(econtainer);
                     }
                     ("-", Type::Value(t)) => {
                         if t == "Int" || t == "Float" {
@@ -168,7 +168,7 @@ impl SemanticCheck for Expression<'_> {
                                 note: None,
                                 help: None,
                             };
-                            return Err(MistiError::Semantic(econtainer));
+                            return Err(econtainer);
                         }
                     }
                     ("-", Type::Function(_, _)) => {
@@ -186,7 +186,7 @@ impl SemanticCheck for Expression<'_> {
                             note: None,
                             help: None,
                         };
-                        return Err(MistiError::Semantic(econtainer));
+                        return Err(econtainer);
                     }
                     (op, _) => {
                         // Compiler error: something that shouldn't be
@@ -220,7 +220,7 @@ impl SemanticCheck for Expression<'_> {
                             note: None,
                             help: None,
                         };
-                        return Err(MistiError::Semantic(econtainer));
+                        return Err(econtainer);
                     }
                 };
 
@@ -253,7 +253,7 @@ impl SemanticCheck for Expression<'_> {
                         note: None,
                         help: None,
                     };
-                    return Err(MistiError::Semantic(econtainer));
+                    return Err(econtainer);
                 }
 
                 if !right_expr_type.is_value(&op_params[1]) {
@@ -273,7 +273,7 @@ impl SemanticCheck for Expression<'_> {
                         note: None,
                         help: None,
                     };
-                    return Err(MistiError::Semantic(econtainer));
+                    return Err(econtainer);
                 }
 
                 // After all these checks, we are ok
@@ -306,7 +306,7 @@ impl SemanticCheck for Expression<'_> {
                         note: None,
                         help: None,
                     };
-                    return Err(MistiError::Semantic(econtainer));
+                    return Err(econtainer);
                 }
 
                 let mut expressions = arr.exps.iter();
@@ -337,7 +337,7 @@ impl SemanticCheck for Expression<'_> {
                             note: None,
                             help: None,
                         };
-                        return Err(MistiError::Semantic(econtainer));
+                        return Err(econtainer);
                     }
                 }
 

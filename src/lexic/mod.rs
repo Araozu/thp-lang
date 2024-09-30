@@ -88,7 +88,7 @@ pub fn get_tokens(input: &String) -> Result<Vec<Token>, MistiError> {
                 current_pos = next_pos;
             }
             LexResult::Err(error_info) => {
-                return Err(MistiError::Lex(error_info));
+                return Err(error_info);
             }
         }
     }

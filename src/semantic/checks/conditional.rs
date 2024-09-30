@@ -1,7 +1,6 @@
 use crate::{
     error_handling::{
-        error_messages::SEMANTIC_MISMATCHED_TYPES, semantic_error::SemanticError, ErrorContainer,
-        ErrorLabel, MistiError,
+        error_messages::SEMANTIC_MISMATCHED_TYPES, ErrorContainer, ErrorLabel, MistiError,
     },
     semantic::{
         impls::SemanticCheck,
@@ -35,7 +34,7 @@ impl SemanticCheck for Conditional<'_> {
                 note: None,
                 help: None,
             };
-            return Err(MistiError::Semantic(econtainer));
+            return Err(econtainer);
         }
 
         // Check if block
@@ -63,7 +62,7 @@ impl SemanticCheck for Conditional<'_> {
                     note: None,
                     help: None,
                 };
-                return Err(MistiError::Semantic(econtainer));
+                return Err(econtainer);
             }
 
             else_if_member.body.check_semantics(scope)?;

@@ -1,8 +1,5 @@
 use crate::{
-    error_handling::{
-        error_messages::SEMANTIC_DUPLICATED_REFERENCE, semantic_error::SemanticError,
-        ErrorContainer, ErrorLabel, MistiError,
-    },
+    error_handling::{error_messages::SEMANTIC_DUPLICATED_REFERENCE, ErrorContainer, ErrorLabel},
     semantic::{
         impls::SemanticCheck,
         types::{Type, Typed},
@@ -32,7 +29,7 @@ impl SemanticCheck for VariableBinding<'_> {
                 note: None,
                 help: None,
             };
-            return Err(MistiError::Semantic(econtainer));
+            return Err(econtainer);
         }
 
         // This gets the datatype of the assigned expression,
@@ -62,7 +59,7 @@ impl SemanticCheck for VariableBinding<'_> {
                 note: None,
                 help: None,
             };
-            return Err(MistiError::Semantic(econtainer));
+            return Err(econtainer);
         }
 
         scope.insert(binding_name.clone(), datatype);

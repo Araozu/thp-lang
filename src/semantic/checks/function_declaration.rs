@@ -1,7 +1,5 @@
 use crate::{
-    error_handling::{
-        error_messages::SEMANTIC_DUPLICATED_REFERENCE, ErrorContainer, ErrorLabel, MistiError,
-    },
+    error_handling::{error_messages::SEMANTIC_DUPLICATED_REFERENCE, ErrorContainer, ErrorLabel},
     semantic::{impls::SemanticCheck, symbol_table::SymbolTable, types::Type},
     syntax::ast::FunctionDeclaration,
 };
@@ -32,7 +30,7 @@ impl SemanticCheck for FunctionDeclaration<'_> {
                 note: None,
                 help: None,
             };
-            return Err(MistiError::Semantic(econtainer));
+            return Err(econtainer);
         }
 
         // Create a new scope and use it in the function block

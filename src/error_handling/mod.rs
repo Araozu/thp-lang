@@ -3,8 +3,6 @@ use std::ops::Range;
 use ariadne::{Label, Report, ReportKind, Source};
 use serde::Serialize;
 
-use self::semantic_error::SemanticError;
-
 pub mod semantic_error;
 mod utils;
 
@@ -32,30 +30,16 @@ pub struct ErrorLabel {
     pub end: usize,
 }
 
+pub type MistiError = ErrorContainer;
+
+/*
 #[derive(Serialize, Debug)]
 pub enum MistiError {
     Lex(ErrorContainer),
     Syntax(ErrorContainer),
     Semantic(ErrorContainer),
 }
-
-impl PrintableError for MistiError {
-    fn get_error_str(&self, chars: &Vec<char>) -> String {
-        match self {
-            Self::Lex(_) => panic!("REMOVED: manually generating an error message"),
-            Self::Syntax(err) => err.get_error_str(chars),
-            Self::Semantic(err) => err.get_error_str(chars),
-        }
-    }
-
-    fn print_ariadne(&self, source: &String) {
-        match self {
-            Self::Lex(err) => err.print_ariadne(source),
-            Self::Syntax(err) => err.print_ariadne(source),
-            Self::Semantic(err) => err.print_ariadne(source),
-        }
-    }
-}
+*/
 
 impl PrintableError for ErrorContainer {
     fn get_error_str(&self, _: &Vec<char>) -> String {

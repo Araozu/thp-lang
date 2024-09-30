@@ -34,7 +34,7 @@ impl SemanticCheck for WhileLoop<'_> {
                 note: Some(String::from("THP does not have truthy/falsey values.")),
                 help: None,
             };
-            return Err(MistiError::Semantic(econtainer));
+            return Err(econtainer);
         }
 
         // TODO: Define scoping rules for while loops

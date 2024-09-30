@@ -44,7 +44,7 @@ impl SemanticCheck for ForLoop<'_> {
                     note: None,
                     help: None,
                 };
-                return Err(MistiError::Semantic(econtainer));
+                return Err(econtainer);
             }
         };
         let item_type = &item_type[0];
