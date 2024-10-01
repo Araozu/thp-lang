@@ -215,7 +215,7 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::lexic::get_tokens;
+    use crate::{error_handling::error_messages::SYNTAX_INCOMPLETE_BLOCK, lexic::get_tokens};
 
     use super::*;
 
@@ -358,7 +358,7 @@ mod tests {
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
+                assert_eq!(err.error_code, SYNTAX_INCOMPLETE_BLOCK);
                 assert_eq!(err.error_offset, 9);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),

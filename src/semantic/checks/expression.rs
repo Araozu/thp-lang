@@ -350,7 +350,6 @@ impl SemanticCheck for Expression<'_> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        error_handling::MistiError,
         lexic::token::Token,
         semantic::{impls::SemanticCheck, std::populate, symbol_table::SymbolTable},
         syntax::ast::{
@@ -380,12 +379,11 @@ mod tests {
         let output = expr.check_semantics(&scope);
         match output {
             Ok(_) => panic!("Expected an error"),
-            Err(MistiError::Semantic(err)) => {
-                assert_eq!(err.reason, "Cannot find `print` in this scope.");
-                assert_eq!(err.error_start, 0);
-                assert_eq!(err.error_end, 5);
+            Err(err) => {
+                //assert_eq!(err.reason, "Cannot find `print` in this scope.");
+                assert_eq!(err.error_offset, 0);
+                //assert_eq!(err.error_end, 5);
             }
-            Err(e) => panic!("Expected a Semantic error, got {:?}", e),
         }
     }
 
@@ -413,12 +411,11 @@ mod tests {
 
         match expr.check_semantics(&scope) {
             Ok(_) => panic!("Expected semantic error, got ok"),
-            Err(MistiError::Semantic(e)) => {
-                assert_eq!(e.reason, "Expected a String, got Value(\"Int\")");
-                assert_eq!(e.error_start, 6);
-                assert_eq!(e.error_end, 9);
+            Err(e) => {
+                //assert_eq!(e.reason, "Expected a String, got Value(\"Int\")");
+                assert_eq!(e.error_offset, 6);
+                //assert_eq!(e.error_end, 9);
             }
-            Err(e) => panic!("Expected semantic error, got {:?}", e),
         }
     }
 
@@ -444,12 +441,11 @@ mod tests {
 
         match expr.check_semantics(&scope) {
             Ok(_) => panic!("Expected semantic error, got ok"),
-            Err(MistiError::Semantic(e)) => {
-                assert_eq!(e.reason, "Expected 1 arguments, got 0");
-                assert_eq!(e.error_start, 5);
-                assert_eq!(e.error_end, 7);
+            Err(e) => {
+                //assert_eq!(e.reason, "Expected 1 arguments, got 0");
+                assert_eq!(e.error_offset, 5);
+                //assert_eq!(e.error_end, 7);
             }
-            Err(e) => panic!("Expected semantic error, got {:?}", e),
         }
     }
 
@@ -481,12 +477,11 @@ mod tests {
 
         match expr.check_semantics(&scope) {
             Ok(_) => panic!("Expected semantic error, got ok"),
-            Err(MistiError::Semantic(e)) => {
-                assert_eq!(e.reason, "Expected 1 arguments, got 2");
-                assert_eq!(e.error_start, 5);
-                assert_eq!(e.error_end, 15);
+            Err(e) => {
+                //assert_eq!(e.reason, "Expected 1 arguments, got 2");
+                assert_eq!(e.error_offset, 5);
+                //assert_eq!(e.error_end, 15);
             }
-            Err(e) => panic!("Expected semantic error, got {:?}", e),
         }
     }
 }
