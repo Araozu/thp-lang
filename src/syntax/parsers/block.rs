@@ -4,7 +4,7 @@ use crate::{
     syntax::{
         ast::{Block, BlockMember, Expression, Statement},
         parseable::{Parseable, ParsingError, ParsingResult},
-        utils::parse_token_type,
+        utils::{parse_token_type, Tokenizer},
     },
 };
 
@@ -80,15 +80,21 @@ impl<'a> Parseable<'a> for Block<'a> {
                     return Err(ParsingError::Err(econtainer));
                 }
                 Err(ParsingError::Unmatched) => {
-                    let label = ErrorLabel {
-                        message: String::from("Expected a closing brace `}` here"),
-                        start: current_pos,
-                        end: current_pos + 1,
+                    let label_1 = ErrorLabel {
+                        message: String::from("The block starts here"),
+                        start: opening_brace.position,
+                        end: opening_brace.get_end_position(),
+                    };
+                    let label_2_pos = tokens.code_position_from_idx(current_pos);
+                    let label_2 = ErrorLabel {
+                        message: String::from("The code ends here without closing the block"),
+                        start: label_2_pos,
+                        end: label_2_pos + 1,
                     };
                     let econtainer = ErrorContainer {
                         error_code: SYNTAX_INCOMPLETE_BLOCK,
-                        error_offset: current_pos,
-                        labels: vec![label],
+                        error_offset: tokens.code_position_from_idx(current_pos),
+                        labels: vec![label_1, label_2],
                         note: None,
                         help: None,
                     };

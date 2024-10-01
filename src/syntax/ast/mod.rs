@@ -89,7 +89,7 @@ pub struct ParamsList<'a> {
 
 impl Positionable for ParamsList<'_> {
     fn get_position(&self) -> (usize, usize) {
-        todo!()
+        (self.start, self.end)
     }
 }
 

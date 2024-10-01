@@ -19,7 +19,7 @@ impl<'a> Parseable<'a> for ModuleAST<'a> {
     /// As this function parses the whole file, it ignores `current_pos` and
     /// always starts from token 0.
     ///
-    /// Its grammar is defined it the spec, at the webpage
+    /// Its grammar is defined at the spec, at the webpage
     fn try_parse(tokens: &'a Vec<Token>, _current_pos: usize) -> ParsingResult<'a, Self::Item> {
         let mut productions = Vec::<ModuleMembers>::new();
         let tokens_len = tokens.len();

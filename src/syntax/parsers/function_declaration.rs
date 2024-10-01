@@ -7,7 +7,7 @@ use crate::{
         ast::{Block, FunctionDeclaration, Positionable},
         functions::params_list::parse_params_list,
         parseable::{Parseable, ParsingError, ParsingResult},
-        utils::{parse_token_type, try_operator},
+        utils::{parse_token_type, try_operator, Tokenizer},
     },
 };
 
@@ -184,13 +184,13 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
                     }
                 };
                 let label = ErrorLabel {
-                    message: String::from("Expected a block here, after the function declaration"),
+                    message: String::from("Expected a block after this parameter list"),
                     start: error_start,
                     end: error_end,
                 };
                 let econtainer = ErrorContainer {
                     error_code: SYNTAX_INVALID_FUNCTION_DECLARATION,
-                    error_offset: error_start,
+                    error_offset: tokens.code_position_from_idx(current_pos),
                     labels: vec![label],
                     note: None,
                     help: None,
@@ -215,7 +215,12 @@ impl<'a> Parseable<'a> for FunctionDeclaration<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{error_handling::error_messages::SYNTAX_INCOMPLETE_BLOCK, lexic::get_tokens};
+    use crate::{
+        error_handling::error_messages::{
+            SYNTAX_INCOMPLETE_BLOCK, SYNTAX_INCOMPLETE_PARAMETER_LIST,
+        },
+        lexic::get_tokens,
+    };
 
     use super::*;
 
@@ -230,98 +235,125 @@ mod tests {
     }
 
     #[test]
-    fn should_not_parse_fun_without_identifier() {
-        let tokens = get_tokens(&String::from("fun = 20")).unwrap();
+    fn should_fail_on_incomplete_1() {
+        let tokens = get_tokens(&String::from("fun ")).unwrap();
         let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 4);
-            }
-            _ => panic!("Expected an error: {:?}", fun_decl),
-        }
-
-        let tokens = get_tokens(&String::from("fun")).unwrap();
-        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
-        match fun_decl {
-            Err(ParsingError::Err(err)) => {
-                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
                 assert_eq!(err.error_offset, 0);
+                assert_eq!(SYNTAX_INVALID_FUNCTION_DECLARATION, err.error_code);
+                let first_label = &err.labels[0];
+                assert_eq!(first_label.start, 0);
+                assert_eq!(first_label.end, 3);
+                assert_eq!(
+                    first_label.message,
+                    "Expected an identifier after this `fun` keyword",
+                );
             }
-            _ => panic!("Expected an error: {:?}", fun_decl),
+            _ => panic!("Expected a ParsingErr"),
         }
     }
 
     #[test]
-    fn should_not_parse_fun_without_parens() {
+    fn should_fail_on_invalid_identifier() {
+        let tokens = get_tokens(&String::from("fun 322")).unwrap();
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
+
+        match fun_decl {
+            Err(ParsingError::Err(err)) => {
+                assert_eq!(err.error_offset, 4);
+                assert_eq!(SYNTAX_INVALID_FUNCTION_DECLARATION, err.error_code);
+                let first_label = &err.labels[0];
+                assert_eq!(first_label.start, 4);
+                assert_eq!(first_label.end, 7);
+                assert_eq!(first_label.message, "Expected an identifier here",);
+            }
+            _ => panic!("Expected a ParsingErr"),
+        }
+    }
+
+    #[test]
+    fn should_fail_on_missing_params_list() {
+        let tokens = get_tokens(&String::from("fun id")).unwrap();
+        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
+
+        match fun_decl {
+            Err(ParsingError::Err(err)) => {
+                assert_eq!(err.error_offset, 6);
+                assert_eq!(SYNTAX_INVALID_FUNCTION_DECLARATION, err.error_code);
+                let first_label = &err.labels[0];
+                assert_eq!(first_label.start, 4);
+                assert_eq!(first_label.end, 6);
+                assert_eq!(
+                    first_label.message,
+                    "Expected a parameter list after this identifier",
+                );
+            }
+            _ => panic!("Expected a ParsingErr"),
+        }
+    }
+
+    #[test]
+    fn should_fail_on_invalid_params_list() {
         let tokens = get_tokens(&String::from("fun id =")).unwrap();
         let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 7);
-            }
-            _ => panic!("Expected an error: {:?}", fun_decl),
-        }
+                assert_eq!(err.error_offset, 8);
 
-        let tokens = get_tokens(&String::from("fun id")).unwrap();
-        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
-        match fun_decl {
-            Err(ParsingError::Err(err)) => {
-                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 4);
+                let label = &err.labels[0];
+                assert_eq!(label.start, 7);
+                assert_eq!(label.end, 8);
+                assert_eq!(label.message, "Expected a parameter list here");
             }
-            _ => panic!("Expected an error: {:?}", fun_decl),
+            _ => panic!("Expected an error, got {:?}", fun_decl),
         }
     }
 
     #[test]
-    fn should_not_parse_fun_without_closing_paren() {
-        let tokens = get_tokens(&String::from("fun id(=")).unwrap();
-        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
-
-        match fun_decl {
-            Err(ParsingError::Err(err)) => {
-                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 7);
-            }
-            _ => panic!("Expected an error: {:?}", fun_decl),
-        }
-
+    fn should_fail_on_incomplete_params_list() {
         let tokens = get_tokens(&String::from("fun id(")).unwrap();
         let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
+
         match fun_decl {
             Err(ParsingError::Err(err)) => {
-                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 6);
+                assert_eq!(err.error_code, SYNTAX_INCOMPLETE_PARAMETER_LIST);
+                assert_eq!(err.error_offset, 7);
+
+                let label = &err.labels[0];
+                assert_eq!(label.message, "The parameter list starts here");
+                assert_eq!(label.start, 6);
+                assert_eq!(label.end, 7);
+
+                let label = &err.labels[1];
+                assert_eq!(
+                    label.message,
+                    "The code ends here without closing the parameter list"
+                );
+                assert_eq!(label.start, 7);
+                assert_eq!(label.end, 8);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
     }
 
     #[test]
-    fn should_not_parse_fun_when_missing_id() {
-        let tokens = get_tokens(&String::from("fun")).unwrap();
+    fn should_fail_on_missing_body() {
+        let tokens = get_tokens(&String::from("fun id() ")).unwrap();
         let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
 
         match fun_decl {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 0);
-            }
-            _ => panic!("Expected an error: {:?}", fun_decl),
-        }
+                assert_eq!(err.error_offset, 8);
 
-        let tokens = get_tokens(&String::from("fun\n")).unwrap();
-        println!("{:?}", tokens);
-        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
-
-        match fun_decl {
-            Err(ParsingError::Err(err)) => {
-                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 0);
+                let label = &err.labels[0];
+                assert_eq!(label.message, "Expected a block after this parameter list");
+                assert_eq!(label.start, 6);
+                assert_eq!(label.end, 8);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -336,16 +368,14 @@ mod tests {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
                 assert_eq!(err.error_offset, 9);
-            }
-            _ => panic!("Expected an error: {:?}", fun_decl),
-        }
 
-        let tokens = get_tokens(&String::from("fun id()")).unwrap();
-        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
-        match fun_decl {
-            Err(ParsingError::Err(err)) => {
-                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 4);
+                let label = &err.labels[0];
+                assert_eq!(
+                    label.message,
+                    "Expected a block here, after the function declaration"
+                );
+                assert_eq!(label.start, 9);
+                assert_eq!(label.end, 10);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -359,18 +389,20 @@ mod tests {
         match fun_decl {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(err.error_code, SYNTAX_INCOMPLETE_BLOCK);
-                assert_eq!(err.error_offset, 9);
-            }
-            _ => panic!("Expected an error: {:?}", fun_decl),
-        }
+                assert_eq!(err.error_offset, 10);
 
-        let tokens = get_tokens(&String::from("fun id() {")).unwrap();
-        let fun_decl = FunctionDeclaration::try_parse(&tokens, 0);
+                let label = &err.labels[0];
+                assert_eq!(label.message, "The block starts here");
+                assert_eq!(label.start, 9);
+                assert_eq!(label.end, 10);
 
-        match fun_decl {
-            Err(ParsingError::Err(err)) => {
-                assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 9);
+                let label = &err.labels[1];
+                assert_eq!(
+                    label.message,
+                    "The code ends here without closing the block"
+                );
+                assert_eq!(label.start, 10);
+                assert_eq!(label.end, 11);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -405,7 +437,12 @@ mod tests {
         match fun_decl {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
-                assert_eq!(err.error_offset, 9);
+                assert_eq!(err.error_offset, 12);
+
+                let label = &err.labels[0];
+                assert_eq!(label.message, "Expected a Datatype here");
+                assert_eq!(label.start, 12);
+                assert_eq!(label.end, 13);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
@@ -420,6 +457,14 @@ mod tests {
             Err(ParsingError::Err(err)) => {
                 assert_eq!(err.error_code, SYNTAX_INVALID_FUNCTION_DECLARATION);
                 assert_eq!(err.error_offset, 9);
+
+                let label = &err.labels[0];
+                assert_eq!(
+                    label.message,
+                    "Expected a Datatype after this arrow `->` operator"
+                );
+                assert_eq!(label.start, 9);
+                assert_eq!(label.end, 11);
             }
             _ => panic!("Expected an error: {:?}", fun_decl),
         }
