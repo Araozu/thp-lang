@@ -4,6 +4,7 @@ use super::{ParsingError, ParsingResult};
 
 pub trait Tokenizer {
     fn get_significant<'a>(&'a self, index: usize) -> Option<(&'a Token, usize)>;
+    fn code_position_from_idx(&self, idx: usize) -> usize;
 }
 
 impl Tokenizer for Vec<Token> {
@@ -27,6 +28,30 @@ impl Tokenizer for Vec<Token> {
                     }
                 }
                 None => return None,
+            }
+        }
+    }
+
+    /// Returns the position in the code from the token idx.
+    ///
+    /// If the token at `idx` exists, returns `tokens[idx].position`.
+    ///
+    /// Otherwise returns `tokens[idx - 1].get_end_position()`
+    fn code_position_from_idx(&self, idx: usize) -> usize {
+        // try to get the token at idx
+        match self.get(idx) {
+            Some(t) if t.token_type == TokenType::EOF => {
+                // If idx points at EOF, return the end position of the previous token
+                // This shouldnt fail
+                self[idx - 1].get_end_position()
+            }
+            Some(t) => t.position,
+            None => {
+                // this should never happen.
+                // the token stream always ends with an EOF token,
+                // and the parser should never be able to go
+                // to a position after that EOF token
+                unreachable!("Compiler error: Tried to get an out of bound token. This means that somewhere a token beyond EOF was requested.")
             }
         }
     }

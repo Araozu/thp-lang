@@ -4,7 +4,10 @@ use crate::{
         ErrorContainer, ErrorLabel,
     },
     lexic::token::{Token, TokenType},
-    syntax::{utils::parse_token_type, ParsingError, ParsingResult},
+    syntax::{
+        utils::{parse_token_type, Tokenizer},
+        ParsingError, ParsingResult,
+    },
 };
 
 use super::super::{
@@ -93,14 +96,15 @@ pub fn parse_params_list(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Param
                     start: opening_paren.position,
                     end: opening_paren.get_end_position(),
                 };
+                let label_2_pos = tokens.code_position_from_idx(current_pos);
                 let label_2 = ErrorLabel {
                     message: String::from("The code ends here without closing the parameter list"),
-                    start: current_pos,
-                    end: current_pos + 1,
+                    start: label_2_pos,
+                    end: label_2_pos + 1,
                 };
                 let econtainer = ErrorContainer {
                     error_code: SYNTAX_INCOMPLETE_PARAMETER_LIST,
-                    error_offset: current_pos,
+                    error_offset: tokens.code_position_from_idx(current_pos),
                     labels: vec![label_1, label_2],
                     note: None,
                     help: None,
@@ -172,7 +176,7 @@ fn parse_param_definition(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Para
                 };
                 let econtainer = ErrorContainer {
                     error_code: SYNTAX_INVALID_PARAMETER_DECLARATION,
-                    error_offset: datatype_token.position,
+                    error_offset: datatype_token.get_end_position(),
                     labels: vec![label],
                     note: None,
                     help: None,
@@ -289,5 +293,127 @@ mod tests {
         let second_param = &result.parameters[1];
         assert_eq!(second_param.datatype, "String");
         assert_eq!(second_param.identifier, "y");
+    }
+
+    #[test]
+    fn should_fail_on_incomplete_params_list() {
+        let tokens = get_tokens(&String::from("   (   ")).unwrap();
+        let result = parse_params_list(&tokens, 0);
+
+        match result {
+            Err(ParsingError::Err(err)) => {
+                assert_eq!(SYNTAX_INCOMPLETE_PARAMETER_LIST, err.error_code);
+                assert_eq!(err.error_offset, 4);
+
+                let label = &err.labels[0];
+                assert_eq!(label.message, "The parameter list starts here");
+                assert_eq!(label.start, 3);
+                assert_eq!(label.end, 4);
+
+                let label = &err.labels[1];
+                assert_eq!(
+                    label.message,
+                    "The code ends here without closing the parameter list"
+                );
+                assert_eq!(label.start, 4);
+                assert_eq!(label.end, 5);
+            }
+            _ => panic!("Expected a ParsingError::Err"),
+        }
+    }
+
+    #[test]
+    fn should_fail_on_invalid_params_closing() {
+        let tokens = get_tokens(&String::from("   (   &")).unwrap();
+        let result = parse_params_list(&tokens, 0);
+
+        match result {
+            Err(ParsingError::Err(err)) => {
+                assert_eq!(SYNTAX_INCOMPLETE_PARAMETER_LIST, err.error_code);
+                assert_eq!(err.error_offset, 7);
+
+                let label = &err.labels[0];
+                assert_eq!(label.message, "The parameter list starts here");
+                assert_eq!(label.start, 3);
+                assert_eq!(label.end, 4);
+
+                let label = &err.labels[1];
+                assert_eq!(label.message, "Expected a closing paren `)` here");
+                assert_eq!(label.start, 7);
+                assert_eq!(label.end, 8);
+            }
+            _ => panic!("Expected a ParsingError::Err"),
+        }
+    }
+
+    #[test]
+    fn should_fail_on_invalid_params_closing_2() {
+        let tokens = get_tokens(&String::from("   (   Int i &")).unwrap();
+        let result = parse_params_list(&tokens, 0);
+
+        match result {
+            Err(ParsingError::Err(err)) => {
+                assert_eq!(SYNTAX_INCOMPLETE_PARAMETER_LIST, err.error_code);
+                assert_eq!(err.error_offset, 13);
+
+                let label = &err.labels[0];
+                assert_eq!(label.message, "The parameter list starts here");
+                assert_eq!(label.start, 3);
+                assert_eq!(label.end, 4);
+
+                let label = &err.labels[1];
+                assert_eq!(label.message, "Expected a closing paren `)` here");
+                assert_eq!(label.start, 13);
+                assert_eq!(label.end, 14);
+            }
+            _ => panic!("Expected a ParsingError::Err"),
+        }
+    }
+}
+
+#[cfg(test)]
+mod params_tests {
+    use super::*;
+    use crate::lexic::get_tokens;
+
+    #[test]
+    fn should_fail_on_missing_identifier() {
+        let tokens = get_tokens(&String::from("  Int ")).unwrap();
+        let result = parse_param_definition(&tokens, 0);
+
+        match result {
+            Err(ParsingError::Err(err)) => {
+                assert_eq!(SYNTAX_INVALID_PARAMETER_DECLARATION, err.error_code);
+                assert_eq!(err.error_offset, 5);
+
+                let label = &err.labels[0];
+                assert_eq!(label.message, "Expected an identifier after this datatype");
+                assert_eq!(label.start, 2);
+                assert_eq!(label.end, 5);
+            }
+            _ => panic!("Expected a ParsingError::Err"),
+        }
+    }
+
+    #[test]
+    fn should_fail_on_wrong_identifier() {
+        let tokens = get_tokens(&String::from("  Int 322")).unwrap();
+        let result = parse_param_definition(&tokens, 0);
+
+        match result {
+            Err(ParsingError::Err(err)) => {
+                assert_eq!(SYNTAX_INVALID_PARAMETER_DECLARATION, err.error_code);
+                assert_eq!(err.error_offset, 6);
+
+                let label = &err.labels[0];
+                assert_eq!(
+                    label.message,
+                    "Expected an identifier here, found this instead"
+                );
+                assert_eq!(label.start, 6);
+                assert_eq!(label.end, 9);
+            }
+            _ => panic!("Expected a ParsingError::Err"),
+        }
     }
 }
