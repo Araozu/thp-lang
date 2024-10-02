@@ -13,7 +13,6 @@ use crate::{
 use super::{Type, Typed};
 
 impl Typed for Expression<'_> {
-    /// Attempts to get the datatype for an expression.
     fn get_type(&self, scope: &SymbolTable) -> Result<Type, MistiError> {
         match self {
             Expression::Int(_) => Ok(Type::Value("Int".into())),
@@ -162,32 +161,32 @@ impl Typed for Expression<'_> {
 
                 unreachable!("Illegal state: Found an unexpected unary operator during semantic analysis: {}", op.value);
             }
-            Expression::BinaryOperator(exp1, exp2, operator) => {
-                let t1 = exp1.get_type(scope)?;
-                let t2 = exp2.get_type(scope)?;
-
-                // TODO: There's definitely a better way to do this
-                // maybe store operators as functions?
-                if operator.value == "+" && t1.is_value("Int") && t2.is_value("Int") {
-                    return Ok(Type::Value("Int".into()));
-                } else if operator.value == "-" && t1.is_value("Int") && t2.is_value("Int") {
-                    return Ok(Type::Value("Int".into()));
+            Expression::BinaryOperator(_, _, operator) => {
+                match scope.get_type(&operator.value) {
+                    Some(Type::Function(_, return_type)) => Ok(Type::Value(return_type)),
+                    Some(_) => {
+                        unreachable!(
+                            "Compiler error: The operator {} was defined but it wasn't a function",
+                            operator.value
+                        )
+                    }
+                    None => {
+                        let label = ErrorLabel {
+                            message: format!("Unsupported binary operator"),
+                            // TODO: Fix positioning
+                            start: 0,
+                            end: 1,
+                        };
+                        let econtainer = ErrorContainer {
+                            error_code: SEMANTIC_MISMATCHED_TYPES,
+                            error_offset: 0,
+                            labels: vec![label],
+                            note: None,
+                            help: None,
+                        };
+                        return Err(econtainer);
+                    }
                 }
-
-                let label = ErrorLabel {
-                    message: format!("Unsupported binary operator"),
-                    // TODO: Fix positioning
-                    start: 0,
-                    end: 1,
-                };
-                let econtainer = ErrorContainer {
-                    error_code: SEMANTIC_MISMATCHED_TYPES,
-                    error_offset: 0,
-                    labels: vec![label],
-                    note: None,
-                    help: None,
-                };
-                return Err(econtainer);
             }
             Expression::Array(arr) => {
                 // The first expression found determines the

@@ -32,6 +32,8 @@ impl SemanticCheck for VariableBinding<'_> {
             return Err(econtainer);
         }
 
+        self.expression.check_semantics(scope)?;
+
         // This gets the datatype of the assigned expression,
         // to compare it later with the declared datatype.
         let expression_datatype = self.expression.get_type(scope)?;

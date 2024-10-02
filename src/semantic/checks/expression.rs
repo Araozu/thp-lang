@@ -261,7 +261,7 @@ impl SemanticCheck for Expression<'_> {
                     let label = ErrorLabel {
                         message: format!(
                             "Expected a {}, got a {:?} on the right side of the {} operator",
-                            op_params[1], left_expr_type, op.value
+                            op_params[1], right_expr_type, op.value
                         ),
                         start: error_start,
                         end: error_end,

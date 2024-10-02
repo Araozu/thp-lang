@@ -6,6 +6,7 @@ use crate::error_handling::MistiError;
 use super::symbol_table::SymbolTable;
 
 mod expression;
+pub mod global;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Type {
@@ -45,5 +46,9 @@ impl Type {
 }
 
 pub trait Typed {
+    /// Returns the datatype of this value.
+    ///
+    /// This function does not perform typechecking, it only returns a type.
+    /// Typeckecking is done by the trait SemanticCheck
     fn get_type(&self, scope: &SymbolTable) -> Result<Type, MistiError>;
 }

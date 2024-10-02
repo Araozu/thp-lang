@@ -10,6 +10,11 @@ impl Transpilable for PExpresssion<'_> {
             Primary(p) => p.transpile(),
             Assignment(a) => a.transpile(),
             FunctionCall(f) => f.transpile(),
+            BinaryOp(left, right, op) => {
+                let left_str = left.transpile();
+                let right_str = right.transpile();
+                format!("{} {} {}", left_str, op, right_str)
+            }
         }
     }
 }

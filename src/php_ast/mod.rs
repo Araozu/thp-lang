@@ -32,6 +32,7 @@ pub enum PExpresssion<'a> {
     Primary(PPrimary<'a>),
     /// This comes from a THP binding
     Assignment(PSimpleAssignment<'a>),
+    BinaryOp(Box<PExpresssion<'a>>, Box<PExpresssion<'a>>, &'a String),
 }
 
 pub struct PSimpleAssignment<'a> {

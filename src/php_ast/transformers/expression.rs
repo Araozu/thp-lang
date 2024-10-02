@@ -36,7 +36,14 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
                 PExpresssion::Primary(PPrimary::BoolLiteral(b.value == "true"))
             }
             Expression::UnaryOperator(_, _) => unimplemented!("transform unary op into php"),
-            Expression::BinaryOperator(_, _, _) => unimplemented!("transform binary op into php"),
+            Expression::BinaryOperator(left_expr, right_expr, op) => {
+                // For now assume that any THP operator directly maps to a PHP operator...
+
+                let left_value = left_expr.into_php_ast();
+                let right_value = right_expr.into_php_ast();
+
+                PExpresssion::BinaryOp(Box::new(left_value), Box::new(right_value), &op.value)
+            }
             Expression::Array(_) => unimplemented!("transform array into php"),
         }
     }

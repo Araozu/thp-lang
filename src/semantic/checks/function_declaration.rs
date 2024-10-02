@@ -7,7 +7,7 @@ use crate::{
 impl SemanticCheck for FunctionDeclaration<'_> {
     fn check_semantics(
         &self,
-        scope: &crate::semantic::symbol_table::SymbolTable,
+        scope: &SymbolTable,
     ) -> Result<(), crate::error_handling::MistiError> {
         let function_name = self.identifier.value.clone();
 
