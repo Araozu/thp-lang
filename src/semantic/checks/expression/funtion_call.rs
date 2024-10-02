@@ -23,7 +23,10 @@ impl SemanticCheck for FunctionCall<'_> {
         let Type::Function(parameters, _) = function_datatype else {
             let (error_start, error_end) = fun.get_position();
             let label = ErrorLabel {
-                message: format!("Expected a function type, got {:?}", function_datatype),
+                message: format!(
+                    "Expected this expression to be a function, found a {:?}",
+                    function_datatype
+                ),
                 start: error_start,
                 end: error_end,
             };
@@ -86,5 +89,83 @@ impl SemanticCheck for FunctionCall<'_> {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        error_handling::error_messages::{
+            SEMANTIC_INVALID_REFERENCE, SEMANTIC_MISMATCHED_TYPES, SEMANTIC_MISSING_REFERENCE,
+        },
+        lexic::{get_tokens, token::Token},
+        semantic::{
+            impls::SemanticCheck,
+            symbol_table::SymbolTable,
+            types::{global::INT, Type},
+        },
+        syntax::{
+            ast::{functions::FunctionCall, Expression},
+            parseable::Parseable,
+        },
+    };
+
+    fn t(i: &str) -> Vec<Token> {
+        get_tokens(&i.into()).unwrap()
+    }
+    fn exp<'a>(t: &'a Vec<Token>) -> FunctionCall<'a> {
+        let e = Expression::try_parse(t, 0).unwrap().0;
+        match e {
+            Expression::FunctionCall(f) => f,
+            _ => panic!("Expected to parse a function call"),
+        }
+    }
+
+    #[test]
+    fn should_fail_on_ref_not_exist() {
+        let b = t("my_fun()");
+        let expr = exp(&b);
+
+        let scope = SymbolTable::new();
+
+        let output = expr.check_semantics(&scope);
+        match output {
+            Ok(_) => panic!("Expected an error"),
+            Err(err) => {
+                assert_eq!(err.error_code, SEMANTIC_MISSING_REFERENCE);
+                assert_eq!(err.error_offset, 0);
+
+                let label = &err.labels[0];
+                assert_eq!(label.message, "Cannot find this identifier in this scope");
+                assert_eq!(label.start, 0);
+                assert_eq!(label.end, 6);
+            }
+        }
+    }
+
+    #[test]
+    fn should_fail_on_ref_not_a_function() {
+        let b = t("my_fun()");
+        let expr = exp(&b);
+
+        let scope = SymbolTable::new();
+        scope.insert(String::from("my_fun"), Type::Value(INT.into()));
+
+        let output = expr.check_semantics(&scope);
+        match output {
+            Ok(_) => panic!("Expected an error"),
+            Err(err) => {
+                assert_eq!(err.error_code, SEMANTIC_MISMATCHED_TYPES);
+                assert_eq!(err.error_offset, 0);
+
+                let label = &err.labels[0];
+                assert_eq!(
+                    label.message,
+                    "Expected this expression to be a function, found a `Int`"
+                );
+                assert_eq!(label.start, 0);
+                assert_eq!(label.end, 6);
+            }
+        }
     }
 }

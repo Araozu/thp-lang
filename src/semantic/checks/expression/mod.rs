@@ -1,9 +1,6 @@
 use crate::{
     error_handling::{
-        error_messages::{
-            COMPILER_TODO, SEMANTIC_INVALID_REFERENCE, SEMANTIC_MISMATCHED_ARGUMENT_COUNT,
-            SEMANTIC_MISMATCHED_TYPES,
-        },
+        error_messages::{COMPILER_TODO, SEMANTIC_INVALID_REFERENCE, SEMANTIC_MISMATCHED_TYPES},
         ErrorContainer, ErrorLabel, MistiError,
     },
     semantic::{
@@ -272,7 +269,7 @@ impl SemanticCheck for Expression<'_> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        lexic::{self, get_tokens, token::Token},
+        lexic::{get_tokens, token::Token},
         semantic::{impls::SemanticCheck, std::populate, symbol_table::SymbolTable},
         syntax::{
             ast::{
@@ -288,25 +285,6 @@ mod tests {
     }
     fn exp<'a>(t: &'a Vec<Token>) -> Expression<'a> {
         Expression::try_parse(t, 0).unwrap().0
-    }
-
-    #[test]
-    fn should_error_on_undefined_symbol() {
-        // source code: `print()`
-        let b = t("print()");
-        let expr = exp(&b);
-
-        let scope = SymbolTable::new();
-
-        let output = expr.check_semantics(&scope);
-        match output {
-            Ok(_) => panic!("Expected an error"),
-            Err(err) => {
-                //assert_eq!(err.reason, "Cannot find `print` in this scope.");
-                assert_eq!(err.error_offset, 0);
-                //assert_eq!(err.error_end, 5);
-            }
-        }
     }
 
     #[test]
