@@ -14,90 +14,12 @@ use crate::{
     syntax::ast::{Expression, Positionable},
 };
 
+mod funtion_call;
+
 impl SemanticCheck for Expression<'_> {
     fn check_semantics(&self, scope: &SymbolTable) -> Result<(), MistiError> {
         match self {
-            Expression::FunctionCall(f) => {
-                let fun = &*f.function;
-                let arguments = &*f.arguments.arguments;
-
-                let function_datatype = fun.get_type(scope)?;
-                match function_datatype {
-                    Type::Function(parameters, _return_type) => {
-                        // Check parameters length
-                        if parameters.len() != arguments.len() {
-                            let (error_start, error_end) = f.arguments.get_position();
-
-                            let label = ErrorLabel {
-                                message: format!(
-                                    "Expected {} arguments, got {}",
-                                    parameters.len(),
-                                    arguments.len(),
-                                ),
-                                start: error_start,
-                                end: error_end,
-                            };
-                            let econtainer = ErrorContainer {
-                                error_code: SEMANTIC_MISMATCHED_ARGUMENT_COUNT,
-                                error_offset: error_start,
-                                labels: vec![label],
-                                note: None,
-                                help: None,
-                            };
-                            return Err(econtainer);
-                        }
-
-                        // Check that each argument matches the required datatype
-                        for i in 0..parameters.len() {
-                            let parameter = &parameters[i];
-                            let argument = &arguments[i];
-
-                            let argument_datatype = argument.get_type(scope)?;
-                            if !argument_datatype.is_value(parameter) {
-                                // The argument and the parameter have diferent types
-                                let (error_start, error_end) = argument.get_position();
-                                let label = ErrorLabel {
-                                    message: format!(
-                                        "Expected a {}, got {:?}",
-                                        parameter, argument_datatype
-                                    ),
-                                    start: error_start,
-                                    end: error_end,
-                                };
-                                let econtainer = ErrorContainer {
-                                    error_code: SEMANTIC_MISMATCHED_TYPES,
-                                    error_offset: error_start,
-                                    labels: vec![label],
-                                    note: None,
-                                    help: None,
-                                };
-                                return Err(econtainer);
-                            }
-                        }
-
-                        Ok(())
-                    }
-                    _ => {
-                        let (error_start, error_end) = fun.get_position();
-                        let label = ErrorLabel {
-                            message: format!(
-                                "Expected a function type, got {:?}",
-                                function_datatype
-                            ),
-                            start: error_start,
-                            end: error_end,
-                        };
-                        let econtainer = ErrorContainer {
-                            error_code: SEMANTIC_MISMATCHED_TYPES,
-                            error_offset: error_start,
-                            labels: vec![label],
-                            note: None,
-                            help: None,
-                        };
-                        return Err(econtainer);
-                    }
-                }
-            }
+            Expression::FunctionCall(f) => f.check_semantics(scope),
             // These are empty because they have nothing to check,
             // their existance alone is correct
             Expression::Int(_) => Ok(()),
@@ -372,18 +294,7 @@ mod tests {
     fn should_error_on_undefined_symbol() {
         // source code: `print()`
         let b = t("print()");
-        let expr_function = exp(&b);
-
-        let arguments = ArgumentsList {
-            arguments: vec![],
-            paren_open_pos: 5,
-            paren_close_pos: 7,
-        };
-
-        let expr = Expression::FunctionCall(FunctionCall {
-            function: Box::new(expr_function),
-            arguments: Box::new(arguments),
-        });
+        let expr = exp(&b);
 
         let scope = SymbolTable::new();
 
