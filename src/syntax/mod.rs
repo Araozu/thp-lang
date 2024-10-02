@@ -1,7 +1,7 @@
 use crate::error_handling::MistiError;
 
 mod functions;
-mod parseable;
+pub mod parseable;
 mod parsers;
 mod utils;
 

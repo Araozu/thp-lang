@@ -350,19 +350,30 @@ impl SemanticCheck for Expression<'_> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        lexic::token::Token,
+        lexic::{self, get_tokens, token::Token},
         semantic::{impls::SemanticCheck, std::populate, symbol_table::SymbolTable},
-        syntax::ast::{
-            functions::{ArgumentsList, FunctionCall},
-            Expression,
+        syntax::{
+            ast::{
+                functions::{ArgumentsList, FunctionCall},
+                Expression,
+            },
+            parseable::Parseable,
         },
     };
+
+    fn t(i: &str) -> Vec<Token> {
+        get_tokens(&i.into()).unwrap()
+    }
+    fn exp<'a>(t: &'a Vec<Token>) -> Expression<'a> {
+        Expression::try_parse(t, 0).unwrap().0
+    }
 
     #[test]
     fn should_error_on_undefined_symbol() {
         // source code: `print()`
-        let expr_token = Token::new_identifier("print".into(), 0);
-        let expr_function = Expression::Identifier(&expr_token);
+        let b = t("print()");
+        let expr_function = exp(&b);
+
         let arguments = ArgumentsList {
             arguments: vec![],
             paren_open_pos: 5,
