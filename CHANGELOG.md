@@ -2,7 +2,6 @@
 
 ## TODO
 
-- Test correct operator precedence
 - Implement functions as first class citizens
 - Parse __more__ binary operators
 - Parse more complex bindings
@@ -23,6 +22,7 @@
 
 - [ ] Test semantic analysis
 - [ ] Generate php code from current AST
+- [x] Test correct operator precedence
 
 
 ## v0.1.2

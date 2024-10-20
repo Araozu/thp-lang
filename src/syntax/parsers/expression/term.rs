@@ -49,6 +49,8 @@ fn parse_many<'a>(
 
 #[cfg(test)]
 mod tests {
+    use core::panic;
+
     use super::*;
     use crate::lexic::get_tokens;
     use crate::lexic::token::TokenType;
@@ -177,6 +179,39 @@ mod tests {
                 assert_eq!(op.value, "+")
             }
             _ => panic!("Expected a binary operator"),
+        }
+    }
+
+    #[test]
+    fn should_parse_correct_precedence() {
+        let tokens = get_tokens(&String::from("1 + 2 * 3")).unwrap();
+        let (result, next) = try_parse(&tokens, 0).unwrap();
+        assert_eq!(next, 5);
+        match result {
+            Expression::BinaryOperator(lexpr, rexpr, op) => {
+                assert_eq!(op.value, "+");
+
+                match (*lexpr, *rexpr) {
+                    (Expression::Int(lvalue), Expression::BinaryOperator(llexpr, rrexpr, oop)) => {
+                        assert_eq!(oop.value, "*");
+                        assert_eq!(lvalue.value, "1");
+
+                        match (*llexpr, *rrexpr) {
+                            (Expression::Int(left), Expression::Int(right)) => {
+                                assert_eq!(left.value, "2");
+                                assert_eq!(right.value, "3");
+                            }
+                            _ => {
+                                panic!("Expected left to be an int, right to be an int")
+                            }
+                        }
+                    }
+                    _ => {
+                        panic!("Expected left to be an int, right to be a binary op")
+                    }
+                }
+            }
+            _ => panic!("Expected a binary op, got {:?}", result),
         }
     }
 }

@@ -161,7 +161,7 @@ mod tests {
                 let label = &err.labels[0];
                 assert_eq!(
                     label.message,
-                    "Expected this expression to be a function, found a `Int`"
+                    "Expected this expression to be a function, found a Value(\"Int\")"
                 );
                 assert_eq!(label.start, 0);
                 assert_eq!(label.end, 6);

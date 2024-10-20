@@ -8,7 +8,7 @@ use crate::{
 /// Parses a factor expression.
 ///
 /// ```ebnf
-/// factor = unary, (("/" | "*", "%"), unary)*;
+/// factor = unary, (("/" | "*" | "%"), unary)*;
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
     let (unary, next_pos) = match super::unary::try_parse(tokens, pos) {
@@ -179,6 +179,36 @@ mod tests {
                 assert_eq!(op.value, "/")
             }
             _ => panic!("Expected a binary operator"),
+        }
+    }
+
+    #[test]
+    fn should_parse_mixed_with_unary_ops() {
+        let tokens = get_tokens(&String::from("2 * -4")).unwrap();
+        let (result, next) = try_parse(&tokens, 0).unwrap();
+        assert_eq!(next, 4);
+
+        match result {
+            Expression::BinaryOperator(lexpr, rexpr, op) => {
+                assert_eq!(op.value, "*");
+                let Expression::Int(left_value) = *lexpr else {
+                    panic!("Expected an Int expression")
+                };
+                assert_eq!(left_value.value, "2");
+
+                let Expression::UnaryOperator(op, right_expr) = *rexpr else {
+                    panic!("Expected a unary operator on the right")
+                };
+                assert_eq!(op.value, "-");
+
+                let Expression::Int(right_value) = *right_expr else {
+                    panic!("Expected an Int expression");
+                };
+                assert_eq!(right_value.value, "4");
+            }
+            _ => {
+                panic!("Expected a binary operator, got {:?}", result)
+            }
         }
     }
 }
