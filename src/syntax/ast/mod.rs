@@ -37,6 +37,15 @@ pub enum Statement<'a> {
     Conditional(Conditional<'a>),
     ForLoop(ForLoop<'a>),
     WhileLoop(WhileLoop<'a>),
+    Assignment(Assignment<'a>),
+}
+
+#[derive(Debug)]
+pub struct Assignment<'a> {
+    /// The left side of the assignment
+    pub identifier: &'a Token,
+    /// The right side of the assignment
+    pub expression: Box<Expression<'a>>,
 }
 
 #[derive(Debug)]

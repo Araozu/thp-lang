@@ -4,7 +4,7 @@ use crate::{
         ast::{
             loops::{ForLoop, WhileLoop},
             var_binding::VariableBinding,
-            Conditional, FunctionDeclaration, Statement,
+            Assignment, Conditional, FunctionDeclaration, Statement,
         },
         parseable::{Parseable, ParsingError, ParsingResult},
     },
@@ -55,6 +55,13 @@ impl<'a> Parseable<'a> for Statement<'a> {
         // Try to parse a while loop
         match WhileLoop::try_parse(tokens, current_pos) {
             Ok((prod, next)) => return Ok((Statement::WhileLoop(prod), next)),
+            Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
+            _ => {}
+        }
+
+        // Try to parse an assignment
+        match Assignment::try_parse(tokens, current_pos) {
+            Ok((prod, next)) => return Ok((Statement::Assignment(prod), next)),
             Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
             _ => {}
         }

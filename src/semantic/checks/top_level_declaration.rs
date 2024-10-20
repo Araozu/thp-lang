@@ -25,6 +25,9 @@ impl SemanticCheck for Statement<'_> {
             Statement::Conditional(c) => c.check_semantics(scope),
             Statement::ForLoop(f) => f.check_semantics(scope),
             Statement::WhileLoop(w) => w.check_semantics(scope),
+            Statement::Assignment(_assignment) => {
+                unimplemented!("Semantic check for an assignment")
+            }
         }
     }
 }
