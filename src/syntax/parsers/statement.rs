@@ -60,14 +60,12 @@ impl<'a> Parseable<'a> for Statement<'a> {
         }
 
         // Try to parse an assignment
+        // If this fails, return unmatched because there is still the
+        // possibility that an expression will be parsed later
         match Assignment::try_parse(tokens, current_pos) {
             Ok((prod, next)) => return Ok((Statement::Assignment(prod), next)),
-            Err(ParsingError::Err(e)) => return Err(ParsingError::Err(e)),
-            _ => {}
+            _ => Err(ParsingError::Unmatched),
         }
-
-        // Here nothing was parsed.
-        Err(ParsingError::Unmatched)
     }
 }
 

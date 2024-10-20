@@ -69,6 +69,23 @@ pub fn try_operator(tokens: &Vec<Token>, pos: usize, operator: String) -> Parsin
     }
 }
 
+/// Expects the token at `pos` to be any of the passed operators. Doesn't ignore whitespace or newlines
+pub fn try_many_operator(
+    tokens: &Vec<Token>,
+    pos: usize,
+    operators: Vec<String>,
+) -> ParsingResult<&Token> {
+    //
+    for op in operators {
+        match try_operator(tokens, pos, op) {
+            Ok(v) => return Ok(v),
+            _ => {}
+        }
+    }
+
+    return Err(ParsingError::Unmatched);
+}
+
 /// Expects the token at `pos` to be of type `token_type`, and returns the token and the next position.
 ///
 /// Ignores all whitespace, newlines and comments.

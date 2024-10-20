@@ -1,10 +1,10 @@
 use crate::{
-    error_handling::{error_messages::SYNTAX_INVALID_ASSIGNMENT, ErrorContainer, ErrorLabel},
+    error_handling::{error_messages::SYNTAX_INCOMPLETE_STATEMENT, ErrorContainer, ErrorLabel},
     lexic::token::{self, TokenType},
     syntax::{
         ast::{Assignment, Expression},
         parseable::{self, Parseable, ParsingError},
-        utils::{parse_token_type, try_operator},
+        utils::{parse_token_type, try_many_operator},
     },
 };
 
@@ -24,7 +24,16 @@ impl<'a> Parseable<'a> for Assignment<'a> {
         };
 
         // parse the equal sign
-        let (equal_operator, next) = match try_operator(tokens, next, String::from("=")) {
+        let assignment_operators = vec![
+            String::from("="),
+            String::from("+="),
+            String::from("-="),
+            String::from("*="),
+            String::from("/="),
+            String::from("%="),
+        ];
+
+        let (equal_operator, next) = match try_many_operator(tokens, next, assignment_operators) {
             Ok((t, next)) => (t, next),
             Err(ParsingError::Mismatch(t)) => {
                 // The parser found a token, but it's not the `=` operator
@@ -34,7 +43,7 @@ impl<'a> Parseable<'a> for Assignment<'a> {
                     end: t.get_end_position(),
                 };
                 let econtainer = ErrorContainer {
-                    error_code: SYNTAX_INVALID_ASSIGNMENT,
+                    error_code: SYNTAX_INCOMPLETE_STATEMENT,
                     error_offset: t.position,
                     labels: vec![label],
                     note: None,
@@ -50,7 +59,7 @@ impl<'a> Parseable<'a> for Assignment<'a> {
                     end: identifier.get_end_position(),
                 };
                 let econtainer = ErrorContainer {
-                    error_code: SYNTAX_INVALID_ASSIGNMENT,
+                    error_code: SYNTAX_INCOMPLETE_STATEMENT,
                     error_offset: identifier.position,
                     labels: vec![label],
                     note: None,
@@ -70,7 +79,7 @@ impl<'a> Parseable<'a> for Assignment<'a> {
                     end: equal_operator.get_end_position(),
                 };
                 let econtainer = ErrorContainer {
-                    error_code: SYNTAX_INVALID_ASSIGNMENT,
+                    error_code: SYNTAX_INCOMPLETE_STATEMENT,
                     error_offset: equal_operator.position,
                     labels: vec![label],
                     note: None,

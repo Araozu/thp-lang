@@ -24,7 +24,6 @@ pub const COMPILER_TODO: u32 = 20;
 pub const SEMANTIC_MISMATCHED_TYPES: u32 = 21;
 pub const SEMANTIC_DUPLICATED_REFERENCE: u32 = 22;
 pub const SEMANTIC_MISMATCHED_ARGUMENT_COUNT: u32 = 23;
-pub const SYNTAX_INVALID_ASSIGNMENT: u32 = 24;
 
 /// Reads the error codes from the error code list
 pub fn error_code_to_string() -> String {
