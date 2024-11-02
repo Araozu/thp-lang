@@ -3,6 +3,7 @@ use crate::{lexic::token::Token, syntax::parseable::Parseable};
 
 mod array;
 mod comparison;
+mod dot_access;
 mod equality;
 mod factor;
 pub mod function_call_expr;

@@ -8,10 +8,10 @@ use crate::{
 /// Parses a factor expression.
 ///
 /// ```ebnf
-/// factor = unary, (("/" | "*" | "%"), unary)*;
+/// factor = dot_access, (("/" | "*" | "%"), dot_access)*;
 /// ```
 pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
-    let (unary, next_pos) = match super::unary::try_parse(tokens, pos) {
+    let (unary, next_pos) = match super::dot_access::try_parse(tokens, pos) {
         Ok((expr, next_pos)) => (expr, next_pos),
         _ => return Err(ParsingError::Unmatched),
     };
