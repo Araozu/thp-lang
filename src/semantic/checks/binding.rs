@@ -4,7 +4,7 @@ use crate::{
         impls::SemanticCheck,
         types::{Type, Typed},
     },
-    syntax::ast::var_binding::VariableBinding,
+    syntax::ast::{var_binding::VariableBinding, Positionable},
 };
 
 impl SemanticCheck for VariableBinding<'_> {
@@ -46,18 +46,26 @@ impl SemanticCheck for VariableBinding<'_> {
 
         // Both the declared & actual datatypes must be the same
         if datatype != expression_datatype {
-            let label = ErrorLabel {
-                message: format!(
-                    "The variable `{}` was declared as `{:?}` but its expression has type `{:?}`",
-                    binding_name, datatype, expression_datatype
-                ),
-                start: self.identifier.position,
-                end: self.identifier.get_end_position(),
+            // This can only happen if the binding has an annotated type,
+            // so its safe to unwrap here
+            let datatype_token = self.datatype.unwrap();
+
+            let label1 = ErrorLabel {
+                message: format!("The variable is declared as {:?} here", datatype),
+                start: datatype_token.position,
+                end: datatype_token.get_end_position(),
             };
+            let (expr_start, expr_end) = self.expression.get_position();
+            let label2 = ErrorLabel {
+                message: format!("But this expression has type {:?}", expression_datatype),
+                start: expr_start,
+                end: expr_end,
+            };
+
             let econtainer = ErrorContainer {
                 error_code: SEMANTIC_DUPLICATED_REFERENCE,
                 error_offset: self.identifier.position,
-                labels: vec![label],
+                labels: vec![label1, label2],
                 note: None,
                 help: None,
             };
