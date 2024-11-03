@@ -3,7 +3,7 @@ use crate::{
     syntax::{ast::Expression, ParsingError, ParsingResult},
 };
 
-use super::utils::try_binary_op;
+use super::utils::parse_many;
 
 /// Parses a factor expression.
 ///
@@ -16,33 +16,7 @@ pub fn try_parse(tokens: &Vec<Token>, pos: usize) -> ParsingResult<Expression> {
         _ => return Err(ParsingError::Unmatched),
     };
 
-    parse_many(tokens, next_pos, term, 0)
-}
-
-fn parse_many<'a>(
-    tokens: &'a Vec<Token>,
-    pos: usize,
-    prev_expr: Expression<'a>,
-    indentation_level: u32,
-) -> ParsingResult<'a, Expression<'a>> {
-    // comparison = term, ((">" | ">=" | "<" | "<="), term)*;
-    try_binary_op(
-        tokens,
-        pos,
-        prev_expr,
-        vec![">", ">=", "<", "<="],
-        indentation_level,
-        |tokens, next_pos, prev_expr, token, indent_count: u32| match super::term::try_parse(
-            tokens, next_pos,
-        ) {
-            Ok((expr, next_pos)) => {
-                let expr = Expression::BinaryOperator(Box::new(prev_expr), Box::new(expr), &token);
-
-                parse_many(tokens, next_pos, expr, indentation_level + indent_count)
-            }
-            _ => return Err(ParsingError::Unmatched),
-        },
-    )
+    parse_many(tokens, next_pos, term, 0, &vec![">", ">=", "<", "<="])
 }
 
 #[cfg(test)]

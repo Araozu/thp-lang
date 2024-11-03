@@ -1,7 +1,7 @@
 use crate::lexic::token::Token;
 use crate::lexic::token::TokenType::{NewLine, DEDENT, INDENT};
 use crate::syntax::ast::Expression;
-use crate::syntax::parseable::ParsingResult;
+use crate::syntax::parseable::{ParsingError, ParsingResult};
 
 /// Parses a binary operator, handles indentation and runs a function on it.
 ///
@@ -15,7 +15,7 @@ pub fn try_binary_op<'a, F>(
     tokens: &'a Vec<Token>,
     original_pos: usize,
     prev_expr: Expression<'a>,
-    operators: Vec<&str>,
+    operators: &Vec<&str>,
     indentation_level: u32,
     fun: F,
 ) -> ParsingResult<'a, Expression<'a>>
@@ -86,4 +86,37 @@ where
     }
 
     Ok((new_expr, next_pos))
+}
+
+pub fn parse_many<'a>(
+    tokens: &'a Vec<Token>,
+    pos: usize,
+    prev_expr: Expression<'a>,
+    indentation_level: u32,
+    operators: &Vec<&str>,
+) -> ParsingResult<'a, Expression<'a>> {
+    // comparison = term, ((">" | ">=" | "<" | "<="), term)*;
+    try_binary_op(
+        tokens,
+        pos,
+        prev_expr,
+        operators,
+        indentation_level,
+        |tokens, next_pos, prev_expr, token, indent_count: u32| match super::term::try_parse(
+            tokens, next_pos,
+        ) {
+            Ok((expr, next_pos)) => {
+                let expr = Expression::BinaryOperator(Box::new(prev_expr), Box::new(expr), &token);
+
+                parse_many(
+                    tokens,
+                    next_pos,
+                    expr,
+                    indentation_level + indent_count,
+                    operators,
+                )
+            }
+            _ => return Err(ParsingError::Unmatched),
+        },
+    )
 }
