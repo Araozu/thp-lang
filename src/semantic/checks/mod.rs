@@ -1,3 +1,4 @@
+pub mod assignment;
 pub mod binding;
 pub mod block;
 pub mod conditional;

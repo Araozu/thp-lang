@@ -38,8 +38,7 @@ pub fn compile_file(input: &String) -> Result<(), ()> {
 
     let out_code = match compile(&contents) {
         Ok(out_code) => out_code,
-        Err(error) => {
-            eprintln!("{}", error);
+        Err(_) => {
             return Err(());
         }
     };
@@ -60,15 +59,15 @@ pub fn compile_file(input: &String) -> Result<(), ()> {
 }
 
 /// Full pipeline from THP source code to PHP output
-fn compile(input: &String) -> Result<String, String> {
+fn compile(input: &String) -> Result<String, ()> {
     //
     // Lexical analysis
     //
     let tokens = match lexic::get_tokens(input) {
         Ok(t) => t,
         Err(error) => {
-            let chars: Vec<char> = input.chars().collect();
-            return Err(error.get_error_str(&chars));
+            error.print_ariadne(input);
+            return Err(());
         }
     };
 
@@ -77,9 +76,9 @@ fn compile(input: &String) -> Result<String, String> {
     //
     let ast = match syntax::build_ast(&tokens) {
         Ok(ast) => ast,
-        Err(reason) => {
-            let chars: Vec<char> = input.chars().collect();
-            return Err(reason.get_error_str(&chars));
+        Err(error) => {
+            error.print_ariadne(input);
+            return Err(());
         }
     };
 
@@ -89,10 +88,9 @@ fn compile(input: &String) -> Result<String, String> {
     let res1 = crate::semantic::check_semantics(&ast);
     match res1 {
         Ok(_) => {}
-        Err(reason) => {
-            let chars: Vec<char> = input.chars().collect();
-            let error = format!("{}: {}", "error".on_red(), reason.get_error_str(&chars));
-            return Err(error);
+        Err(error) => {
+            error.print_ariadne(input);
+            return Err(());
         }
     }
 

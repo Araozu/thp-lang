@@ -64,7 +64,7 @@ impl SemanticCheck for VariableBinding<'_> {
             return Err(econtainer);
         }
 
-        scope.insert(binding_name.clone(), datatype);
+        scope.insert_custom(binding_name.clone(), datatype, self.is_mutable);
 
         Ok(())
     }

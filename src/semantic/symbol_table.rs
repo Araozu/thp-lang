@@ -12,7 +12,7 @@ struct SymbolTableNode {
     // the parent scope
     parent: Option<Rc<RefCell<SymbolTableNode>>>,
     // the current scope
-    scope: HashMap<String, Type>,
+    scope: HashMap<String, (Type, bool)>,
 }
 
 impl SymbolTable {
@@ -33,7 +33,17 @@ impl SymbolTable {
 
     /// Inserts a new symbol into the current table scope
     pub fn insert(&self, key: String, value: Type) {
-        self.node.borrow_mut().insert(key, value);
+        self.node.borrow_mut().insert(key, value, false);
+    }
+
+    /// Inserts a new symbol into the current table scope
+    pub fn insert_mutable(&self, key: String, value: Type) {
+        self.node.borrow_mut().insert(key, value, true);
+    }
+
+    /// Inserts a new symbol into the current table scope
+    pub fn insert_custom(&self, key: String, value: Type, is_mutable: bool) {
+        self.node.borrow_mut().insert(key, value, is_mutable);
     }
 
     /// Tests if a symbol is declared in the current or parent scopes
@@ -44,6 +54,11 @@ impl SymbolTable {
     /// Gets the datatype of a symbol, if it exists
     pub fn get_type<'a>(&'a self, key: &String) -> Option<Type> {
         self.node.borrow_mut().get_type(key)
+    }
+
+    /// Gets the datatype of a symbol, if it exists, and if its mutable
+    pub fn get_type_and_mut<'a>(&'a self, key: &String) -> Option<(Type, bool)> {
+        self.node.borrow_mut().get_type_and_mut(key)
     }
 }
 
@@ -65,8 +80,8 @@ impl SymbolTableNode {
     }
 
     /// Inserts a new symbol into the current scope
-    pub fn insert(&mut self, key: String, value: Type) {
-        self.scope.insert(key, value);
+    pub fn insert(&mut self, key: String, value: Type, is_mutable: bool) {
+        self.scope.insert(key, (value, is_mutable));
     }
 
     /// Tests if a symbol is declared in the current or parent scopes
@@ -87,7 +102,7 @@ impl SymbolTableNode {
     /// Returns the symbol's datatype
     pub fn get_type<'a>(&'a mut self, key: &String) -> Option<Type> {
         // Try to get the type in the current scope
-        if let Some(entry) = self.scope.get(key) {
+        if let Some((entry, _)) = self.scope.get(key) {
             // TODO: Change to allow other types of datatypes: functions, classes, maps
             return Some(entry.clone());
         }
@@ -96,6 +111,24 @@ impl SymbolTableNode {
         match &self.parent {
             Some(parent) => {
                 parent.as_ref().borrow_mut().get_type(key)
+                // parent.get_type(key)
+            }
+            None => None,
+        }
+    }
+
+    /// Returns the symbol's datatype and mutability
+    pub fn get_type_and_mut<'a>(&'a mut self, key: &String) -> Option<(Type, bool)> {
+        // Try to get the type in the current scope
+        if let Some((entry, mutable)) = self.scope.get(key) {
+            // TODO: Change to allow other types of datatypes: functions, classes, maps
+            return Some((entry.clone(), *mutable));
+        }
+
+        // Try to get the type in the parent scope
+        match &self.parent {
+            Some(parent) => {
+                parent.as_ref().borrow_mut().get_type_and_mut(key)
                 // parent.get_type(key)
             }
             None => None,

@@ -30,6 +30,7 @@
 
 - [ ] Test semantic analysis
 - [ ] Generate php code from current AST
+- [x] Typecheck and semantic check simple assignment
 - [x] Test correct operator precedence
 - [x] Parse assignments
 - [x] Parse dot `.` operator
