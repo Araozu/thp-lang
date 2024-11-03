@@ -45,6 +45,7 @@ impl<'a> PHPTransformable<'a> for Expression<'_> {
                 PExpresssion::BinaryOp(Box::new(left_value), Box::new(right_value), &op.value)
             }
             Expression::Array(_) => unimplemented!("transform array into php"),
+            Expression::ArrayAcccess(_) => unimplemented!("transform array access into php"),
         }
     }
 }

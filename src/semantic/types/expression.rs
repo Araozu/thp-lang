@@ -219,6 +219,7 @@ impl Typed for Expression<'_> {
                 let first_type = arr.exps[0].get_type(scope)?;
                 Ok(Type::Generic("Array".into(), vec![first_type]))
             }
+            Expression::ArrayAcccess(_array_access) => unimplemented!("typecheck array access"),
         }
     }
 }

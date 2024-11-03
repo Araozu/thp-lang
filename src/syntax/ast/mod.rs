@@ -121,6 +121,7 @@ pub enum Expression<'a> {
     /// left expression, right expression, operator
     BinaryOperator(Box<Expression<'a>>, Box<Expression<'a>>, &'a Token),
     Array(Array<'a>),
+    ArrayAcccess(ArrayAccess<'a>),
 }
 
 #[derive(Debug)]
@@ -130,6 +131,13 @@ pub struct Array<'a> {
     pub start: usize,
     /// The position of the closed bracket ]
     pub end: usize,
+}
+
+#[derive(Debug)]
+pub struct ArrayAccess<'a> {
+    pub left_expr: Box<Expression<'a>>,
+    pub idx_expr: Box<Expression<'a>>,
+    pub end_pos: usize,
 }
 
 impl Positionable for Expression<'_> {
@@ -158,6 +166,10 @@ impl Positionable for Expression<'_> {
                 end,
                 exps: _,
             }) => (*start, *end),
+            Expression::ArrayAcccess(a) => {
+                let (start, _) = a.left_expr.get_position();
+                (start, a.end_pos)
+            }
         }
     }
 }

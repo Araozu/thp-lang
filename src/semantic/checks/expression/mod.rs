@@ -262,6 +262,7 @@ impl SemanticCheck for Expression<'_> {
 
                 Ok(())
             }
+            Expression::ArrayAcccess(_array_access) => unimplemented!("typecheck array access"),
         }
     }
 }
