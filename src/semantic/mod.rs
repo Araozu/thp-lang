@@ -2,11 +2,12 @@ use crate::{error_handling::MistiError, syntax::ast::ModuleAST};
 
 mod checks;
 mod impls;
-mod std;
-mod symbol_table;
+pub mod std;
+pub mod symbol_table;
 mod types;
 
 use impls::SemanticCheck;
+use symbol_table::SymbolTable;
 
 // What to do?
 // 1. Create a mutable symbol table
@@ -23,6 +24,15 @@ pub fn check_semantics(ast: &ModuleAST) -> Result<(), MistiError> {
     std::populate(&mut global_scope);
 
     ast.check_semantics(&global_scope)
+}
+
+/// Checks that the AST is semantically correct.
+/// Accepts a handle to a symbol table to operate with.
+pub fn check_semantics_with(
+    ast: &ModuleAST,
+    symbol_table: &mut SymbolTable,
+) -> Result<(), MistiError> {
+    ast.check_semantics(&symbol_table)
 }
 
 #[cfg(test)]

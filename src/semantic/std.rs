@@ -19,4 +19,8 @@ pub fn populate(table: &mut SymbolTable) {
     // + operator (Int, Int) -> Int
     let plus_op = Type::Function(vec![INT.into(), INT.into()], INT.into());
     table.insert("+".into(), plus_op);
+
+    // - operator (Int, Int) -> Int
+    let plus_op = Type::Function(vec![INT.into(), INT.into()], INT.into());
+    table.insert("-".into(), plus_op);
 }

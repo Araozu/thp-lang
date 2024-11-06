@@ -1,7 +1,9 @@
-use std::io::{self, Write};
+use ::std::io::{self, Write};
 
 use crate::codegen::Transpilable;
 use crate::error_handling::PrintableError;
+use crate::semantic::std;
+use crate::semantic::symbol_table::SymbolTable;
 
 use super::lexic;
 use super::syntax;
@@ -12,6 +14,8 @@ use crate::php_ast::transformers::PHPTransformable;
 pub fn run() -> io::Result<()> {
     let stdin = io::stdin();
     let mut buffer = String::new();
+    let mut repl_symbol_table = SymbolTable::new();
+    std::populate(&mut repl_symbol_table);
 
     println!("REPL: Enter expressions to evaluate. Type Ctrl-D to exit.");
     loop {
@@ -26,7 +30,7 @@ pub fn run() -> io::Result<()> {
                 break Ok(());
             }
             Ok(_) => {
-                compile(&buffer);
+                compile(&buffer, &mut repl_symbol_table);
             }
             Err(error) => {
                 eprintln!("Error reading stdin.");
@@ -37,7 +41,7 @@ pub fn run() -> io::Result<()> {
 }
 
 /// Full pipeline from THP source code to PHP output
-fn compile(input: &String) {
+fn compile(input: &String, symbol_table: &mut SymbolTable) {
     //
     // Lexical analysis
     //
@@ -63,7 +67,7 @@ fn compile(input: &String) {
     //
     // Semantic analysis
     //
-    let res1 = crate::semantic::check_semantics(&ast);
+    let res1 = crate::semantic::check_semantics_with(&ast, symbol_table);
     match res1 {
         Ok(_) => {}
         Err(error) => {
