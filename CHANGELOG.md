@@ -21,23 +21,25 @@
 
 ## v0.1.4
 
+- [ ] Synchronize the THP & PHP repls outputs
+- [ ] Test semantic analysis
+- [ ] Generate php code from current AST
 - [ ] Parse obj/map/dict syntax
 - [ ] Parse tuple syntax
 - [ ] Parse class instantiation syntax
+- [ ] Parse logic operators `&& ||`
+- [ ] Parse namespace operator `::`
+- [ ] Implement subtyping for numbers
 
 
 ## v0.1.3
 
-- [ ] Test semantic analysis
-- [ ] Generate php code from current AST
 - [x] Typecheck and semantic check simple assignment
 - [x] Test correct operator precedence
 - [x] Parse assignments
 - [x] Parse dot `.` operator
-- [ ] Parse logic operators `&& ||`
 - [x] Parse Array access `arr[pos]`
-- [ ] Parse namespace operator `::`
-- [ ] Implement subtyping for numbers
+- [x] Spawn a PHP repl, and connect the THP repl to it
 
 
 ## v0.1.2

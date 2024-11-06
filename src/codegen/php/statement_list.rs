@@ -12,6 +12,16 @@ impl Transpilable for PFile<'_> {
     }
 }
 
+impl PFile<'_> {
+    pub fn transpile_without_header(&self) -> String {
+        let mut fragments = vec![];
+        for statement in self.statements.iter() {
+            fragments.push(statement.transpile());
+        }
+        fragments.join("\n")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{
